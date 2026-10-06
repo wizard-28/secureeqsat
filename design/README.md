@@ -65,3 +65,4 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0008](0008-automate-venv-and-identity.md) | Automate venv creation; keep git identity local | accepted |
 | [0009](0009-egglog-for-engine-check.md) | Add `egglog` for the engine feasibility check | accepted |
 | [0010](0010-reframe-soundness-and-resharing.md) | Reframe around soundness and the re-sharing gap | accepted |
+| [0011](0011-correct-claims-after-pass-3.md) | Correct claims after adversarial pass 3 | accepted |

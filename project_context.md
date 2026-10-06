@@ -56,10 +56,12 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ✅ done | **Security-constrained extraction implemented and working** (`design/0006`) — recovers a secure circuit from the insecure optimum |
 | ✅ done | **Scalability answered** — `egglog` saturates the two-gadget chain instantly; the in-house blowup was an engine artifact (`design/0009`) |
 | ⚠️ negative | **Payoff not demonstrated.** Gadget scale: constrained optimum == known construction. Chain scale: the entire sampled cheap frontier is insecure (`docs/feasibility-report.md` §4) |
-| ⚠️ medium | Abstraction-level explanation: the useful optimizations are not Boolean equalities (`docs/feasibility-report.md` §6) |
-| ⏳ next | **Re-sharing formulation** — refresh as a first-class rewrite with randomness side conditions; the only identified route to genuine gains |
-| ⏳ next | Revise the Review-1 title/novelty claim per `design/0010` |
-| ⏳ watch | superVer / eVer (verification group) — if they add optimization, reposition |
+| ⚠️ medium | Abstraction-level explanation: the useful optimizations are **not congruences** of the wire-term algebra (`docs/feasibility-report.md` §6, corrected in `design/0011`) |
+| ✅ done | **Third adversarial pass** on the reframed proposal: claims corrected, disclaimers added, eVer collision found (`docs/adversarial-search-3.md`, `design/0011`) |
+| ⚠️ measured | **Labelling is the scalability bottleneck**: checker doubles per random (6.7 s at 16), called once per e-class; `egglog` saturation scales fine |
+| ⏳ next | **Symbolic/lazy safety labeller** — the top implementation task before larger circuits |
+| ⏳ next | **Re-sharing formulation** — refresh as a congruence-aware representation; the only identified route to genuine gains |
+| 🔔 realised | **eVer (ePrint 2026/208) now optimizes refresh sequences and gadgets** with re-verification. Repositioned: claim the e-graph + congruence angle, never "optimize refreshes" |
 
 **Headline result:** unconstrained Boolean equality saturation turns a secure
 ISW masked AND into a functionally equivalent but probing-insecure circuit, and
@@ -84,6 +86,7 @@ Full records in [`design/`](design/README.md).
 | `0008` | Automate venv creation in `postCreateCommand`; keep git identity local | accepted |
 | `0009` | Add `egglog` for the engine feasibility check | accepted, **answered** |
 | `0010` | Reframe around soundness and the re-sharing gap | accepted |
+| `0011` | Correct the novelty claims after adversarial pass 3 (congruence framing, eVer disclaimer, labelling bottleneck) | accepted |
 
 ---
 
@@ -93,7 +96,8 @@ Full records in [`design/`](design/README.md).
 |---|---|
 | `docs/original/` | Original research overview + first adversarial search — **historical, do not edit** |
 | `docs/adversarial-search-2.md` | Second adversarial pass + auditable search record |
-| `docs/probing-secure-eqsat-proposal.md` | Plan A proposal (carries a revision note after the feasibility push) |
+| `docs/adversarial-search-3.md` | Third adversarial pass (on the reframed proposal) + scaling measurements |
+| `docs/probing-secure-eqsat-proposal.md` | Proposal (revision 3: soundness, repair, congruence obstruction) |
 | `docs/team-briefing-plan-a.md` | Team-facing argument for why the original direction is dead |
 | `docs/feasibility-report.md` | **Consolidated feasibility checks and confidence levels** |
 | `experiments/premise_test/` | `egraph.py`, `masked.py`, `run.py`, `test_premise.py`, `RESULTS.md` |
@@ -115,30 +119,39 @@ Full records in [`design/`](design/README.md).
 2. **Abstraction level (MEDIUM).** The valuable optimizations may not be
    expressible as e-graph equalities at all. This is now the central research
    question rather than an unexamined assumption.
-3. **Novelty window (MEDIUM).** superVer (EGRAPHS 2024) verifies probing
-   security with e-graphs; if that group adds optimization, reposition onto the
-   soundness/re-sharing framing, which they have not claimed.
+3. **Novelty window (MEDIUM → partially realised).** superVer (EGRAPHS 2024)
+   verifies probing security with e-graphs; **eVer (2026) now optimizes refresh
+   sequences and gadgets** with re-verification. Reposition onto the soundness +
+   congruence framing, which they have not claimed (`design/0011`).
 4. **Scope (MEDIUM).** First order, 2 shares, glitch-free only. No claim about
    robust probing, glitches, PINI or higher orders.
-5. **Oracle dependency (LOW).** The cross-check requires an external GPL tool;
+5. **Labelling bottleneck (HIGH, measured).** The exhaustive checker doubles per
+   fresh random (6.7 s at 16) and is called once per e-class; `egglog`
+   saturation scales fine. Mitigation: symbolic/lazy labeller — VerifMSI as an
+   external labelling oracle, ANF/BDD check, structural pre-filters, on-demand
+   frontier labelling.
+6. **Oracle dependency (LOW).** The cross-check requires an external GPL tool;
    the tests skip when it is absent, so CI without the oracle silently loses
    coverage.
-6. **Licensing (LOW).** VerifMSI/tightPROVE are GPLv3 — external processes only.
+7. **Licensing (LOW).** VerifMSI/tightPROVE are GPLv3 — external processes only.
 
 ---
 
 ## 7. Next actions (ordered)
 
-1. **Revise the Review-1 material** to the `design/0010` framing: title,
-   novelty claim, and the three supported claims.
-2. **Re-sharing formulation** (highest leverage): model refresh/randomness
-   reuse as first-class rewrites with randomness side conditions, and test
-   whether they produce a secure improvement where Boolean refactoring cannot.
-3. **Expand fixtures** beyond ISW/DOM/chain: use VerifMSI's benchmark gadget set
-   and MaskedVerifBench for the checker and the extraction.
+1. **Build a symbolic/lazy safety labeller** — the measured bottleneck. Options:
+   VerifMSI as an external labelling oracle, an ANF/BDD-based exact check,
+   conservative structural pre-filters (non-completeness/uniformity), and/or
+   labelling only the extraction frontier on demand.
+2. **Re-sharing representation** (highest leverage): what representation can
+   carry re-sharing while keeping extraction security-aware, given that
+   re-sharing is not a congruence (`design/0011`)?
+3. **Expand fixtures** beyond ISW/DOM/chain: VerifMSI's benchmark gadget set and
+   MaskedVerifBench, now that the labeller question is being addressed.
 4. **Wire the cross-check into the default test run** where the oracle is
    present, and document the skip behaviour.
-5. **Monitor** superVer / eVer.
+5. **Monitor** eVer (already optimizing refresh gadgets) and the re-sharing
+   literature (RNI-f / COMAR line).
 
 ---
 
@@ -186,3 +199,10 @@ uv run python experiments/egglog_port/port.py --circuit chain --rules full --ite
   engine artifact; payoff shown to be unsupported at both scales;
   re-sharing gap identified. `docs/feasibility-report.md`, `design/0005`,
   `0006`, `0009`, `0010`, `experiments/*/RESULTS.md`.
+- **2026-10-06** — **Third adversarial pass** on the reframed proposal. Soundness
+  claim sharpened and disclaimed (MaskedHLS, FRAIG-CAD, SecCG); repair claim
+  narrowed to a semantic-hyperproperty constraint and disclaimed against eVer;
+  re-sharing claim **corrected** to a congruence obstruction (it is standard
+  masking semantics, not a new notion). Measured: search scales (egglog, chain
+  depth 5, <0.01 s), **labelling is the bottleneck** (6.7 s/check at 16
+  randoms). `docs/adversarial-search-3.md`, `design/0011`, proposal v3.
