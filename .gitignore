@@ -1,0 +1,29 @@
+# Environments
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.pyright/
+.mypy_cache/
+
+# Harness exports (opencode session share)
+opencode-share.zip
+
+# Editors / OS
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# Local secrets
+.env
