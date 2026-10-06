@@ -89,6 +89,7 @@ Full records in [`design/`](design/README.md).
 | `0011` | Correct the novelty claims after adversarial pass 3 (congruence framing, eVer disclaimer, labelling bottleneck) | accepted |
 | `0012` | Make the shared dev container agent-neutral; per-user agents opt in via `.devcontainer/personal/` | accepted |
 | `0013` | Publication scope: PDFs tracked, teammate PPTX untracked, no licence until public | accepted |
+| `0014` | Provision the VerifMSI oracle for every teammate (shared volume + auto-setup, non-fatal) | accepted |
 
 ---
 
@@ -242,3 +243,14 @@ uv run python experiments/egglog_port/port.py --circuit chain --rules full --ite
   (`up` / `exec` / `--config` / `--remove-existing-container`) in the README, and
   recorded in `design/0012` that `--config` and `--override-config` supply the
   local override a filename could not.
+- **2026-10-06** — **First real rebuild exposed a provisioning bug, fixed, and
+  the oracle became shared infrastructure.** Docker creates mount-point parents
+  as root and mounts volumes root-owned, so `~/.local/share` was created
+  root-owned and `uv sync` failed; `setup-tools.sh` now restores ownership from a
+  `HOME_DIRS` list kept in sync with the devcontainer `mounts` (an initial fix
+  missed `~/.config`). A fourth volume, `secureeqsat-oracles` → `~/oracles`, moved
+  into the **shared** configuration, and `setup-tools.sh` now runs
+  `setup_oracles.sh` **non-fatally**, so a network failure warns instead of
+  breaking the container. Previously every rebuild silently turned the three
+  VerifMSI cross-check tests from passes into skips — a trust-boundary hole for
+  onboarding (`design/0012`, `0014`).

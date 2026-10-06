@@ -26,15 +26,33 @@ the optimizations that matter — refresh insertion/removal, randomness reuse,
 gadget substitution — are **not congruences** of the wire-term algebra, and so
 cannot be the equality relation of a plain e-graph.
 
-## Quick start
-
-Requires [uv](https://docs.astral.sh/uv/). There is no system Python.
+## Onboarding
 
 ```bash
-uv sync
-uv run pytest -q
-uv run ruff check .
+git clone <repo-url> && cd <repo>
+devcontainer up --workspace-folder .
+devcontainer exec --workspace-folder . bash -lc 'uv run pytest -q'
 ```
+
+That is the whole setup. `postCreateCommand` provisions everything:
+
+1. `uv`, `ruff`, `pyright`, and `.venv` from the committed `uv.lock`
+2. the **VerifMSI oracle**, shallow-cloned into a named volume at `~/oracles`
+
+Expect **10 passed** on a fresh container. There is nothing else to install.
+
+If the oracle clone fails — offline, or a blocked network — the container still
+comes up, and the three cross-check tests **skip**. A skip is not a pass: re-run
+`bash experiments/oracle_crosscheck/setup_oracles.sh` and re-check before making
+any security claim (`AGENTS.md` §6.3).
+
+Working without a container is also fine:
+
+```bash
+uv sync && uv run pytest -q
+```
+
+Requires [uv](https://docs.astral.sh/uv/). There is no system Python.
 
 ## Commands
 
@@ -71,6 +89,17 @@ installs `uv`, `ruff` and `pyright`, then builds `.venv` from the committed
 The CLI writes `.devcontainer-lock.json` on first run; it pins dev container
 Feature versions and, like `uv.lock`, it is worth committing. `--no-lockfile`
 opts out and `--frozen-lockfile` enforces an existing one.
+
+The shared configuration also declares one named volume, `secureeqsat-oracles`,
+mounted at `~/oracles`. It holds the VerifMSI oracle, which the trust boundary
+requires but which is GPLv3 and so must stay outside the repository
+(`AGENTS.md` §6.4, `design/0005`). The volume means it is cloned once rather
+than on every rebuild.
+
+> **If you add a mount below `$HOME`**, add its target to `VOLUME_MOUNTS` in
+> `scripts/setup-tools.sh`. Docker creates mount points and any missing parents
+> as **root**, and an omitted entry fails later as a confusing permission error
+> that only appears on a fresh container.
 
 ### The container is agent-neutral
 
@@ -133,12 +162,6 @@ duplicated per tool:
 | `secureeqsat-citation-check` | A citation or novelty claim is about to enter a document |
 
 `CLAUDE.local.md` is gitignored — personal preferences only, never committed.
-
-### Without a container
-
-```bash
-uv sync && uv run pytest -q
-```
 
 ## Where things live
 

@@ -22,7 +22,8 @@ STATE_DIRS=(
 )
 
 if mountpoint -q "${STATE_DIRS[0]}"; then
-  # Named volumes mount root-owned; give them back to the remote user.
+  # Belt and braces: scripts/setup-tools.sh already fixed ownership, but this
+  # script is documented as runnable standalone.
   sudo chown -R "$(id -u):$(id -g)" "${STATE_DIRS[@]}"
 else
   echo "warning: opencode state directories are not mounted volumes." >&2

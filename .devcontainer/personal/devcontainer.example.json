@@ -1,6 +1,6 @@
 // Example PERSONAL container configuration. Not used directly: copy it to
-// devcontainer.json in this directory, then select "Research (personal)" from
-// the Dev Containers configuration picker when you rebuild.
+// devcontainer.json in this directory, then select it per invocation with
+// `--config` (or from the Dev Containers configuration picker in VS Code).
 //
 //   cp .devcontainer/personal/devcontainer.example.json \
 //      .devcontainer/personal/devcontainer.json
@@ -22,7 +22,15 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "remoteUser": "vscode",
 
+  // This list REPLACES the shared configuration's mounts, so it must repeat
+  // them. Keep in sync with ../devcontainer.json, and keep both in sync with
+  // HOME_DIRS in scripts/setup-tools.sh.
   "mounts": [
+    {
+      "source": "secureeqsat-oracles",
+      "target": "/home/vscode/oracles",
+      "type": "volume"
+    },
     {
       "source": "opencode-config",
       "target": "/home/vscode/.config/opencode",

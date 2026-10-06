@@ -3,15 +3,32 @@
 // one. Provisioning lives in scripts/ -- see README "Dev container" and
 // design/0012.
 //
-// Personal additions (e.g. a coding agent and its persistent volumes) go in
+// Personal additions (e.g. a coding agent) go in
 // .devcontainer/personal/devcontainer.json, which is gitignored. A tracked
 // example is provided.
+//
+// If you add a mount below $HOME, add its target to HOME_DIRS in
+// scripts/setup-tools.sh -- Docker mounts it root-owned.
 {
   "name": "Research",
 
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 
   "remoteUser": "vscode",
+
+  "mounts": [
+    {
+      // VerifMSI oracle state. It is GPLv3, so it must stay outside this
+      // repository (AGENTS.md 6.4, design/0005); a named volume keeps it across
+      // rebuilds instead of re-cloning every time.
+      //
+      // Shared rather than personal: the oracle cross-check is the project's
+      // mandatory trust boundary (AGENTS.md 6.3), so every teammate needs it.
+      "source": "secureeqsat-oracles",
+      "target": "/home/vscode/oracles",
+      "type": "volume"
+    }
+  ],
 
   "postCreateCommand": "bash scripts/setup-tools.sh"
 }

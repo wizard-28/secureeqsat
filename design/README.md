@@ -68,3 +68,4 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0011](0011-correct-claims-after-pass-3.md) | Correct claims after adversarial pass 3 | accepted |
 | [0012](0012-agent-neutral-devcontainer.md) | Make the shared dev container agent-neutral | accepted |
 | [0013](0013-publication-scope.md) | Publication scope for the repository | accepted |
+| [0014](0014-provision-the-oracle.md) | Provision the VerifMSI oracle for every teammate | accepted |

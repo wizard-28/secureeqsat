@@ -88,3 +88,18 @@ there.
   as a **flag**, not as a discovered filename. The personal configuration in this
   repo is self-sufficient, so either flag works; the README documents `--config`.
   This does not change the decision above, which concerns automatic discovery.
+- **2026-10-06** — **Provisioning bug found on the first real rebuild, and
+  fixed.** Docker creates missing mount-point **parents** as root, and named
+  volumes mount root-owned. With the volumes under `$HOME`, `~/.local/share` was
+  created root-owned and `uv sync` failed. `scripts/setup-tools.sh` now restores
+  ownership of every directory it writes into, driven by a `HOME_DIRS` list that
+  must be kept in sync with `mounts`; `~/.config` was added after the first fix
+  proved incomplete (uv writes `~/.config/uv`).
+- **2026-10-06** — **The oracle became shared infrastructure.** A fourth volume,
+  `secureeqsat-oracles` → `~/oracles`, is now in the **shared** configuration,
+  and `setup-tools.sh` runs `setup_oracles.sh` **non-fatally**: a network failure
+  warns and continues rather than breaking the container. Rationale: the
+  VerifMSI cross-check is the mandatory trust boundary (`AGENTS.md` §6.3), so
+  every teammate needs it, and previously it was wiped on every rebuild —
+  silently turning the cross-check tests from passes into skips.
+  `experiments/oracle_crosscheck/`.
