@@ -71,6 +71,7 @@ Full records in [`design/`](design/README.md).
 | `0005` | In-house checker + mandatory external-oracle cross-check as the trust boundary | accepted, **gate open** |
 | `0006` | Security-constrained extraction: per-class admissibility (first order) + lazy separation oracle (`t ≥ 2`) | accepted, unimplemented |
 | `0007` | Adopt git: trunk-based, logical commits, `.gitignore` authoritative | accepted |
+| `0008` | Automate venv creation in `postCreateCommand`; keep git identity local | accepted |
 
 ---
 
@@ -157,3 +158,5 @@ uv run python experiments/premise_test/run.py   # full narrative run
 - **2026-10-06** — Project governance added: `AGENTS.md`, this file, `design/`.
 - **2026-10-06** — Adopted git; repository initialised with logical historical commits
   (`.gitignore`, `design/0007`, `AGENTS.md` §8).
+- **2026-10-06** — Devcontainer now provisions `.venv` via `uv sync`; git identity set and
+  the seven unpublished commits reattributed (`design/0008`).

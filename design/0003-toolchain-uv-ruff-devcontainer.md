@@ -31,7 +31,8 @@ test runner that is the artifact of record.
 ## Consequences
 
 - After a devcontainer rebuild, one `uv sync` is required, because `postCreateCommand` does
-  not create the project venv. (Known gap; may be automated later.)
+  not create the project venv. (Known gap; may be automated later.) — **resolved by
+  [0008](0008-automate-venv-and-identity.md).**
 - Lint/format cleanliness is a hard gate for every change (`AGENTS.md` §10).
 - Narrowing the ruff rule set to dodge a fix is not allowed without an ADR.
 - Adding tooling is a conversation with the human, not a shell command.

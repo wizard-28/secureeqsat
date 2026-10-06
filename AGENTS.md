@@ -42,8 +42,8 @@ directly and do not rely on a system interpreter.
   explicitly-stated instruction on this project.
 - `ruff` and `pyright` are installed as `uv tool`s by `postCreateCommand`; they are invoked
   as bare commands, not via `uv run`.
-- **After a devcontainer rebuild, run `uv sync`** — `postCreateCommand` does not create the
-  project venv.
+- **`postCreateCommand` provisions `.venv` via `uv sync`** (`design/0008`). If a rebuild
+  leaves `.venv/` missing or stale, run `uv sync` manually.
 - Keep the Python toolchain in `pyproject.toml` under `[dependency-groups].dev`. Adding any
   **runtime** dependency requires an ADR first (`design/`), because the premise test is
   deliberately stdlib-only.
@@ -146,6 +146,8 @@ because of specific incidents — noted in brackets.
 
 - **Trunk is `main`; commit directly to it.** No branch/PR ceremony at this size (see
   `design/0007`).
+- **Set your git identity before committing** — it is per-clone and deliberately not in the
+  committed devcontainer: `git config user.name "..." && git config user.email "..."`.
 - **Small, logical commits**, Conventional-Commit prefixes: `feat:`, `fix:`, `docs:`,
   `chore:`, `refactor:`, `test:`.
 - **Never commit** environments, caches, editor artifacts, or harness exports. `.gitignore`

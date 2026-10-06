@@ -62,3 +62,4 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0005](0005-security-checker-and-trust-boundary.md) | Security checker and the external-oracle trust boundary | accepted — **gate open** |
 | [0006](0006-security-constrained-extraction.md) | Security-constrained extraction design | accepted — unimplemented |
 | [0007](0007-git-workflow.md) | Adopt git with trunk-based, logical-commit history | accepted |
+| [0008](0008-automate-venv-and-identity.md) | Automate venv creation; keep git identity local | accepted |

@@ -23,5 +23,5 @@
     }
   ],
 
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.config /home/vscode/.local /home/vscode/.cache && curl -fsSL https://opencode.ai/v2/install | bash && curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"/home/vscode/.local/bin:$PATH\" && uv tool install --python 3.14 pyright && uv tool install --python 3.14 ruff"
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.config /home/vscode/.local /home/vscode/.cache && curl -fsSL https://opencode.ai/v2/install | bash && curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"/home/vscode/.local/bin:$PATH\" && uv tool install --python 3.14 pyright && uv tool install --python 3.14 ruff && uv sync"
 }
