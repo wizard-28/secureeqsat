@@ -53,15 +53,24 @@ are installed as `uv tool`s and invoked as bare commands.
 
 ## Dev container
 
-Prerequisites: Docker, and the VS Code **Dev Containers** extension.
+Prerequisites: Docker, and the
+[dev container CLI](https://github.com/devcontainers/cli) (`devcontainer`). VS Code's
+Dev Containers extension also works — see below.
 
-Open the folder in a container: `F1` → **Dev Containers: Reopen in Container**.
+```bash
+devcontainer up --workspace-folder .                              # create and start
+devcontainer up --workspace-folder . --remove-existing-container  # rebuild
+devcontainer exec --workspace-folder . bash                       # shell inside it
+```
+
+Rebuild after editing anything under `.devcontainer/` or `pyproject.toml`.
 `postCreateCommand` runs [`scripts/setup-tools.sh`](scripts/setup-tools.sh), which
 installs `uv`, `ruff` and `pyright`, then builds `.venv` from the committed
 `uv.lock`.
 
-Rebuild after editing anything under `.devcontainer/` or `pyproject.toml`:
-`F1` → **Dev Containers: Rebuild Container**.
+The CLI writes `.devcontainer-lock.json` on first run; it pins dev container
+Feature versions and, like `uv.lock`, it is worth committing. `--no-lockfile`
+opts out and `--frozen-lockfile` enforces an existing one.
 
 ### The container is agent-neutral
 
@@ -75,14 +84,55 @@ cp .devcontainer/personal/devcontainer.example.json \
    .devcontainer/personal/devcontainer.json
 ```
 
-Then pick **"Research (personal)"** from the Dev Containers configuration picker
-when you rebuild. That configuration adds the three named volumes that keep
-opencode's config, data and cache alive across rebuilds, and runs
-[`scripts/setup-opencode.sh`](scripts/setup-opencode.sh).
+Then select it on the command line — `--config` applies for that invocation only,
+so nothing is imposed on anyone else:
+
+```bash
+devcontainer up --workspace-folder . \
+  --config .devcontainer/personal/devcontainer.json \
+  --remove-existing-container
+```
+
+That configuration adds the three named volumes that keep opencode's config, data
+and cache alive across rebuilds, and runs
+[`scripts/setup-opencode.sh`](scripts/setup-opencode.sh). If you would rather keep
+using the default configuration and overlay only a partial file, the CLI also
+accepts `--override-config <path>`.
 
 It is deliberately **not** part of the shared configuration: teammates using
 other agents should not have opencode installed for them. `.devcontainer/personal/`
 is gitignored apart from the example template. See `design/0012`.
+
+<details>
+<summary>Using VS Code instead of the CLI</summary>
+
+`F1` → **Dev Containers: Reopen in Container**, and pick **"Research (personal)"**
+from the configuration picker to get the personal configuration. Rebuild with
+`F1` → **Dev Containers: Rebuild Container**.
+
+</details>
+
+### Agent instructions
+
+Normative guidance lives in [`AGENTS.md`](AGENTS.md), which is read natively by
+Codex, Claude Code, Cursor, Copilot, opencode and others.
+
+A thin [`CLAUDE.md`](CLAUDE.md) imports it with `@AGENTS.md`. That is not
+decoration: Claude Code stops reading `AGENTS.md` once **any** `CLAUDE.md` or
+`CLAUDE.local.md` exists — including a teammate's personal one — so without the
+pointer a local preferences file would silently drop the entire protocol.
+
+Repeatable procedures are packaged as skills in [`.claude/skills/`](.claude/skills/),
+a location both Claude Code and opencode read, so they are shared rather than
+duplicated per tool:
+
+| Skill | Use it when |
+|---|---|
+| `secureeqsat-gate` | Finishing a change, or before any commit |
+| `secureeqsat-adr` | A decision needs recording in `design/` |
+| `secureeqsat-citation-check` | A citation or novelty claim is about to enter a document |
+
+`CLAUDE.local.md` is gitignored — personal preferences only, never committed.
 
 ### Without a container
 

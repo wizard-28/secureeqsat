@@ -106,6 +106,9 @@ Full records in [`design/`](design/README.md).
 | `experiments/oracle_crosscheck/` | VerifMSI driver, cross-check protocol, tests, `RESULTS.md` |
 | `experiments/constrained_extraction/` | `constrained.py`, `run_constrained.py`, `run_chain.py` |
 | `experiments/egglog_port/` | `port.py`, `kbest.py`, `RESULTS.md` |
+| `AGENTS.md` | **Canonical working norms** — read natively by most agents |
+| `CLAUDE.md` | Thin `@AGENTS.md` pointer; Claude Code stops reading `AGENTS.md` once any `CLAUDE.md`/`CLAUDE.local.md` exists |
+| `.claude/skills/` | Repo procedures as skills — read by both Claude Code and opencode |
 | `design/` | ADRs |
 | `README.md` | Entry point: what this is, how to run it, dev container instructions |
 | `scripts/` | Container provisioning — `setup-tools.sh` (team-wide), `setup-opencode.sh` (opt-in, per user) |
@@ -230,3 +233,12 @@ uv run python experiments/egglog_port/port.py --circuit chain --rules full --ite
   `scripts/setup-opencode.sh` and `.devcontainer/personal/` (`design/0012`), and
   the README documents both. Fixed stale ADR status lines for `0005` (gate
   closed) and `0006` (prototype implemented).
+- **2026-10-06** — **Agent-facing configuration.** Added a thin `CLAUDE.md` that
+  imports `AGENTS.md` — without it, Claude Code stops reading `AGENTS.md` when any
+  `CLAUDE.md`/`CLAUDE.local.md` is present, including a teammate's personal one.
+  Added three skills under `.claude/skills/`, a location both Claude Code and
+  opencode read: `secureeqsat-gate`, `secureeqsat-adr`,
+  `secureeqsat-citation-check`. Documented the dev container CLI workflow
+  (`up` / `exec` / `--config` / `--remove-existing-container`) in the README, and
+  recorded in `design/0012` that `--config` and `--override-config` supply the
+  local override a filename could not.

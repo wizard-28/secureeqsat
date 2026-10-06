@@ -24,6 +24,9 @@ dist/
 opencode.json
 .opencode/
 opencode-share.zip
+# Personal, per-user instruction files -- never commit (Claude Code docs)
+CLAUDE.local.md
+.agents.local.md
 
 # Third-party artifacts: published only with the author's consent.
 # See design/0013 -- note these remain in pre-untrack git history.

@@ -77,3 +77,14 @@ there.
   (closed → sub-folder configurations).
 - Local: `git log` on `.devcontainer/devcontainer.json`; `sudo -n true` confirms
   passwordless sudo for the volume `chown`.
+
+## Status updates
+
+- **2026-10-06** — **Follow-up: the mechanism exists at CLI level.** The dev
+  container CLI accepts `--config <path>` to use an arbitrary `devcontainer.json`
+  for a single invocation, and `--override-config <path>` to overlay one; a CLI
+  maintainer's own answer to this question is to pass a modified file through
+  `--override-config` (devcontainers/cli#395). So a local override is possible —
+  as a **flag**, not as a discovered filename. The personal configuration in this
+  repo is self-sufficient, so either flag works; the README documents `--config`.
+  This does not change the decision above, which concerns automatic discovery.
