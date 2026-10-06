@@ -1,6 +1,6 @@
 # 0005 — Security checker and the external-oracle trust boundary
 
-- **Status:** accepted — **gate open**
+- **Status:** accepted — **gate closed** (0 violations)
 - **Date:** 2026-10-06
 - **Deciders:** project team
 
@@ -77,3 +77,12 @@ way that makes an insecure optimizer look successful.
 - `AGENTS.md` §6.3 (trust boundary), §11 (stopping conditions).
 - Oracles: VerifMSI (`github.com/quentin-meunier/VerifMSI`), tightPROVE
   (`github.com/CryptoExperts/tightPROVE`, ASIACRYPT 2018).
+
+## Status updates
+
+- **2026-10-06** — **Gate closed.** The cross-check ran against VerifMSI over
+  1,216 circuits / 21,760 wires with **0 disagreements**, so the stopping
+  condition in `AGENTS.md` §6.3 and §11 is satisfied for the tested scope
+  (first order, 2 shares, glitch-free). Gate reopens if the scope changes or a
+  disagreement appears. `experiments/oracle_crosscheck/RESULTS.md`,
+  `docs/feasibility-report.md`.

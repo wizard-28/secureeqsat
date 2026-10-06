@@ -39,11 +39,18 @@ directly and do not rely on a system interpreter.
 - **There is no system Python.** `uv` provisions interpreters and manages `.venv`.
 - **Never install tools with `apt`, `pip`, or `curl | sh`.** If something is missing, edit
   `.devcontainer/devcontainer.json` and ask the human to rebuild. This is the single most
-  explicitly-stated instruction on this project.
-- `ruff` and `pyright` are installed as `uv tool`s by `postCreateCommand`; they are invoked
-  as bare commands, not via `uv run`.
-- **`postCreateCommand` provisions `.venv` via `uv sync`** (`design/0008`). If a rebuild
-  leaves `.venv/` missing or stale, run `uv sync` manually.
+  explicitly-stated instruction on this project. **Carve-out:** the provisioning scripts run
+  by `postCreateCommand` (`scripts/setup-tools.sh`, `scripts/setup-opencode.sh`) are the
+  sanctioned path, not an exception to it — this rule targets *ad-hoc* mutation of a running
+  sandbox, not container provisioning (`design/0012`).
+- `ruff` and `pyright` are installed as `uv tool`s by `scripts/setup-tools.sh`; they are
+  invoked as bare commands, not via `uv run`.
+- **`postCreateCommand` provisions `.venv` via `uv sync`** (`design/0008`), through
+  `scripts/setup-tools.sh`. If a rebuild leaves `.venv/` missing or stale, run `uv sync`
+  manually.
+- **The shared dev container is agent-neutral** (`design/0012`). Do not add a coding agent to
+  `.devcontainer/devcontainer.json`; per-user agents belong in the gitignored
+  `.devcontainer/personal/devcontainer.json` (template committed).
 - Keep the Python toolchain in `pyproject.toml` under `[dependency-groups].dev`. Adding any
   **runtime** dependency requires an ADR first (`design/`), because the premise test is
   deliberately stdlib-only.

@@ -1,3 +1,11 @@
+// Shared development container. Deliberately AGENT-NEUTRAL: it installs no
+// coding agent, so nothing here is imposed on teammates who use a different
+// one. Provisioning lives in scripts/ -- see README "Dev container" and
+// design/0012.
+//
+// Personal additions (e.g. a coding agent and its persistent volumes) go in
+// .devcontainer/personal/devcontainer.json, which is gitignored. A tracked
+// example is provided.
 {
   "name": "Research",
 
@@ -5,23 +13,5 @@
 
   "remoteUser": "vscode",
 
-  "mounts": [
-    {
-      "source": "opencode-config",
-      "target": "/home/vscode/.config/opencode",
-      "type": "volume"
-    },
-    {
-      "source": "opencode-data",
-      "target": "/home/vscode/.local/share/opencode",
-      "type": "volume"
-    },
-    {
-      "source": "opencode-cache",
-      "target": "/home/vscode/.cache/opencode",
-      "type": "volume"
-    }
-  ],
-
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.config /home/vscode/.local /home/vscode/.cache && curl -fsSL https://opencode.ai/v2/install | bash && curl -LsSf https://astral.sh/uv/install.sh | sh && export PATH=\"/home/vscode/.local/bin:$PATH\" && uv tool install --python 3.14 pyright && uv tool install --python 3.14 ruff && uv sync"
+  "postCreateCommand": "bash scripts/setup-tools.sh"
 }

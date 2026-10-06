@@ -1,0 +1,44 @@
+// Example PERSONAL container configuration. Not used directly: copy it to
+// devcontainer.json in this directory, then select "Research (personal)" from
+// the Dev Containers configuration picker when you rebuild.
+//
+//   cp .devcontainer/personal/devcontainer.example.json \
+//      .devcontainer/personal/devcontainer.json
+//
+// This adds opencode and the three named volumes that keep its state alive
+// across rebuilds, on top of the agent-neutral shared configuration in
+// ../devcontainer.json. See README "Dev container" and design/0012.
+{
+  "name": "Research (personal)",
+
+  // Inheritance would avoid repeating the shared keys below, but `extends` is
+  // in NEITHER the base dev container spec reference NOR VS Code's schema; it
+  // is still an open proposal (devcontainers/spec#22). Uncomment only if you
+  // have confirmed your tool honours it -- otherwise the file below is
+  // deliberately self-sufficient.
+  //
+  // "extends": "../devcontainer.json",
+
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "remoteUser": "vscode",
+
+  "mounts": [
+    {
+      "source": "opencode-config",
+      "target": "/home/vscode/.config/opencode",
+      "type": "volume"
+    },
+    {
+      "source": "opencode-data",
+      "target": "/home/vscode/.local/share/opencode",
+      "type": "volume"
+    },
+    {
+      "source": "opencode-cache",
+      "target": "/home/vscode/.cache/opencode",
+      "type": "volume"
+    }
+  ],
+
+  "postCreateCommand": "bash scripts/setup-tools.sh && bash scripts/setup-opencode.sh"
+}

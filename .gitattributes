@@ -1,0 +1,13 @@
+# Normalize line endings on commit, check out LF everywhere.
+* text=auto eol=lf
+
+# Binary assets: never normalize, never attempt a text diff.
+*.pdf   binary
+*.pptx  binary
+*.docx  binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+
+# Generated lockfile: keep it out of diffs and language stats.
+uv.lock -diff linguist-generated

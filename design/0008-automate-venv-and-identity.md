@@ -55,3 +55,11 @@ devcontainer so rebuilds configure it automatically, or stay outside the reposit
 - `.devcontainer/devcontainer.json` — `uv sync` appended to `postCreateCommand`.
 - `git log --format='%an <%ae>'` — all commits now attributed.
 - `design/0003` (the gap this resolves), `AGENTS.md` §3 and §8.
+
+## Status updates
+
+- **2026-10-06** — Decision **stands**; only its location changed. The
+  `postCreateCommand` body moved into `scripts/setup-tools.sh` (invoked as
+  `bash scripts/setup-tools.sh`) so the provisioning is reviewable and the
+  container can be made agent-neutral. `uv sync` still runs on create — see
+  `design/0012` and `AGENTS.md` §3.

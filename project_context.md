@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-06 (after the feasibility push)
+**Last updated:** 2026-10-06 (push preparation)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -87,6 +87,8 @@ Full records in [`design/`](design/README.md).
 | `0009` | Add `egglog` for the engine feasibility check | accepted, **answered** |
 | `0010` | Reframe around soundness and the re-sharing gap | accepted |
 | `0011` | Correct the novelty claims after adversarial pass 3 (congruence framing, eVer disclaimer, labelling bottleneck) | accepted |
+| `0012` | Make the shared dev container agent-neutral; per-user agents opt in via `.devcontainer/personal/` | accepted |
+| `0013` | Publication scope: PDFs tracked, teammate PPTX untracked, no licence until public | accepted |
 
 ---
 
@@ -105,6 +107,9 @@ Full records in [`design/`](design/README.md).
 | `experiments/constrained_extraction/` | `constrained.py`, `run_constrained.py`, `run_chain.py` |
 | `experiments/egglog_port/` | `port.py`, `kbest.py`, `RESULTS.md` |
 | `design/` | ADRs |
+| `README.md` | Entry point: what this is, how to run it, dev container instructions |
+| `scripts/` | Container provisioning — `setup-tools.sh` (team-wide), `setup-opencode.sh` (opt-in, per user) |
+| `.devcontainer/` | Shared **agent-neutral** container; `personal/` holds the gitignored per-user config plus a tracked example |
 | `pyproject.toml`, `uv.lock`, `.venv/` | uv project (dev deps: pytest, ruff, egglog) |
 
 ---
@@ -134,6 +139,13 @@ Full records in [`design/`](design/README.md).
    the tests skip when it is absent, so CI without the oracle silently loses
    coverage.
 7. **Licensing (LOW).** VerifMSI/tightPROVE are GPLv3 — external processes only.
+8. **Publication (LOW while private, HIGH on a public flip).** The teammate PPTX
+   was untracked but **remains in git history** (`df67155`), and there is no
+   `LICENSE`. Both must be handled before the repository goes public —
+   `design/0013` carries the purge command.
+9. **Container friction (LOW).** The per-user agent configuration must be
+   re-selected on each rebuild and is unavailable in Codespaces; the shared
+   container is otherwise sufficient (`design/0012`).
 
 ---
 
@@ -152,6 +164,11 @@ Full records in [`design/`](design/README.md).
    present, and document the skip behaviour.
 5. **Monitor** eVer (already optimizing refresh gadgets) and the re-sharing
    literature (RNI-f / COMAR line).
+6. **Push to a private GitHub remote.** Create the empty repository, then
+   `git remote add origin …` and push `main` (`design/0013`).
+7. **Before any public flip:** purge `docs/teammates-made/` from history, add a
+   `LICENSE`, and re-read the proposal for claims that only hold internally
+   (`design/0013`).
 
 ---
 
@@ -206,3 +223,10 @@ uv run python experiments/egglog_port/port.py --circuit chain --rules full --ite
   masking semantics, not a new notion). Measured: search scales (egglog, chain
   depth 5, <0.01 s), **labelling is the bottleneck** (6.7 s/check at 16
   randoms). `docs/adversarial-search-3.md`, `design/0011`, proposal v3.
+- **2026-10-06** — **Push preparation.** Added `README.md` and `.gitattributes`;
+  untracked the teammate PPTX and gitignored `docs/teammates-made/`
+  (`design/0013`). Made the dev container **agent-neutral**: provisioning moved
+  to `scripts/setup-tools.sh`, the per-user agent install is opt-in via
+  `scripts/setup-opencode.sh` and `.devcontainer/personal/` (`design/0012`), and
+  the README documents both. Fixed stale ADR status lines for `0005` (gate
+  closed) and `0006` (prototype implemented).

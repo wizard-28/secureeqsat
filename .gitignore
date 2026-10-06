@@ -15,8 +15,19 @@ dist/
 .pyright/
 .mypy_cache/
 
-# Harness exports (opencode session share)
+# Personal dev container configuration -- only the example is tracked.
+# See README "Dev container" and design/0012.
+.devcontainer/personal/*
+!.devcontainer/personal/devcontainer.example.json
+
+# Agent / harness configuration
+opencode.json
+.opencode/
 opencode-share.zip
+
+# Third-party artifacts: published only with the author's consent.
+# See design/0013 -- note these remain in pre-untrack git history.
+docs/teammates-made/
 
 # Editors / OS
 .DS_Store
@@ -26,7 +37,7 @@ opencode-share.zip
 .vscode/
 
 # Office lock files (LibreOffice leaves these behind)
-.~lock.*#
+.~lock.*
 
 # Local secrets
 .env

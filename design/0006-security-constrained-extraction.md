@@ -1,6 +1,6 @@
 # 0006 — Security-constrained extraction design
 
-- **Status:** accepted — unimplemented
+- **Status:** accepted — **prototype implemented**
 - **Date:** 2026-10-06
 - **Deciders:** project team
 
@@ -64,3 +64,13 @@ The technical shape of the constraint:
 - `experiments/premise_test/RESULTS.md` — the failure this design must prevent.
 - `docs/probing-secure-eqsat-proposal.md` §10.3–10.5 — safety semantics and the algorithm.
 - `design/0002` (scope), `design/0005` (trust boundary).
+
+## Status updates
+
+- **2026-10-06** — **Prototype implemented.** Per-class admissibility and
+  security-constrained extraction work and recover a secure circuit from the
+  insecure optimum (ISW AND: 7 gates insecure → 8 gates secure, price of
+  security = 1 gate). The lazy separation oracle for `t ≥ 2` remains
+  **unimplemented**. Separately, safety labelling is now the measured scalability
+  bottleneck (`docs/adversarial-search-3.md` §D2, `project_context.md` §6.5).
+  `experiments/constrained_extraction/`.

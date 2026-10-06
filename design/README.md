@@ -59,10 +59,12 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0002](0002-scope-first-order-2-share-glitch-free.md) | Scope: first order, 2 shares, straight-line, glitch-free | accepted |
 | [0003](0003-toolchain-uv-ruff-devcontainer.md) | Toolchain: uv, ruff, pytest, devcontainer-managed | accepted |
 | [0004](0004-minimal-egraph-for-premise-test.md) | Minimal in-repo e-graph for the premise test; egglog for the real engine | accepted |
-| [0005](0005-security-checker-and-trust-boundary.md) | Security checker and the external-oracle trust boundary | accepted — **gate open** |
-| [0006](0006-security-constrained-extraction.md) | Security-constrained extraction design | accepted — unimplemented |
+| [0005](0005-security-checker-and-trust-boundary.md) | Security checker and the external-oracle trust boundary | accepted — **gate closed** |
+| [0006](0006-security-constrained-extraction.md) | Security-constrained extraction design | accepted — **prototype implemented** |
 | [0007](0007-git-workflow.md) | Adopt git with trunk-based, logical-commit history | accepted |
 | [0008](0008-automate-venv-and-identity.md) | Automate venv creation; keep git identity local | accepted |
 | [0009](0009-egglog-for-engine-check.md) | Add `egglog` for the engine feasibility check | accepted |
 | [0010](0010-reframe-soundness-and-resharing.md) | Reframe around soundness and the re-sharing gap | accepted |
 | [0011](0011-correct-claims-after-pass-3.md) | Correct claims after adversarial pass 3 | accepted |
+| [0012](0012-agent-neutral-devcontainer.md) | Make the shared dev container agent-neutral | accepted |
+| [0013](0013-publication-scope.md) | Publication scope for the repository | accepted |
