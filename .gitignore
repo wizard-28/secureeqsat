@@ -28,6 +28,10 @@ opencode-share.zip
 CLAUDE.local.md
 .agents.local.md
 
+# Note: .devcontainer-lock.json is deliberately NOT ignored. It pins dev
+# container Feature versions, like uv.lock. This configuration declares no
+# Features so none is generated -- but if you add any, commit the lockfile.
+
 # Third-party artifacts: published only with the author's consent.
 # See design/0013 -- note these remain in pre-untrack git history.
 docs/teammates-made/

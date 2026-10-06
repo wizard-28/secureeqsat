@@ -86,9 +86,10 @@ Rebuild after editing anything under `.devcontainer/` or `pyproject.toml`.
 installs `uv`, `ruff` and `pyright`, then builds `.venv` from the committed
 `uv.lock`.
 
-The CLI writes `.devcontainer-lock.json` on first run; it pins dev container
-Feature versions and, like `uv.lock`, it is worth committing. `--no-lockfile`
-opts out and `--frozen-lockfile` enforces an existing one.
+The CLI generates `.devcontainer-lock.json` to pin dev container **Feature**
+versions, and it is worth committing when it appears — like `uv.lock`. This
+configuration declares no Features, so none is written; `--no-lockfile` opts out
+and `--frozen-lockfile` enforces an existing one if you add any.
 
 The shared configuration also declares one named volume, `secureeqsat-oracles`,
 mounted at `~/oracles`. It holds the VerifMSI oracle, which the trust boundary
