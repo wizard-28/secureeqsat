@@ -1,0 +1,24 @@
+[project]
+name = "secureeqsat"
+version = "0.1.0"
+description = "Probing-secure equality saturation: premise test and prototype"
+readme = "experiments/premise_test/RESULTS.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.16",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+pythonpath = ["experiments/premise_test"]
+testpaths = ["experiments/premise_test"]
