@@ -7,7 +7,8 @@ a first-order probing-security constraint.
 > *soundness* finding plus a repair, **not** an optimization win. See
 > [`project_context.md`](project_context.md) for the live snapshot, and
 > [`docs/adversarial-search-3.md`](docs/adversarial-search-3.md) for the
-> calibrated novelty claims and their residual risks.
+> calibrated novelty claims and their residual risks. Explicit non-claims are
+> listed in the proposal, §11.2.
 
 ## What we found
 
@@ -52,7 +53,9 @@ Working without a container is also fine:
 uv sync && uv run pytest -q
 ```
 
-Requires [uv](https://docs.astral.sh/uv/). There is no system Python.
+Requires [uv](https://docs.astral.sh/uv/). There is no system Python: `uv`
+provisions the interpreter (`requires-python = ">=3.12"`; the container pins
+CPython 3.14).
 
 ## Commands
 
@@ -175,6 +178,7 @@ duplicated per tool:
 | [`docs/feasibility-report.md`](docs/feasibility-report.md) | Consolidated feasibility checks and confidence levels |
 | [`docs/adversarial-search-2.md`](docs/adversarial-search-2.md) | Second adversarial pass, with its query log |
 | [`docs/adversarial-search-3.md`](docs/adversarial-search-3.md) | Third adversarial pass + scaling measurements |
+| [`docs/team-briefing-plan-a.md`](docs/team-briefing-plan-a.md) | Why the original direction was closed, and what replaced it |
 | [`experiments/`](experiments/) | Premise test, oracle cross-check, constrained extraction, `egglog` port |
 | `docs/original/` | Historical record of the closed direction — **do not edit** |
 
