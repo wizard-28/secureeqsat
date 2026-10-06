@@ -143,6 +143,54 @@ def build_masked_buffer():
     return c
 
 
+def build_isw_and_wrong_order():
+    """Same ISW function with r folded in too late (known insecure).
+
+    The intermediate a0&b1 ^ a1&b0 = a0*b ^ a*b0 leaks; real ISW folds the
+    fresh random into every c1-chain intermediate.
+    """
+    c = Circuit()
+    a0 = c.add_input("a0")
+    a1 = c.add_input("a1")
+    b0 = c.add_input("b0")
+    b1 = c.add_input("b1")
+    r = c.add_input("r")
+    p1 = c.add_gate("and", a0, b0)
+    c0 = c.add_gate("xor", p1, r)
+    p2 = c.add_gate("and", a0, b1)
+    p3 = c.add_gate("and", a1, b0)
+    p4 = c.add_gate("and", a1, b1)
+    t1 = c.add_gate("xor", p2, p3)
+    t2 = c.add_gate("xor", t1, p4)
+    c1 = c.add_gate("xor", t2, r)
+    c.outputs = [c0, c1]
+    return c
+
+
+def build_dom_and():
+    """2-share DOM masked AND, glitch-free model (registers elided).
+
+    Structure transcribed from VerifMSI's own generate_dom_and.py:
+        c0 = a0&b0 ^ (a0&b1 ^ r)
+        c1 = a1&b1 ^ (a1&b0 ^ r)
+    Known first-order secure (glitch-free).
+    """
+    c = Circuit()
+    a0 = c.add_input("a0")
+    a1 = c.add_input("a1")
+    b0 = c.add_input("b0")
+    b1 = c.add_input("b1")
+    r = c.add_input("r")
+    x = c.add_gate("and", a0, b0)
+    y = c.add_gate("and", a0, b1)
+    u = c.add_gate("and", a1, b0)
+    v = c.add_gate("and", a1, b1)
+    y2 = c.add_gate("xor", y, r)
+    u2 = c.add_gate("xor", u, r)
+    c.outputs = [c.add_gate("xor", x, y2), c.add_gate("xor", v, u2)]
+    return c
+
+
 def build_naive_unmasked_intermediate():
     """A masking built through an unmasked intermediate t = (a0^a1)&(b0^b1).
 

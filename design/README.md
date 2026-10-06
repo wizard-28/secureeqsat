@@ -63,3 +63,5 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0006](0006-security-constrained-extraction.md) | Security-constrained extraction design | accepted — unimplemented |
 | [0007](0007-git-workflow.md) | Adopt git with trunk-based, logical-commit history | accepted |
 | [0008](0008-automate-venv-and-identity.md) | Automate venv creation; keep git identity local | accepted |
+| [0009](0009-egglog-for-engine-check.md) | Add `egglog` for the engine feasibility check | accepted |
+| [0010](0010-reframe-soundness-and-resharing.md) | Reframe around soundness and the re-sharing gap | accepted |

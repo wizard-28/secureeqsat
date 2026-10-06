@@ -627,3 +627,48 @@ If the team has 2 members: A and B merge ownership of search+security, C owns ev
 - **Negative results (auditable):** no e-graph/EqSat system found that optimizes masked circuits under probing security; no masked-circuit optimizer found that uses e-graphs. Query lists in §11.4.
 - **Novelty confidence:** ~6/10, dominated by the risk that superVer/eVer's line of work adds an optimization step before this project matures.
 - **Feasibility confidence:** ~medium-high for the 30% milestone and ~medium for a publishable empirical win; the single largest technical risk is constrained extraction under a non-local property, and the single largest scientific risk is a null result on cost savings.
+
+---
+
+# Revision Note — after the feasibility push (2026-10-06)
+
+This document is the Plan A proposal. Its **mechanism (§10), novelty boundaries
+(§11) and trust-boundary material remain valid**. The headline claim has been
+revised by `design/0010` after the feasibility push; read this document together
+with `docs/feasibility-report.md`.
+
+**What the checks confirmed**
+
+- The trust boundary is **closed**: the in-house checker agrees with VerifMSI on
+  every wire of 21,760 wires across 1,216 circuits, zero violations
+  (`design/0005`).
+- The premise is confirmed on **two independent engines**, leaking on identical
+  wires (`experiments/premise_test/RESULTS.md`,
+  `experiments/egglog_port/RESULTS.md`).
+- Security-constrained extraction is **implemented** and recovers a secure
+  circuit from the insecure optimum (`experiments/constrained_extraction/`).
+- Scalability is an engineering problem, solved by using `egglog`
+  (`design/0009`).
+
+**What changed**
+
+- "Constrained search finds cheaper secure masked circuits" is **not supported**.
+  At gadget scale the constrained optimum equals the known construction; at
+  chain scale the entire sampled cheap extraction frontier is insecure.
+- The explanation is the **re-sharing gap**: the optimizations worth having
+  (refresh insertion/removal, randomness reuse, gadget substitution) are not
+  Boolean equalities, so plain equality saturation cannot express them — and
+  prefers the one refactoring it can express, which is the insecure one.
+
+**Revised headline (per `design/0010`)**
+
+1. Unconstrained equality saturation is **unsound** for masked-circuit
+   optimization, with a concrete mechanism and two-engine reproduction.
+2. The **repair**: exact cross-validated checker, per-class safety labelling,
+   security-constrained extraction.
+3. The **research question**: what equivalence relation should an e-graph use
+   for masked circuits, given that the useful optimizations are equivalences up
+   to re-sharing?
+
+The §11 disclaimers (superVer, the masked-optimizer lineage, constraint-aware and
+colored e-graphs) still apply verbatim and must appear in any write-up.

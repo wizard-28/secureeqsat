@@ -25,5 +25,8 @@ opencode-share.zip
 .idea/
 .vscode/
 
+# Office lock files (LibreOffice leaves these behind)
+.~lock.*#
+
 # Local secrets
 .env
