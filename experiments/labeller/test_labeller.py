@@ -1,8 +1,10 @@
 """Agreement tests: the bitsliced labeller must reproduce the reference checker.
 
 The reference is `masked.check_first_order` (itself cross-validated against
-VerifMSI, design/0005) and, on e-graphs, `constrained.class_safety`. Any
-disagreement on any wire or class is a failure.
+VerifMSI, design/0005) and, on e-graphs, `constrained.class_safety_reference`.
+Any disagreement on any wire or class is a failure. The labeller is also
+cross-checked against VerifMSI directly (RULE 1b in
+experiments/oracle_crosscheck/crosscheck.py).
 """
 
 import random
@@ -14,7 +16,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "experiments" / "constrained_extraction"))
 
-from constrained import class_safety  # noqa: E402
+from constrained import class_safety, class_safety_reference  # noqa: E402
 from egraph import RULES_CORE, RULES_FULL, saturate  # noqa: E402
 from labeller import (  # noqa: E402
     InconsistentClassError,
@@ -102,11 +104,25 @@ def test_egraph_labels_match_class_safety(rules):
     eg, _c0, _c1 = build_isw_egraph()
     saturate(eg, rules)
     randoms = ["r"]
-    ref = class_safety(eg, SECRET_GROUPS_AND, randoms)
+    ref = class_safety_reference(eg, SECRET_GROUPS_AND, randoms)
     ours = class_safety_bitsliced(eg, SECRET_GROUPS_AND, randoms)
     assert ours == ref
+    # constrained.class_safety is wired to the bitsliced labeller.
+    assert class_safety(eg, SECRET_GROUPS_AND, randoms) == ref
     assert any(ours.values())
     assert not all(ours.values())
+
+
+def test_chain_egraph_labels_match_reference():
+    """Two chained ISW gadgets (3 secrets, 2 randoms), core rules."""
+    from measure import build_chain
+
+    eg, secrets, randoms = build_chain(2)
+    saturate(eg, RULES_CORE)
+    ref = class_safety_reference(eg, secrets, randoms)
+    assert class_safety_bitsliced(eg, secrets, randoms) == ref
+    assert any(ref.values())
+    assert not all(ref.values())
 
 
 def test_full_rules_expose_the_unmasked_secret_class():

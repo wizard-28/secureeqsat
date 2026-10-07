@@ -40,7 +40,7 @@ That is the whole setup. `postCreateCommand` provisions everything:
 1. `uv`, `ruff`, `pyright`, and `.venv` from the committed `uv.lock`
 2. the **VerifMSI oracle**, shallow-cloned into a named volume at `~/oracles`
 
-Expect **10 passed** on a fresh container. There is nothing else to install.
+Expect **24 passed** on a fresh container. There is nothing else to install.
 
 If the oracle clone fails — offline, or a blocked network — the container still
 comes up, and the three cross-check tests **skip**. A skip is not a pass: re-run
@@ -68,6 +68,7 @@ CPython 3.14).
 | `uv run python experiments/premise_test/run.py` | Narrative premise test |
 | `uv run python experiments/constrained_extraction/run_constrained.py` | Constrained extraction |
 | `uv run python experiments/egglog_port/port.py --circuit chain --rules full --iters 4` | `egglog` engine check |
+| `uv run python experiments/labeller/measure.py` | Labelling cost: reference vs bitsliced labeller |
 
 `uv run <cmd>` is the only sanctioned way to execute Python. `ruff` and `pyright`
 are installed as `uv tool`s and invoked as bare commands.
