@@ -254,3 +254,12 @@ uv run python experiments/egglog_port/port.py --circuit chain --rules full --ite
   breaking the container. Previously every rebuild silently turned the three
   VerifMSI cross-check tests from passes into skips — a trust-boundary hole for
   onboarding (`design/0012`, `0014`).
+- **2026-10-07** — **Corrected the feasibility report and ADR 0010.** The report's
+  §6 still asserted the superseded "EqSat cannot express re-sharing" claim that
+  `design/0011` had falsified, and §7's "novelty intact" predated the
+  eVer / MaskedHLS / SecCG disclaimers — so the two documents a reviewer reads
+  side by side disagreed. §6 now carries the congruence argument plus both
+  corrections, §7 the narrowed novelty claim, and §8 a new high-confidence row
+  for the congruence obstruction. `design/0010` keeps its reasoning (append-only)
+  and gains a dated status update recording that its decision stands while the
+  explanation was sharpened. No claim changed — only how it is stated.
