@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-06 (push preparation)
+**Last updated:** 2026-10-07 (bitsliced labeller)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -58,8 +58,8 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ⚠️ negative | **Payoff not demonstrated.** Gadget scale: constrained optimum == known construction. Chain scale: the entire sampled cheap frontier is insecure (`docs/feasibility-report.md` §4) |
 | ⚠️ medium | Abstraction-level explanation: the useful optimizations are **not congruences** of the wire-term algebra (`docs/feasibility-report.md` §6, corrected in `design/0011`) |
 | ✅ done | **Third adversarial pass** on the reframed proposal: claims corrected, disclaimers added, eVer collision found (`docs/adversarial-search-3.md`, `design/0011`) |
-| ⚠️ measured | **Labelling is the scalability bottleneck**: checker doubles per random (6.7 s at 16), called once per e-class; `egglog` saturation scales fine |
-| ⏳ next | **Symbolic/lazy safety labeller** — the top implementation task before larger circuits |
+| ✅ done | **Labelling bottleneck resolved at chain scale** — bitsliced exact labeller (`design/0015`): depth-5 chain labelled in ~0.4 s vs ~50 min (est.); identical verdicts vs reference and VerifMSI (22,463 wires, 0 violations) |
+| ⏳ deferred | **Symbolic labeller** (ANF/BDD, VerifMSI oracle, pre-filters) — only needed past the bitsliced `2**26` cap (S-box scale) |
 | ⏳ next | **Re-sharing formulation** — refresh as a congruence-aware representation; the only identified route to genuine gains |
 | 🔔 realised | **eVer (ePrint 2026/208) now optimizes refresh sequences and gadgets** with re-verification. Repositioned: claim the e-graph + congruence angle, never "optimize refreshes" |
 
@@ -90,6 +90,7 @@ Full records in [`design/`](design/README.md).
 | `0012` | Make the shared dev container agent-neutral; per-user agents opt in via `.devcontainer/personal/` | accepted |
 | `0013` | Publication scope: PDFs tracked, teammate PPTX untracked, no licence until public | accepted |
 | `0014` | Provision the VerifMSI oracle for every teammate (shared volume + auto-setup, non-fatal) | accepted |
+| `0015` | Bitsliced exact labeller replaces per-class materialisation; symbolic routes deferred | accepted |
 
 ---
 
@@ -107,6 +108,7 @@ Full records in [`design/`](design/README.md).
 | `experiments/oracle_crosscheck/` | VerifMSI driver, cross-check protocol, tests, `RESULTS.md` |
 | `experiments/constrained_extraction/` | `constrained.py`, `run_constrained.py`, `run_chain.py` |
 | `experiments/egglog_port/` | `port.py`, `kbest.py`, `RESULTS.md` |
+| `experiments/labeller/` | Bitsliced exact labeller: `labeller.py`, `test_labeller.py`, `measure.py`, `RESULTS.md` |
 | `AGENTS.md` | **Canonical working norms** — read natively by most agents |
 | `CLAUDE.md` | Thin `@AGENTS.md` pointer; Claude Code stops reading `AGENTS.md` once any `CLAUDE.md`/`CLAUDE.local.md` exists |
 | `.claude/skills/` | Repo procedures as skills — read by both Claude Code and opencode |
@@ -134,11 +136,11 @@ Full records in [`design/`](design/README.md).
    congruence framing, which they have not claimed (`design/0011`).
 4. **Scope (MEDIUM).** First order, 2 shares, glitch-free only. No claim about
    robust probing, glitches, PINI or higher orders.
-5. **Labelling bottleneck (HIGH, measured).** The exhaustive checker doubles per
-   fresh random (6.7 s at 16) and is called once per e-class; `egglog`
-   saturation scales fine. Mitigation: symbolic/lazy labeller — VerifMSI as an
-   external labelling oracle, ANF/BDD check, structural pre-filters, on-demand
-   frontier labelling.
+5. **Labelling bottleneck (HIGH → LOW at chain scale, measured).** The
+   bitsliced labeller (`design/0015`) labels a depth-5 chain in ~0.4 s, but is
+   still exact and exponential: spaces above `2**26` are refused. S-box-scale
+   circuits will need the deferred symbolic route (VerifMSI oracle, ANF/BDD,
+   structural pre-filters, on-demand frontier labelling).
 6. **Oracle dependency (LOW).** The cross-check requires an external GPL tool;
    the tests skip when it is absent, so CI without the oracle silently loses
    coverage.
@@ -155,10 +157,9 @@ Full records in [`design/`](design/README.md).
 
 ## 7. Next actions (ordered)
 
-1. **Build a symbolic/lazy safety labeller** — the measured bottleneck. Options:
-   VerifMSI as an external labelling oracle, an ANF/BDD-based exact check,
-   conservative structural pre-filters (non-completeness/uniformity), and/or
-   labelling only the extraction frontier on demand.
+1. ~~Build a faster safety labeller~~ — **done** for chain scale (`design/0015`).
+   A symbolic labeller is deferred until a benchmark exceeds `2**26`. Labelling
+   `egglog` e-graphs still needs an export of their classes.
 2. **Re-sharing representation** (highest leverage): what representation can
    carry re-sharing while keeping extraction security-aware, given that
    re-sharing is not a congruence (`design/0011`)?
@@ -192,12 +193,13 @@ Full records in [`design/`](design/README.md).
 
 ```bash
 uv sync
-uv run pytest -q                                    # 10 tests (3 skip without the oracle)
+uv run pytest -q                                    # 24 tests (3 skip without the oracle)
 uv run python experiments/premise_test/run.py       # premise, in-house
 bash experiments/oracle_crosscheck/setup_oracles.sh # one-off, outside the repo
 uv run python experiments/oracle_crosscheck/crosscheck.py --random 20
 uv run python experiments/constrained_extraction/run_constrained.py
 uv run python experiments/egglog_port/port.py --circuit chain --rules full --iters 4
+uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
 ```
 
 ---
@@ -254,3 +256,11 @@ uv run python experiments/egglog_port/port.py --circuit chain --rules full --ite
   breaking the container. Previously every rebuild silently turned the three
   VerifMSI cross-check tests from passes into skips — a trust-boundary hole for
   onboarding (`design/0012`, `0014`).
+- **2026-10-07** — **Labelling bottleneck resolved at chain scale.** Added the
+  bitsliced exact labeller (`experiments/labeller/`, `design/0015`):
+  `constrained.class_safety` now uses it, the original is kept as
+  `class_safety_reference`. Identical verdicts against the reference checker,
+  the reference labeller and VerifMSI (new RULE 1b in the cross-check; 1,265
+  circuits / 22,463 wires, 0 violations). Depth-5 chain labelled in ~0.4 s vs
+  ~50 min (est.); saturation now dominates. Fixed `run_chain.py` passing all
+  free variables as randoms.

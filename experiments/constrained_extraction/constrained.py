@@ -5,7 +5,9 @@ premise test shows it selects a cheaper insecure circuit. This module adds the
 constraint:
 
   * `class_safety`  labels every e-class by whether the Boolean FUNCTION it
-    represents is independent of the secrets (first order, glitch-free).
+    represents is independent of the secrets (first order, glitch-free). It
+    uses the bitsliced labeller (experiments/labeller, design/0015); the
+    original per-class implementation is kept as `class_safety_reference`.
   * `extract_constrained` runs the cost fixed point restricted to nodes whose
     children are internally materialisable, where a class may be materialised
     internally only if it is safe.
@@ -21,8 +23,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "experiments" / "premise_test"))
+sys.path.insert(0, str(ROOT / "experiments" / "labeller"))
 
 from egraph import MaterializeError, extract, materialize  # noqa: E402
+from labeller import class_safety_bitsliced  # noqa: E402
 from masked import Circuit, check_first_order  # noqa: E402
 
 INF = float("inf")
@@ -36,8 +40,20 @@ def free_vars_for(secrets, randoms):
 def class_safety(eg, secrets, randoms):
     """{class: bool} — is the function computed by this class independent of secrets?
 
+    `randoms` are the fresh randoms only; the first share of every secret is
+    added automatically. Computed by the bitsliced labeller: one truth table
+    per class, bottom-up, with a check that every node in a class computes the
+    same function (an unsound merge raises `InconsistentClassError`).
+    """
+    return class_safety_bitsliced(eg, secrets, randoms)
+
+
+def class_safety_reference(eg, secrets, randoms):
+    """The original labeller, kept as the reference for `class_safety`.
+
     Safety is a property of the function, so any representative term suffices;
     we materialise the cheapest one and ask the checker about the root wire.
+    Exponential per class: prefer `class_safety`.
     """
     free = free_vars_for(secrets, randoms)
     eg.rebuild()

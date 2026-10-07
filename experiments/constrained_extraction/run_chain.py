@@ -31,7 +31,8 @@ from egraph import (  # noqa: E402
 from masked import Circuit, check_first_order, unsafe_wires  # noqa: E402
 
 SECRETS = {"a": ["a0", "a1"], "b": ["b0", "b1"], "d": ["d0", "d1"]}
-FREE = ["a0", "b0", "d0", "r1", "r2"]
+RANDOMS = ["r1", "r2"]
+FREE = ["a0", "b0", "d0", *RANDOMS]
 INPUTS = ["a0", "a1", "b0", "b1", "d0", "d1", "r1", "r2"]
 
 
@@ -119,7 +120,7 @@ def main():
         )
 
         t0 = time.time()
-        safety = class_safety(eg, SECRETS, FREE)
+        safety = class_safety(eg, SECRETS, RANDOMS)
         t_lab = time.time() - t0
         n_unsafe = sum(1 for v in safety.values() if not v)
         best_i, cost_i = extract_constrained(eg, safety)

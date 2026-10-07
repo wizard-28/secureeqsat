@@ -14,6 +14,9 @@ What we learned about the oracle (probed empirically, see RESULTS.md):
 Protocol per wire:
   RULE 1 (two-sided)  our verdict == VerifMSI exact "independent"
                       -> failure on mismatch
+  RULE 1b (two-sided) the bitsliced labeller's verdict (experiments/labeller,
+                      design/0015) == VerifMSI exact "independent"
+                      -> failure on mismatch
   RULE 2 (internal)   tps=True must imply exact independent=True
                       -> failure on contradiction
   RULE 3 (one-sided)  tps=True must imply our verdict == safe
@@ -41,7 +44,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "experiments" / "premise_test"))
+sys.path.insert(0, str(ROOT / "experiments" / "labeller"))
 
+from labeller import check_first_order_bitsliced  # noqa: E402
 from masked import (  # noqa: E402
     Circuit,
     build_dom_and,
@@ -108,7 +113,9 @@ def oracle_verdict(circ, secrets, randoms):
 
 def compare(circ, secrets, randoms):
     """Return dict with ours, oracle, violations, conservative, safe_wires."""
-    ours = check_first_order(circ, secrets, free_vars(secrets, randoms))
+    free = free_vars(secrets, randoms)
+    ours = check_first_order(circ, secrets, free)
+    bitsliced = check_first_order_bitsliced(circ, secrets, free)
     oracle = oracle_verdict(circ, secrets, randoms)
     violations = []
     conservative = 0
@@ -124,6 +131,8 @@ def compare(circ, secrets, randoms):
         tps = bool(o["tps"])
         if bool(ours[name]) != exact:  # RULE 1
             violations.append((name, "exact-mismatch", (bool(ours[name]), exact)))
+        if bitsliced[name] != exact:  # RULE 1b
+            violations.append((name, "bitsliced-mismatch", (bitsliced[name], exact)))
         if tps and not exact:  # RULE 2
             violations.append((name, "oracle-internal-contradiction", None))
         if tps and not ours[name]:  # RULE 3
@@ -293,6 +302,7 @@ def main():
         return 1
     print("RESULT: no violations.")
     print("  - our verdict == VerifMSI exact independence on every wire (two-sided)")
+    print("  - bitsliced labeller == VerifMSI exact independence on every wire")
     print("  - no tps certificate contradicted us (one-sided)")
     print("  - conservative tps alarms counted and explained, not failures")
     return 0
