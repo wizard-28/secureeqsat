@@ -4,7 +4,8 @@ E-classes of sort `S` are equal iff their terms reconstruct the same unmasked
 value. At this layer the masking-specific equivalences become ordinary rules:
 
   R1  Boolean identities on values: XOR comm/assoc; for each AND gadget g,
-      comm, assoc, distributivity over XOR and its reverse (factoring).
+      comm, assoc, distributivity over XOR and its reverse (factoring);
+      NOT involution and g(~x, y) = y ^ g(x, y) in both directions.
       Idempotence (x & x = x) and constants are deliberately NOT included
       (see RESULTS.md, "Known limitations").
   R2  gadget equivalences: isw(x, y) = dom(x, y) = hpc1(x, y).
@@ -33,6 +34,8 @@ class S(Expr):
     def dom(self, other: S) -> S: ...
     def hpc1(self, other: S) -> S: ...
     def refresh(self) -> S: ...
+    def not_(self) -> S: ...
+    def out(self, other: S) -> S: ...
 
 
 def _g(kind, x, y):
@@ -44,7 +47,10 @@ def r1(x: S, y: S, z: S):
     yield rewrite(x.xor(y)).to(y.xor(x))
     yield rewrite(x.xor(y).xor(z)).to(x.xor(y.xor(z)))
     yield rewrite(x.xor(y.xor(z))).to(x.xor(y).xor(z))
+    yield rewrite(x.not_().not_()).to(x)
     for g in GADGETS:
+        yield rewrite(_g(g, x.not_(), y)).to(y.xor(_g(g, x, y)))
+        yield rewrite(y.xor(_g(g, x, y))).to(_g(g, x.not_(), y))
         yield rewrite(_g(g, x, y)).to(_g(g, y, x))
         yield rewrite(_g(g, _g(g, x, y), z)).to(_g(g, x, _g(g, y, z)))
         yield rewrite(_g(g, x, _g(g, y, z))).to(_g(g, _g(g, x, y), z))
@@ -76,6 +82,8 @@ def to_expr(term):
         return S.inp(term[1])
     if op == "refresh":
         return to_expr(term[1]).refresh()
+    if op == "not":
+        return to_expr(term[1]).not_()
     return getattr(to_expr(term[1]), op)(to_expr(term[2]))
 
 
@@ -117,7 +125,8 @@ def export(eg):
         if op == "inp":
             (child,) = node["children"]
             entry = ("in", json.loads(nodes[child]["op"]))
-        elif op in ("xor", "refresh", *GADGETS):
+        elif op in ("xor", "refresh", "not_", "out", *GADGETS):
+            op = op.rstrip("_")
             entry = (op, tuple(nodes[c]["eclass"] for c in node["children"]))
         else:
             raise ValueError(f"unexpected egglog node {nid}: {node['op']!r}")

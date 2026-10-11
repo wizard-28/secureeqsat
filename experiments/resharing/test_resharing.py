@@ -17,7 +17,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "experiments" / "labeller"))
 
 from extract import OWN_COST, Evaluator, InconsistentClassError, kbest  # noqa: E402
-from fixtures import FIXTURES  # noqa: E402
+from fixtures import FIXTURES, TIGHT, chi  # noqa: E402
 from gadgets import (  # noqa: E402
     GADGETS,
     cost_of,
@@ -35,11 +35,32 @@ SMALL_TERMS = [
     A,
     Z,
     ("refresh", A),
+    ("not", A),
+    ("isw", ("not", A), B),
     *[(g, A, B) for g in GADGETS],
     *[(g, A, A) for g in GADGETS],
     *[(g, (g, A, B), ("xor", A, D)) for g in GADGETS],
     *FIXTURES.values(),
 ]
+
+
+def reconstructions(term):
+    """Yield (secret env, list of reconstructed outputs) for every assignment."""
+    low = lower([term])
+    names = secrets_of(term)
+    inputs = [f"{s}0" for s in names] + low.randoms
+    outs = low.circ.outputs
+    for svals in itertools.product((0, 1), repeat=len(names)):
+        env = dict(zip(names, svals, strict=True))
+        for fvals in itertools.product((0, 1), repeat=len(inputs)):
+            ass = dict(zip(inputs, fvals, strict=True))
+            for s in names:
+                ass[f"{s}1"] = ass[f"{s}0"] ^ env[s]
+            vals = evaluate(low.circ, ass)
+            yield (
+                env,
+                [vals[outs[i]] ^ vals[outs[i + 1]] for i in range(0, len(outs), 2)],
+            )
 
 
 def leaks(term):
@@ -73,10 +94,10 @@ def test_lowering_reconstructs_the_value(term):
             assert vals[s0] ^ vals[s1] == want
 
 
-@pytest.mark.parametrize("op", ["xor", "refresh", *GADGETS])
+@pytest.mark.parametrize("op", ["xor", "refresh", "not", *GADGETS])
 def test_own_cost_matches_lowering(op):
     """OWN_COST feeds the extraction lower bound; it must equal the lowering."""
-    term = ("refresh", A) if op == "refresh" else (op, A, B)
+    term = (op, A) if op in ("refresh", "not") else (op, A, B)
     assert cost_of(lower([term])) == OWN_COST[op]
 
 
@@ -170,6 +191,23 @@ def test_factoring_is_secure_at_the_value_layer():
 def test_r2_swaps_hpc1_for_cheaper_gadgets():
     cost, term = best(FIXTURES["hpc_chain"], ("R2",), secure=True)
     assert cost == 18 and "hpc1" not in repr(term)
+
+
+def test_chi_lowering_computes_keccak_chi():
+    """FIPS 202 sec. 3.2.4: y[x] = x[x] ^ ((x[x+1] ^ 1) & x[x+2])."""
+    for env, ys in reconstructions(chi(3)):
+        x = [env[f"x{i}"] for i in range(3)]
+        assert ys == [x[i] ^ ((x[(i + 1) % 3] ^ 1) & x[(i + 2) % 3]) for i in range(3)]
+
+
+@pytest.mark.parametrize("name", sorted(TIGHT))
+def test_tight_chi_has_no_gain(name):
+    start = Evaluator()(TIGHT[name])
+    assert not start[1]
+    for rules in ((), ("R1", "R2", "R3")):
+        for secure in (False, True):
+            cost, term = best(TIGHT[name], rules, secure=secure)
+            assert cost == start[0] and not leaks(term)
 
 
 # ---- trust boundary ---------------------------------------------------
