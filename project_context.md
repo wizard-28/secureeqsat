@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-07 (bitsliced labeller)
+**Last updated:** 2026-10-11 (shared-value layer)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -60,7 +60,8 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ✅ done | **Third adversarial pass** on the reframed proposal: claims corrected, disclaimers added, eVer collision found (`docs/adversarial-search-3.md`, `design/0011`) |
 | ✅ done | **Labelling bottleneck resolved at chain scale** — bitsliced exact labeller (`design/0015`): depth-5 chain labelled in ~0.4 s vs ~50 min (est.); identical verdicts vs reference and VerifMSI (22,463 wires, 0 violations) |
 | ⏳ deferred | **Symbolic labeller** (ANF/BDD, VerifMSI oracle, pre-filters) — only needed past the bitsliced `2**26` cap (S-box scale) |
-| ⏳ next | **Re-sharing formulation** — refresh as a congruence-aware representation; the only identified route to genuine gains |
+| ✅ done | **Re-sharing representation** — shared-value layer in egglog (`design/0016`): R2 (ISW = DOM = HPC1) and R3 (refresh) are ordinary rules there; constrained extraction blocks a cheaper leaking refresh removal; gains only where the start circuit has slack (redundant refreshes 30→18, factoring 20→11); hand-written chain still 18. VerifMSI: 458 wires, 0 violations |
+| ⚠️ new limit | **Term-based extraction** is now the bottleneck at the value layer (~144 s at chain depth 5) |
 | 🔔 realised | **eVer (ePrint 2026/208) now optimizes refresh sequences and gadgets** with re-verification. Repositioned: claim the e-graph + congruence angle, never "optimize refreshes" |
 
 **Headline result:** unconstrained Boolean equality saturation turns a secure
@@ -91,6 +92,7 @@ Full records in [`design/`](design/README.md).
 | `0013` | Publication scope: PDFs tracked, teammate PPTX untracked, no licence until public | accepted |
 | `0014` | Provision the VerifMSI oracle for every teammate (shared volume + auto-setup, non-fatal) | accepted |
 | `0015` | Bitsliced exact labeller replaces per-class materialisation; symbolic routes deferred | accepted |
+| `0016` | Shared-value layer: sharings identified by value; R2/R3 as rules; lowering + term-based constrained extraction; cost = gates + randoms | accepted |
 
 ---
 
@@ -109,6 +111,7 @@ Full records in [`design/`](design/README.md).
 | `experiments/constrained_extraction/` | `constrained.py`, `run_constrained.py`, `run_chain.py` |
 | `experiments/egglog_port/` | `port.py`, `kbest.py`, `RESULTS.md` |
 | `experiments/labeller/` | Bitsliced exact labeller: `labeller.py`, `test_labeller.py`, `measure.py`, `RESULTS.md` |
+| `experiments/resharing/` | Shared-value layer: `gadgets.py` (lowering), `layer.py` (egglog rules), `extract.py`, `fixtures.py`, `run.py`, `test_resharing.py`, `RESULTS.md` |
 | `AGENTS.md` | **Canonical working norms** — read natively by most agents |
 | `CLAUDE.md` | Thin `@AGENTS.md` pointer; Claude Code stops reading `AGENTS.md` once any `CLAUDE.md`/`CLAUDE.local.md` exists |
 | `.claude/skills/` | Repo procedures as skills — read by both Claude Code and opencode |
@@ -127,9 +130,16 @@ Full records in [`design/`](design/README.md).
    is entirely insecure. Mitigation: the re-sharing formulation (`design/0010`);
    if that fails, the project's deliverable is the soundness + repair + gap
    story, which is already strong.
+   *Update 2026-10-11:* the shared-value layer (`design/0016`) finds gains only
+   where the start circuit has slack (redundant refreshes, unfactored products);
+   the tight hand-written chain still gains nothing. Payoff over a published
+   tight construction remains undemonstrated.
 2. **Abstraction level (MEDIUM).** The valuable optimizations may not be
    expressible as e-graph equalities at all. This is now the central research
    question rather than an unexamined assumption.
+   *Update 2026-10-11 (MEDIUM → LOW for R2/R3):* they are expressible one layer
+   up, where sharings are identified by value (`design/0016`); the price is that
+   safety stops being a per-class label and extraction must be term-based.
 3. **Novelty window (MEDIUM → partially realised).** superVer (EGRAPHS 2024)
    verifies probing security with e-graphs; **eVer (2026) now optimizes refresh
    sequences and gadgets** with re-verification. Reposition onto the soundness +
@@ -160,9 +170,11 @@ Full records in [`design/`](design/README.md).
 1. ~~Build a faster safety labeller~~ — **done** for chain scale (`design/0015`).
    A symbolic labeller is deferred until a benchmark exceeds `2**26`. Labelling
    `egglog` e-graphs still needs an export of their classes.
-2. **Re-sharing representation** (highest leverage): what representation can
-   carry re-sharing while keeping extraction security-aware, given that
-   re-sharing is not a congruence (`design/0011`)?
+2. ~~Re-sharing representation~~ — **done** (`design/0016`). Follow-ups: make
+   value-layer extraction scale (it is ~144 s at chain depth 5); find a
+   benchmark where the *start* circuit is a published, tight construction and
+   R1–R3 still help; run the citation check before any novelty claim about the
+   representation.
 3. **Expand fixtures** beyond ISW/DOM/chain: VerifMSI's benchmark gadget set and
    MaskedVerifBench, now that the labeller question is being addressed.
 4. **Wire the cross-check into the default test run** where the oracle is
@@ -193,7 +205,7 @@ Full records in [`design/`](design/README.md).
 
 ```bash
 uv sync
-uv run pytest -q                                    # 24 tests (3 skip without the oracle)
+uv run pytest -q                                    # 59 tests (4 skip without the oracle)
 uv run python experiments/premise_test/run.py       # premise, in-house
 bash experiments/oracle_crosscheck/setup_oracles.sh # one-off, outside the repo
 uv run python experiments/oracle_crosscheck/crosscheck.py --random 20
@@ -264,3 +276,12 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
   circuits / 22,463 wires, 0 violations). Depth-5 chain labelled in ~0.4 s vs
   ~50 min (est.); saturation now dominates. Fixed `run_chain.py` passing all
   free variables as randoms.
+- **2026-10-11** — **Shared-value layer for re-sharing.** Added
+  `experiments/resharing/` and `design/0016`: an egglog layer whose classes
+  identify sharings by value, with R1 (Boolean), R2 (ISW = DOM = HPC1) and R3
+  (refresh) as ordinary rules, lowering to wire circuits, and term-based
+  constrained extraction (cost = gates + randoms). Ablation over five fixtures:
+  hand-written chain unchanged (18); over-refreshed chain 30 → 18 via R3;
+  square: unconstrained drops a needed refresh (11, leaks), constrained keeps it
+  (14); factoring 20 → 11, secure; HPC1 chain 24 → 18 (glitch-free model only).
+  VerifMSI: 19 circuits / 458 wires, 0 violations. Extraction is the new limit.
