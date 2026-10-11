@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-11 (shared-value layer)
+**Last updated:** 2026-10-11 (shared-value layer; tight starts)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -60,7 +60,8 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ✅ done | **Third adversarial pass** on the reframed proposal: claims corrected, disclaimers added, eVer collision found (`docs/adversarial-search-3.md`, `design/0011`) |
 | ✅ done | **Labelling bottleneck resolved at chain scale** — bitsliced exact labeller (`design/0015`): depth-5 chain labelled in ~0.4 s vs ~50 min (est.); identical verdicts vs reference and VerifMSI (22,463 wires, 0 violations) |
 | ⏳ deferred | **Symbolic labeller** (ANF/BDD, VerifMSI oracle, pre-filters) — only needed past the bitsliced `2**26` cap (S-box scale) |
-| ✅ done | **Re-sharing representation** — shared-value layer in egglog (`design/0016`): R2 (ISW = DOM = HPC1) and R3 (refresh) are ordinary rules there; constrained extraction blocks a cheaper leaking refresh removal; gains only where the start circuit has slack (redundant refreshes 30→18, factoring 20→11); hand-written chain still 18. VerifMSI: 458 wires, 0 violations |
+| ✅ done | **Re-sharing representation** — shared-value layer in egglog (`design/0016`): R2 (ISW = DOM = HPC1) and R3 (refresh) are ordinary rules there; constrained extraction blocks a cheaper leaking refresh removal; gains only where the start circuit has slack (redundant refreshes 30→18, factoring 20→11); hand-written chain still 18. VerifMSI: 914 wires, 0 violations |
+| ⚠️ negative | **Tight starts gain nothing.** Keccak chi (3- and 5-bit rows, direct ISW masking) is unchanged under every rule class; the unmodelled lever is randomness reuse (`experiments/resharing/RESULTS.md`) |
 | ⚠️ new limit | **Term-based extraction** is now the bottleneck at the value layer (~144 s at chain depth 5) |
 | 🔔 realised | **eVer (ePrint 2026/208) now optimizes refresh sequences and gadgets** with re-verification. Repositioned: claim the e-graph + congruence angle, never "optimize refreshes" |
 
@@ -132,8 +133,9 @@ Full records in [`design/`](design/README.md).
    story, which is already strong.
    *Update 2026-10-11:* the shared-value layer (`design/0016`) finds gains only
    where the start circuit has slack (redundant refreshes, unfactored products);
-   the tight hand-written chain still gains nothing. Payoff over a published
-   tight construction remains undemonstrated.
+   the tight hand-written chain still gains nothing, and neither do the
+   tight Keccak chi starts (3- and 5-bit rows). The remaining lever is
+   randomness reuse across gadgets, which the layer does not model.
 2. **Abstraction level (MEDIUM).** The valuable optimizations may not be
    expressible as e-graph equalities at all. This is now the central research
    question rather than an unexamined assumption.
@@ -173,7 +175,8 @@ Full records in [`design/`](design/README.md).
 2. ~~Re-sharing representation~~ — **done** (`design/0016`). Follow-ups: make
    value-layer extraction scale (it is ~144 s at chain depth 5); find a
    benchmark where the *start* circuit is a published, tight construction and
-   R1–R3 still help; run the citation check before any novelty claim about the
+   R1–R3 still help (Keccak chi: none — done); model **randomness reuse** as the
+   next lever; run the citation check before any novelty claim about the
    representation.
 3. **Expand fixtures** beyond ISW/DOM/chain: VerifMSI's benchmark gadget set and
    MaskedVerifBench, now that the labeller question is being addressed.
@@ -205,7 +208,7 @@ Full records in [`design/`](design/README.md).
 
 ```bash
 uv sync
-uv run pytest -q                                    # 59 tests (4 skip without the oracle)
+uv run pytest -q                                    # 65 tests (4 skip without the oracle)
 uv run python experiments/premise_test/run.py       # premise, in-house
 bash experiments/oracle_crosscheck/setup_oracles.sh # one-off, outside the repo
 uv run python experiments/oracle_crosscheck/crosscheck.py --random 20
@@ -285,3 +288,8 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
   square: unconstrained drops a needed refresh (11, leaks), constrained keeps it
   (14); factoring 20 → 11, secure; HPC1 chain 24 → 18 (glitch-free model only).
   VerifMSI: 19 circuits / 458 wires, 0 violations. Extraction is the new limit.
+- **2026-10-11** — **Tight starts.** Added Keccak chi (3- and 5-bit rows,
+  FIPS 202) as tight fixtures, plus share-wise NOT and a gate-free output bundle
+  in the layer. No rule class improves either start (36 and 60); VerifMSI now
+  27 circuits / 914 wires, 0 violations. VerifMSI's own gadget set was not used:
+  single gadgets are atoms at this layer (`experiments/resharing/RESULTS.md`).

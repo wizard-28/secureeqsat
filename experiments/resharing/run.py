@@ -23,7 +23,9 @@ sys.path.insert(0, str(ROOT / "experiments" / "oracle_crosscheck"))
 sys.path.insert(0, str(ROOT / "experiments" / "premise_test"))
 
 from extract import Evaluator, kbest  # noqa: E402
-from fixtures import FIXTURES  # noqa: E402
+from fixtures import FIXTURES, TIGHT  # noqa: E402
+
+ALL = {**FIXTURES, **TIGHT}
 from gadgets import lower, secret_groups, secrets_of, show  # noqa: E402
 from layer import export, saturate  # noqa: E402
 
@@ -50,7 +52,7 @@ def fmt(term):
 
 def ablation(k, iters):
     rows = []
-    for name, term in FIXTURES.items():
+    for name, term in ALL.items():
         print(f"\n== {name}: {fmt(term)}")
         for cfg in CONFIGS:
             t0 = time.time()
@@ -79,7 +81,7 @@ def ablation(k, iters):
 
 def stability(iters, ks=(2, 8, 32)):
     print("\n== frontier stability: constrained cost, all rules, by k")
-    for name, term in FIXTURES.items():
+    for name, term in ALL.items():
         eg, _ = saturate(term, ("R1", "R2", "R3"), iters)
         classes, root = export(eg)
         costs = []
@@ -96,7 +98,7 @@ def crosscheck(rows):
     if not oracle_available():
         print("\nVerifMSI not available: cross-check SKIPPED (not passed)")
         return
-    terms = {t for t in FIXTURES.values()}
+    terms = set(ALL.values())
     for _, _, u, c in rows:
         for best in (u, c):
             if best:

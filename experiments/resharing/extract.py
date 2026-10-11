@@ -41,7 +41,17 @@ from gadgets import (  # noqa: E402
 )
 from labeller import check_first_order_bitsliced  # noqa: E402
 
-OWN_COST = {"in": 0, "xor": 2, "refresh": 3, "isw": 9, "dom": 9, "hpc1": 12}
+OWN_COST = {
+    "in": 0,
+    "out": 0,
+    "not": 1,
+    "xor": 2,
+    "refresh": 3,
+    "isw": 9,
+    "dom": 9,
+    "hpc1": 12,
+}
+UNEVALUABLE = float("inf")
 
 
 class InconsistentClassError(Exception):
@@ -54,15 +64,21 @@ class Evaluator:
     def __init__(self, max_bits=None):
         self.max_bits = max_bits
         self._cache = {}
+        self.over_cap = 0
 
     def __call__(self, term):
         if term not in self._cache:
             low = lower([term])
             names = secrets_of(term)
             kw = {} if self.max_bits is None else {"max_bits": self.max_bits}
-            verdict = check_first_order_bitsliced(
-                low.circ, secret_groups(names), free_vars(names, low.randoms), **kw
-            )
+            try:
+                verdict = check_first_order_bitsliced(
+                    low.circ, secret_groups(names), free_vars(names, low.randoms), **kw
+                )
+            except ValueError:  # beyond the labeller's 2**max_bits cap
+                self.over_cap += 1
+                self._cache[term] = (UNEVALUABLE, None)
+                return self._cache[term]
             leaks = [w for w, ok in verdict.items() if not ok]
             self._cache[term] = (cost_of(low), leaks)
         return self._cache[term]
@@ -104,6 +120,8 @@ def kbest(classes, root, k=16, secure=True, max_rounds=40, evaluator=None):
                         continue  # cannot enter the list; may be retried later
                     seen[c].add(term)
                     cost, leaks = ev(term)
+                    if leaks is None:
+                        continue  # too large to label: never admitted
                     tab = value_table(term, names)
                     if tables.setdefault(c, tab) != tab:
                         raise InconsistentClassError(f"class {c}: {term!r}")
@@ -114,7 +132,12 @@ def kbest(classes, root, k=16, secure=True, max_rounds=40, evaluator=None):
                         cur.sort(key=lambda p: (p[0], repr(p[1])))
                         del cur[k:]
                         changed = True
-    info = {"rounds": rounds, "evaluated": ev.evaluated, "converged": not changed}
+    info = {
+        "rounds": rounds,
+        "evaluated": ev.evaluated,
+        "over_cap": ev.over_cap,
+        "converged": not changed,
+    }
     best = lists[root][0] if lists[root] else None
     return best, info
 
@@ -127,6 +150,10 @@ def _candidates(node, lists):
         for _, t in lists[node[1][0]]:
             if t[0] != "refresh":  # a second refresh never helps (same distribution)
                 yield ("refresh", t)
+    elif op == "not":
+        for _, t in lists[node[1][0]]:
+            if t[0] != "not":  # not(not(t)) is t, which the class already holds
+                yield ("not", t)
     else:
         c1, c2 = node[1]
         for (_, t1), (_, t2) in itertools.product(lists[c1], lists[c2]):

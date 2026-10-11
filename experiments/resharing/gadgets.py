@@ -11,6 +11,8 @@ Terms are nested tuples:
 
     ("in", name)          shares name0, name1 of secret `name`
     ("xor", x, y)         share-wise XOR: (x0 ^ y0, x1 ^ y1)
+    ("not", x)            share-wise NOT: (x0 ^ 1, x1)
+    ("out", x, y)         bundles several outputs into one root (no gates)
     ("refresh", x)        (x0 ^ r, x1 ^ r)
     ("isw", x, y)         ISW AND, r folded into every c1 intermediate
     ("dom", x, y)         DOM-indep AND, glitch-free model (registers elided)
@@ -36,7 +38,16 @@ sys.path.insert(0, str(ROOT / "experiments" / "premise_test"))
 from masked import Circuit  # noqa: E402
 
 GADGETS = ("isw", "dom", "hpc1")  # the AND gadgets (R2 equates them)
-RANDOMS_PER_OP = {"in": 0, "xor": 0, "refresh": 1, "isw": 1, "dom": 1, "hpc1": 2}
+RANDOMS_PER_OP = {
+    "in": 0,
+    "xor": 0,
+    "not": 0,
+    "out": 0,
+    "refresh": 1,
+    "isw": 1,
+    "dom": 1,
+    "hpc1": 2,
+}
 
 
 class Lowering:
@@ -53,7 +64,10 @@ class Lowering:
         return self.circ.add_input(name)
 
     def lower(self, term):
-        """Return the (share0, share1) wire names of `term`."""
+        """Return the (share0, share1) wire names of `term`.
+
+        For an `out` bundle, the concatenated share pairs of its children.
+        """
         if term in self._memo:
             return self._memo[term]
         op = term[0]
@@ -64,6 +78,11 @@ class Lowering:
             x0, x1 = self.lower(term[1])
             y0, y1 = self.lower(term[2])
             out = (c.add_gate("xor", x0, y0), c.add_gate("xor", x1, y1))
+        elif op == "not":
+            x0, x1 = self.lower(term[1])
+            out = (c.add_gate("xor", x0, c.add_const(1)), x1)
+        elif op == "out":
+            out = self.lower(term[1]) + self.lower(term[2])
         elif op == "refresh":
             out = self._refresh(self.lower(term[1]))
         elif op in GADGETS:
@@ -143,7 +162,11 @@ def value(term, env):
         return env[term[1]]
     if op == "refresh":
         return value(term[1], env)
+    if op == "not":
+        return 1 - value(term[1], env)
     a, b = value(term[1], env), value(term[2], env)
+    if op == "out":
+        return (a, b)
     return a ^ b if op == "xor" else a & b
 
 
