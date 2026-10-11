@@ -107,6 +107,7 @@ Full records in [`design/`](design/README.md).
 | `docs/probing-secure-eqsat-proposal.md` | Proposal (revision 3: soundness, repair, congruence obstruction) |
 | `docs/team-briefing-plan-a.md` | Team-facing argument for why the original direction is dead |
 | `docs/feasibility-report.md` | **Consolidated feasibility checks and confidence levels** |
+| `docs/getting-up-to-speed.md` | 15-minute orientation for new readers |
 | `experiments/premise_test/` | `egraph.py`, `masked.py`, `run.py`, `test_premise.py`, `RESULTS.md` |
 | `experiments/oracle_crosscheck/` | VerifMSI driver, cross-check protocol, tests, `RESULTS.md` |
 | `experiments/constrained_extraction/` | `constrained.py`, `run_constrained.py`, `run_chain.py` |
@@ -293,3 +294,6 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
   in the layer. No rule class improves either start (36 and 60); VerifMSI now
   27 circuits / 914 wires, 0 violations. VerifMSI's own gadget set was not used:
   single gadgets are atoms at this layer (`experiments/resharing/RESULTS.md`).
+- **2026-10-11** — Added `docs/getting-up-to-speed.md` (orientation for new
+  readers) and linked it from the README; corrected the README's test counts
+  (65 passed, 4 oracle skips).
