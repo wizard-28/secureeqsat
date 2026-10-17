@@ -69,3 +69,5 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0012](0012-agent-neutral-devcontainer.md) | Make the shared dev container agent-neutral | accepted |
 | [0013](0013-publication-scope.md) | Publication scope for the repository | accepted |
 | [0014](0014-provision-the-oracle.md) | Provision the VerifMSI oracle for every teammate | accepted |
+| [0015](0015-bitsliced-exact-labeller.md) | Bitsliced exact labeller for safety labelling | accepted |
+| [0016](0016-shared-value-layer-for-resharing.md) | A shared-value layer for re-sharing equivalences | accepted |

@@ -121,3 +121,13 @@ RESULT: no violations.
 cases=229  wires=5480  safe_wires=4648  conservative_tps_alarms=54  (8.1s)
 RESULT: no violations.
 ```
+
+## Update 2026-10-07 — RULE 1b: the bitsliced labeller
+
+`compare()` now also checks the bitsliced labeller (`experiments/labeller/`,
+`design/0015`) against VerifMSI's exact independence on every wire (RULE 1b).
+All five configurations above were rerun: identical case, wire and
+conservatism counts, and **0 violations** for both the original checker and the
+bitsliced labeller (1,265 circuits / 22,463 wires). A deliberately wrong
+labeller was confirmed to trip RULE 1b. Raw summary lines are in
+`experiments/labeller/RESULTS.md`.
