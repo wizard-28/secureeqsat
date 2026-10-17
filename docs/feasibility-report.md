@@ -1,6 +1,9 @@
 # Feasibility Report — SecureEqSat
 
 **Date:** 2026-10-06
+**Last revised:** 2026-10-07 — §6 and §7 corrected after adversarial pass 3. The
+"cannot express" claim was too strong and partly a rediscovery, and the novelty
+claims were narrowed. See `design/0011` and `docs/adversarial-search-3.md`.
 **Scope:** every feasibility check we could run before Review 1, including the
 trust boundary, the premise, the constrained-extraction mechanism, the payoff
 hypothesis, and scalability.
@@ -139,19 +142,45 @@ Boolean equalities. They are **equivalences up to re-sharing**: the output
 shares are re-randomised, so the function of each individual wire changes while
 the shared value does not.
 
-Plain equality saturation operates on *functional* equality. It therefore:
+**An e-graph's equality is a congruence**: if `x = y`, then `f(x) = f(y)` for
+every context (Suciu, Wang, Zhang, *Semantic Foundations of Equality
+Saturation*, ICDT 2025). **Re-sharing is not a congruence** of the wire-term
+algebra — `x0` and `x0 ^ r` are different functions, and that difference
+survives ordinary contexts. A guard controls *when an equality fires*; it cannot
+turn a non-equality into an equality. So re-sharing **cannot be the equality
+relation** of a plain e-graph over wires. This is a representation problem, not
+a missing feature.
 
-- **cannot express** refresh removal or randomness reuse as rewrites, because
-  those change which function each wire computes; and
-- **actively prefers** the one refactoring that is expressible (refolding),
-  which is exactly the insecure one.
+Plain equality saturation therefore:
+
+- cannot make the valuable transformations into equalities, and
+- **actively prefers** the one refactoring it *can* express (refolding), which
+  is exactly the insecure one.
 
 This is a coherent explanation of the negative payoff results, and it is a
 sharper research question than the original pitch:
 
-> **What equivalence relation should an e-graph use for masked-circuit
-> optimization, given that the optimizations worth having are not function
-> equalities?**
+> **What representation can carry re-sharing while keeping extraction
+> security-aware?**
+
+**Two corrections to this section, both load-bearing** (full record in
+`docs/adversarial-search-3.md`, `design/0011`):
+
+1. It originally said EqSat **cannot express** re-sharing rewrites. That is
+   **false**: `egg` has conditional and dynamic appliers, and `egglog` rules
+   carry `:when` guards — all verified in the APIs. The defensible claim is the
+   congruence argument above.
+2. "Equivalence up to re-sharing" is **standard masking semantics**, not our
+   observation: ISW relies on it, SNI states refresh preserves functional
+   behaviour, tightPROVE's `Flatten` replaces gadget outputs with fresh sharings
+   as a reduction step, and RNI-f / COMAR are entire research lines. What is
+   ours is only the consequence for e-graph search.
+
+Also note the three optimizations are **not one relation** — refresh is about
+shares, randomness reuse about the dependency structure, gadget substitution
+about composability — and "same decoded value" is too coarse, since it would
+identify a secure `(x0, x1)` with the insecure `(x, 0)`. A usable relation must
+be **finer than the decode kernel** and security-aware.
 
 ## 7. What this means for the project
 
@@ -159,9 +188,17 @@ sharper research question than the original pitch:
 is reproducible on two engines, constrained extraction works, and the search
 scales on a real engine. Almost none of this needs to be built from scratch.
 
-**Novelty: intact.** Nothing in the literature does security-constrained
-extraction (superVer verifies; Tornado/AGEMA/COMPRESS optimize without
-e-graphs). The characterization in §6 appears to be new.
+**Novelty: narrow but intact** (corrected 2026-10-07). *Constrained* e-graph
+extraction already exists — acyclic constraints (EGRAPHS 2023), resource
+constraints (SkeleShare, CGO 2026) — so our claim is narrower: the first
+extraction constrained by a **semantic hyperproperty** (probing security).
+Likewise **eVer** (2026) already optimizes refresh sequences, and **MaskedHLS**
+(TCAD 2024) already showed a conventional optimizer producing an unmasked
+circuit — so the soundness claim is the **EqSat instantiation plus the
+systematicity argument** (the insecure representative wins *on cost*), not the
+phenomenon itself. Neither the congruence obstruction nor a re-sharing-aware
+formulation is claimed by anyone we found. `docs/adversarial-search-3.md`,
+`design/0011`.
 
 **The original headline — "we find cheaper secure masked circuits" — is not
 supported** and, per §6, we now have a principled reason to expect it is hard at
@@ -181,6 +218,7 @@ re-sharing gap that explains where the payoff must come from.**
 | Security-constrained extraction is implementable and correct | **high** | Working prototype, verified output |
 | The constraint yields no gain at gadget scale | **high** | Constrained optimum == known construction |
 | The cheap frontier is insecure at chain scale | **medium-high** | 240 sampled pairs, none secure; sampled, not exhaustive |
+| Re-sharing is **not a congruence**, so it cannot be an e-graph's equality relation | **high** | Follows from the definition of congruence plus PCR semantics (ICDT 2025); guarded/dynamic rewrites verified not to repair it |
 | The abstraction-level explanation in §6 | **medium** | Coherent and consistent with the negative results; not yet demonstrated constructively |
 | A re-sharing-aware formulation is achievable | **speculative** | Not attempted; it is the proposed next research step |
 

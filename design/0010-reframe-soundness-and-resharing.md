@@ -78,3 +78,17 @@ a named route*.
   `experiments/egglog_port/RESULTS.md`.
 - `design/0005` (trust boundary), `design/0006` (constrained extraction),
   `design/0009` (engine check).
+
+## Status updates
+
+- **2026-10-07** — **Reasoning partially superseded, decision unchanged.** The
+  Context above says "plain functional equality saturation **cannot express**"
+  re-sharing equivalences. That is too strong and factually wrong — `egg` and
+  `egglog` both support guarded and dynamic rewrites — and the equivalence
+  itself is standard masking semantics rather than our observation. The
+  defensible core is that re-sharing is **not a congruence**, so it cannot be
+  the equality relation of a plain e-graph over wire terms; guards do not repair
+  that. This ADR's *decision* (reframe onto soundness, repair, and the gap)
+  stands unchanged and is strengthened by the sharper formulation. See
+  `design/0011` for the correction and `docs/adversarial-search-3.md` for the
+  evidence. `docs/feasibility-report.md` §6–§7 now carry the corrected text.
