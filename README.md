@@ -4,6 +4,7 @@ Equality saturation (e-graphs) for optimizing masked cryptographic circuits unde
 a first-order probing-security constraint.
 
 > **New here?** Start with [`docs/getting-up-to-speed.md`](docs/getting-up-to-speed.md) — a 15-minute orientation.
+> **Checking the results?** [`findings/`](findings/README.md) indexes every finding and re-runs it: `uv run python findings/verify.py`.
 
 > **Status: mid-flight.** This repository is at Review 1. The headline result is a
 > *soundness* finding plus a repair, **not** an optimization win. See

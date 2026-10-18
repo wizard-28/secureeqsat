@@ -29,7 +29,9 @@ observation `O_L(w, C)`, a tuple of functions:
 `C` is **L-secure** if for every wire `w`, the distribution of `O_L(w, C)`
 under the masking distribution is the same for every secret assignment.
 
-**E-graphs.** An e-graph over wire terms holds a congruence `≡`; it is *sound*
+**E-graphs.** An e-graph over wire terms holds a congruence `≡` — formally a
+partial congruence relation (Suciu, Wang, Zhang, *Semantic Foundations of
+Equality Saturation*, ICDT 2025, §3.1); it is *sound*
 if `t ≡ t'` implies `⟦t⟧ = ⟦t'⟧`. Extraction picks a term per root;
 *one-node-per-class* (DAG) extraction picks one node per class, so every
 occurrence of a class becomes the same wire.
@@ -107,6 +109,16 @@ by its correctness (ISW, DOM: standard; HPC1 = DOM after a refresh). ∎
 
 *Author to verify:* the gadget-correctness base cases against the transcribed
 structures in `experiments/resharing/gadgets.py`. *Witness:* `test_c4_*`.
+
+*Remark (why the decode kernel is usable here).* Adversarial pass 3 warned
+that equality of decoded values alone is too coarse: it identifies a secure
+sharing `(x0, x1)` with the insecure `(x, 0)`. That objection applies to a
+relation over *all* share pairs. The value layer is the decode kernel
+restricted to a masking-closed term language — inputs, share-wise XOR,
+refresh, register, gadgets — in which `(x, 0)` has no term, and whose
+lowerings are well-formed sharings by C4(b). Security is not encoded in the
+equality at all; it is enforced at extraction. C5 is exactly the price of that
+choice (`docs/adversarial-search-4.md`, T1).
 
 ### C5 — With a VPLC operator, safety is not class-local, and DAG extraction is incomplete
 
@@ -196,7 +208,12 @@ probe *tuple* can span cones. *Witness:* `test_c8_*`.
 - Gains: there are none over tight constructions (chain, Keccak chi, DOM).
 - Novelty of the optimizations (refresh removal, factoring, gadget choice,
   register placement) — known in masking compilers; only the representation and
-  the obstruction are claimed, after the citation check.
+  the obstruction may be claimed, and only at the confidence in
+  `docs/adversarial-search-4.md`.
+- That optimizers breaking (glitch-robust) masking is new — known for
+  re-timing and LLVM reassociation (pass 3, pass 4).
+- That context-dependence in e-graphs is new — contextual equality saturation
+  exists (Hou, Laddad, Hellerstein, arXiv 2507.11897).
 - Anything about higher orders, more shares, PINI/SNI, transitions, timing, or
   real synthesis tools treating registers as transparent.
 - Optimality of extraction: exact only on its k-best frontier.
@@ -205,8 +222,10 @@ probe *tuple* can span cones. *Witness:* `test_c8_*`.
 
 - [ ] Author checks every proof; in particular C4(b) base cases and C7's
       "unchanged up to renaming" step.
-- [ ] Citation check (`.claude/skills/secureeqsat-citation-check`) on: e-graph
-      semantics as partial congruence; eVer; register placement in AGEMA-class
-      generators; any prior "refresh breaks congruence" statement.
+- [x] Citation check — `docs/adversarial-search-4.md` (2026-10-18). Outcome:
+      PCR citation verified; the glitch *phenomenon* (optimizers moving
+      registers break masking) and register placement are **not** claimable;
+      T1–T3 survive narrowly at medium confidence. Still open: read eVer's PDF
+      directly, AGEMA's register handling, and the extraction papers.
 - [ ] Decide whether C5(b) should be stated for all rule sets without
       self-refreshing gadgets, with a proof, or kept as a witnessed instance.
