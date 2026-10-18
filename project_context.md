@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-11 (shared-value layer; tight starts)
+**Last updated:** 2026-10-18 (glitch feasibility probe)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -61,6 +61,7 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ✅ done | **Labelling bottleneck resolved at chain scale** — bitsliced exact labeller (`design/0015`): depth-5 chain labelled in ~0.4 s vs ~50 min (est.); identical verdicts vs reference and VerifMSI (22,463 wires, 0 violations) |
 | ⏳ deferred | **Symbolic labeller** (ANF/BDD, VerifMSI oracle, pre-filters) — only needed past the bitsliced `2**26` cap (S-box scale) |
 | ✅ done | **Re-sharing representation** — shared-value layer in egglog (`design/0016`): R2 (ISW = DOM = HPC1) and R3 (refresh) are ordinary rules there; constrained extraction blocks a cheaper leaking refresh removal; gains only where the start circuit has slack (redundant refreshes 30→18, factoring 20→11); hand-written chain still 18. VerifMSI: 914 wires, 0 violations |
+| ✅ probe | **Glitch model: go for the theory, no gains** (`design/0017`). In-house glitch-extended checker agrees with VerifMSI (167 probes, 0 disagreements). Opaque registers block rewriting; transparent registers reproduce the premise (registered DOM 10→5, leaks); occurrence-aware extraction repairs it by placing registers, exactly as with refresh (`experiments/glitch_probe/`) |
 | ⚠️ negative | **Tight starts gain nothing.** Keccak chi (3- and 5-bit rows, direct ISW masking) is unchanged under every rule class; the unmodelled lever is randomness reuse (`experiments/resharing/RESULTS.md`) |
 | ⚠️ new limit | **Term-based extraction** is now the bottleneck at the value layer (~144 s at chain depth 5) |
 | 🔔 realised | **eVer (ePrint 2026/208) now optimizes refresh sequences and gadgets** with re-verification. Repositioned: claim the e-graph + congruence angle, never "optimize refreshes" |
@@ -93,6 +94,7 @@ Full records in [`design/`](design/README.md).
 | `0013` | Publication scope: PDFs tracked, teammate PPTX untracked, no licence until public | accepted |
 | `0014` | Provision the VerifMSI oracle for every teammate (shared volume + auto-setup, non-fatal) | accepted |
 | `0015` | Bitsliced exact labeller replaces per-class materialisation; symbolic routes deferred | accepted |
+| `0017` | Feasibility probe of the glitch-extended model, core scope unchanged | accepted (probe) |
 | `0016` | Shared-value layer: sharings identified by value; R2/R3 as rules; lowering + term-based constrained extraction; cost = gates + randoms | accepted |
 
 ---
@@ -113,6 +115,7 @@ Full records in [`design/`](design/README.md).
 | `experiments/constrained_extraction/` | `constrained.py`, `run_constrained.py`, `run_chain.py` |
 | `experiments/egglog_port/` | `port.py`, `kbest.py`, `RESULTS.md` |
 | `experiments/labeller/` | Bitsliced exact labeller: `labeller.py`, `test_labeller.py`, `measure.py`, `RESULTS.md` |
+| `experiments/glitch_probe/` | Glitch feasibility probe: `glitch.py` (checker), `glitch_driver.py` (VerifMSI), `gextract.py`, `probe.py`, `test_glitch.py`, `RESULTS.md` |
 | `experiments/resharing/` | Shared-value layer: `gadgets.py` (lowering), `layer.py` (egglog rules), `extract.py`, `fixtures.py`, `run.py`, `test_resharing.py`, `RESULTS.md` |
 | `AGENTS.md` | **Canonical working norms** — read natively by most agents |
 | `CLAUDE.md` | Thin `@AGENTS.md` pointer; Claude Code stops reading `AGENTS.md` once any `CLAUDE.md`/`CLAUDE.local.md` exists |
@@ -209,7 +212,7 @@ Full records in [`design/`](design/README.md).
 
 ```bash
 uv sync
-uv run pytest -q                                    # 65 tests (4 skip without the oracle)
+uv run pytest -q                                    # 77 tests (5 skip without the oracle)
 uv run python experiments/premise_test/run.py       # premise, in-house
 bash experiments/oracle_crosscheck/setup_oracles.sh # one-off, outside the repo
 uv run python experiments/oracle_crosscheck/crosscheck.py --random 20
@@ -297,3 +300,12 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
 - **2026-10-11** — Added `docs/getting-up-to-speed.md` (orientation for new
   readers) and linked it from the README; corrected the README's test counts
   (65 passed, 4 oracle skips).
+- **2026-10-18** — **Glitch feasibility probe** (`design/0017`,
+  `experiments/glitch_probe/`). New glitch-extended checker, cross-checked
+  against VerifMSI's own leakage sets (167 probes, 0 disagreements;
+  `checkSecurity` agrees on all 10 circuits). Opaque registers block Boolean
+  rewriting; transparent registers make cost-optimal extraction drop them
+  (registered DOM 10 → 5, chain 20 → 10, both leaking); the occurrence-aware
+  extractor restores glitch security by placing registers, including on
+  unregistered ISW and DOM. Verdict: go for the theory (register ≈ refresh),
+  no gains.

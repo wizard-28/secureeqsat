@@ -71,3 +71,4 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0014](0014-provision-the-oracle.md) | Provision the VerifMSI oracle for every teammate | accepted |
 | [0015](0015-bitsliced-exact-labeller.md) | Bitsliced exact labeller for safety labelling | accepted |
 | [0016](0016-shared-value-layer-for-resharing.md) | A shared-value layer for re-sharing equivalences | accepted |
+| [0017](0017-glitch-feasibility-probe.md) | Feasibility probe: glitch-extended probing | accepted (probe) |
