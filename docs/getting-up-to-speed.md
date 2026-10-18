@@ -96,13 +96,13 @@ does and does **not** show, and raw output.
 
 ```bash
 uv sync                      # builds .venv from uv.lock (needs uv)
-uv run pytest -q             # 65 tests; 4 skip without the VerifMSI oracle
+uv run pytest -q             # 77 tests; 5 skip without the VerifMSI oracle
 uv run python experiments/premise_test/run.py      # result 1, narrated
 uv run python experiments/resharing/run.py         # results 6-7 ablation
 ```
 
 The dev container (see `README.md`) also installs the VerifMSI oracle. Without it,
-the 4 cross-check tests **skip**, and a skip is not a pass:
+the 5 cross-check tests **skip**, and a skip is not a pass:
 `bash experiments/oracle_crosscheck/setup_oracles.sh` installs it outside the repo.
 
 ## 7. Reading order
