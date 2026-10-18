@@ -61,3 +61,7 @@ search recovers a secure circuit). Otherwise stay with the glitch-free paper.
   `leakageOut`; `checkSecurity(order, withGlitches, prop, ...)`.
 - VerifMSI `benchmarks/dom_and/generate_dom_and.py`: register-annotated DOM.
 - `experiments/glitch_probe/RESULTS.md` (this probe).
+
+## Status updates
+
+- **2026-10-18** — Verdict *go* (`experiments/glitch_probe/RESULTS.md`); the scope change is made in `0018`.
