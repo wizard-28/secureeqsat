@@ -1,0 +1,61 @@
+
+== isw (no registers)
+   start            8 =  8g + 0reg  glitch-free: secure  glitch: LEAKS
+   opaque      U    7 =  7g + 0reg  glitch-free: LEAKS   glitch: LEAKS
+   opaque      egglog k-best: 28 circuits, 0 with a register, 0 glitch-secure
+   opaque      C  no glitch-secure term (k=8)
+   transparent U    7 =  7g + 0reg  glitch-free: LEAKS   glitch: LEAKS
+   transparent egglog k-best: 34 circuits, 6 with a register, 0 glitch-secure
+   transparent C   10 =  8g + 2reg  glitch-free: secure  glitch: secure
+                  o0 = ((a0 & b0) ^ r)
+                  o1 = (reg((reg(((a1 & b0) ^ r)) ^ (a1 & b1))) ^ (a0 & b1))
+
+== dom (no registers)
+   start            8 =  8g + 0reg  glitch-free: secure  glitch: LEAKS
+   opaque      U    5 =  5g + 0reg  glitch-free: LEAKS   glitch: LEAKS
+   opaque      egglog k-best: 36 circuits, 0 with a register, 0 glitch-secure
+   opaque      C  no glitch-secure term (k=8)
+   transparent U    5 =  5g + 0reg  glitch-free: LEAKS   glitch: LEAKS
+   transparent egglog k-best: 64 circuits, 28 with a register, 1 glitch-secure
+   transparent C   10 =  8g + 2reg  glitch-free: secure  glitch: secure
+                  o0 = (reg(((a0 & b0) ^ z1)) ^ (a0 & b1))
+                  o1 = (reg(((a1 & b1) ^ z1)) ^ (a1 & b0))
+
+== dom (registered)
+   start           10 =  8g + 2reg  glitch-free: secure  glitch: secure
+   opaque      U   10 =  8g + 2reg  glitch-free: secure  glitch: secure
+   opaque      egglog k-best: 4 circuits, 4 with a register, 4 glitch-secure
+   opaque      C   10 =  8g + 2reg  glitch-free: secure  glitch: secure
+                  o0 = ((a0 & b0) ^ reg(((a0 & b1) ^ z1)))
+                  o1 = ((a1 & b1) ^ reg(((a1 & b0) ^ z1)))
+   transparent U    5 =  5g + 0reg  glitch-free: LEAKS   glitch: LEAKS
+   transparent egglog k-best: 64 circuits, 28 with a register, 1 glitch-secure
+   transparent C   10 =  8g + 2reg  glitch-free: secure  glitch: secure
+                  o0 = (reg(((a0 & b0) ^ z1)) ^ (a0 & b1))
+                  o1 = (reg(((a1 & b1) ^ z1)) ^ (a1 & b0))
+
+== dom chain (registered)
+   start           20 = 16g + 4reg  glitch-free: secure  glitch: secure
+   opaque      U   20 = 16g + 4reg  glitch-free: secure  glitch: secure
+   opaque      egglog k-best: 36 circuits, 36 with a register, 36 glitch-secure
+   opaque      C   20 = 16g + 4reg  glitch-free: secure  glitch: secure
+                  o0 = ((((a0 & b0) ^ reg(((a0 & b1) ^ z1))) & d0) ^ reg(((((a0 & b0) ^ reg(((a0 & b1) ^ z1))) & d1) ^ z2)))
+                  o1 = ((((a1 & b1) ^ reg(((a1 & b0) ^ z1))) & d1) ^ reg(((((a1 & b1) ^ reg(((a1 & b0) ^ z1))) & d0) ^ z2)))
+   transparent U   10 = 10g + 0reg  glitch-free: LEAKS   glitch: LEAKS
+   transparent egglog k-best: 784 circuits, 108 with a register, 0 glitch-secure
+   transparent C   20 = 16g + 4reg  glitch-free: secure  glitch: secure
+                  o0 = (reg((z2 ^ ((reg(((a0 & b0) ^ z1)) ^ (a0 & b1)) & d0))) ^ ((reg(((a0 & b0) ^ z1)) ^ (a0 & b1)) & d1))
+                  o1 = (reg((z2 ^ ((reg(((a1 & b1) ^ z1)) ^ (a1 & b0)) & d1))) ^ ((reg(((a1 & b1) ^ z1)) ^ (a1 & b0)) & d0))
+
+== VerifMSI cross-check (exact, per probe) and checkSecurity(glitches)
+   isw (no registers)                           checkSecurity leaks=1   agrees
+   isw (no registers) / opaque / U              checkSecurity leaks=1   agrees
+   isw (no registers) / transparent / C         checkSecurity leaks=0   agrees
+   dom (no registers)                           checkSecurity leaks=2   agrees
+   dom (no registers) / opaque / U              checkSecurity leaks=2   agrees
+   dom (no registers) / transparent / C         checkSecurity leaks=0   agrees
+   dom (registered)                             checkSecurity leaks=0   agrees
+   dom chain (registered)                       checkSecurity leaks=0   agrees
+   dom chain (registered) / transparent / U     checkSecurity leaks=2   agrees
+   dom chain (registered) / transparent / C     checkSecurity leaks=0   agrees
+   10 circuits, 167 probes, 0 disagreements

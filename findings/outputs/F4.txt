@@ -1,0 +1,6 @@
+saturation: run(4) [full] in 0.00s
+function sizes: [(· & ·, 90), (· ^ ·, 666), (B.var, 8), (B.zero, 0)]
+variants: 6 for u0, 40 for u1  (k=40)
+tested 240 pairs in 2.5s
+cheapest extraction overall : 14 gates, INSECURE
+cheapest SECURE extraction  : none found in the k-best frontier
