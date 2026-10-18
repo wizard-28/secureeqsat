@@ -61,8 +61,9 @@ wires — where so far they only remove slack.
 
 ## 4. What we do *not* claim
 
-- Anything beyond **first order, 2 shares, glitch-free, straight-line** circuits
-  (`design/0002`). No glitches, no PINI/SNI composition, no higher orders.
+- Anything beyond **first order, 2 shares, straight-line** circuits in the
+  glitch-free and glitch-extended models (`design/0018`). No PINI/SNI
+  composition, no higher orders, no register timing.
 - That refresh removal, factoring before masking, or gadget choice are new —
   masking compilers already do these. Our contribution is the soundness finding,
   the repair, and the representation.
@@ -96,7 +97,7 @@ does and does **not** show, and raw output.
 
 ```bash
 uv sync                      # builds .venv from uv.lock (needs uv)
-uv run pytest -q             # 77 tests; 5 skip without the VerifMSI oracle
+uv run pytest -q             # 89 tests; 5 skip without the VerifMSI oracle
 uv run python experiments/premise_test/run.py      # result 1, narrated
 uv run python experiments/resharing/run.py         # results 6-7 ablation
 ```

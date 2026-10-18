@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-18 (glitch feasibility probe)
+**Last updated:** 2026-10-18 (scope adds the glitch model; theory draft)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -18,9 +18,12 @@
 - **Context:** compiler-design research project.
 - **Review 1 deliverable:** title + novelty claim + plan (30% implementation is a
   later milestone; its foundations are already built — see §3).
-- **Team:** _to be filled in (names + track ownership, see proposal §19)_
-- **Primary venue target:** EGRAPHS workshop (PLDI) fits the EqSat framing; a
-  security/HW venue fits the masking framing. Decide after Review 1.
+- **Team:** Shreyash Panigrahy, solo since 2026-10-17. Earlier work was done
+  as a team (with Sourajyoti Basak and J. Nandhakishor); code authorship is in
+  the git history, and earlier contributions must be credited in the paper and
+  report.
+- **Primary venue target:** EGRAPHS workshop class (theory + negative results),
+  decided in `design/0018`.
 
 ---
 
@@ -61,6 +64,7 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ✅ done | **Labelling bottleneck resolved at chain scale** — bitsliced exact labeller (`design/0015`): depth-5 chain labelled in ~0.4 s vs ~50 min (est.); identical verdicts vs reference and VerifMSI (22,463 wires, 0 violations) |
 | ⏳ deferred | **Symbolic labeller** (ANF/BDD, VerifMSI oracle, pre-filters) — only needed past the bitsliced `2**26` cap (S-box scale) |
 | ✅ done | **Re-sharing representation** — shared-value layer in egglog (`design/0016`): R2 (ISW = DOM = HPC1) and R3 (refresh) are ordinary rules there; constrained extraction blocks a cheaper leaking refresh removal; gains only where the start circuit has slack (redundant refreshes 30→18, factoring 20→11); hand-written chain still 18. VerifMSI: 914 wires, 0 violations |
+| ✅ done | **Scope widened to the glitch-extended model; theory drafted** (`design/0018`). `docs/theory.md` states the result once for both models (claims C1–C8), each with an executable witness in `experiments/claims/` |
 | ✅ probe | **Glitch model: go for the theory, no gains** (`design/0017`). In-house glitch-extended checker agrees with VerifMSI (167 probes, 0 disagreements). Opaque registers block rewriting; transparent registers reproduce the premise (registered DOM 10→5, leaks); occurrence-aware extraction repairs it by placing registers, exactly as with refresh (`experiments/glitch_probe/`) |
 | ⚠️ negative | **Tight starts gain nothing.** Keccak chi (3- and 5-bit rows, direct ISW masking) is unchanged under every rule class; the unmodelled lever is randomness reuse (`experiments/resharing/RESULTS.md`) |
 | ⚠️ new limit | **Term-based extraction** is now the bottleneck at the value layer (~144 s at chain depth 5) |
@@ -80,7 +84,7 @@ Full records in [`design/`](design/README.md).
 | ADR | Decision | Status |
 |---|---|---|
 | `0001` | Pivot from LLM/agent-guided EqSat to probing-secure EqSat (Plan A) | accepted |
-| `0002` | Scope: first order, 2 shares, straight-line, glitch-free | accepted |
+| `0002` | Scope: first order, 2 shares, straight-line, glitch-free | superseded by `0018` |
 | `0003` | Toolchain: uv + ruff + pytest, devcontainer-managed, no manual installs | accepted |
 | `0004` | Minimal in-repo e-graph for the premise test; `egglog`/`egg` for the real engine | accepted |
 | `0005` | In-house checker + external-oracle cross-check as the trust boundary | **closed** (0 violations) |
@@ -94,6 +98,7 @@ Full records in [`design/`](design/README.md).
 | `0013` | Publication scope: PDFs tracked, teammate PPTX untracked, no licence until public | accepted |
 | `0014` | Provision the VerifMSI oracle for every teammate (shared volume + auto-setup, non-fatal) | accepted |
 | `0015` | Bitsliced exact labeller replaces per-class materialisation; symbolic routes deferred | accepted |
+| `0018` | Scope: first order, 2 shares, glitch-free **and** glitch-extended; deliverable is a workshop paper | accepted |
 | `0017` | Feasibility probe of the glitch-extended model, core scope unchanged | accepted (probe) |
 | `0016` | Shared-value layer: sharings identified by value; R2/R3 as rules; lowering + term-based constrained extraction; cost = gates + randoms | accepted |
 
@@ -109,6 +114,8 @@ Full records in [`design/`](design/README.md).
 | `docs/probing-secure-eqsat-proposal.md` | Proposal (revision 3: soundness, repair, congruence obstruction) |
 | `docs/team-briefing-plan-a.md` | Team-facing argument for why the original direction is dead |
 | `docs/feasibility-report.md` | **Consolidated feasibility checks and confidence levels** |
+| `docs/theory.md` | **Theory draft for the paper**: claims C1–C8 with proofs and witnesses |
+| `experiments/claims/` | `test_claims.py` — one executable witness per claim in `docs/theory.md` |
 | `docs/getting-up-to-speed.md` | 15-minute orientation for new readers |
 | `experiments/premise_test/` | `egraph.py`, `masked.py`, `run.py`, `test_premise.py`, `RESULTS.md` |
 | `experiments/oracle_crosscheck/` | VerifMSI driver, cross-check protocol, tests, `RESULTS.md` |
@@ -150,8 +157,9 @@ Full records in [`design/`](design/README.md).
    verifies probing security with e-graphs; **eVer (2026) now optimizes refresh
    sequences and gadgets** with re-verification. Reposition onto the soundness +
    congruence framing, which they have not claimed (`design/0011`).
-4. **Scope (MEDIUM).** First order, 2 shares, glitch-free only. No claim about
-   robust probing, glitches, PINI or higher orders.
+4. **Scope (MEDIUM).** First order, 2 shares, glitch-free and glitch-extended
+   (`design/0018`). No claim about PINI/SNI, higher orders, transitions or
+   register timing.
 5. **Labelling bottleneck (HIGH → LOW at chain scale, measured).** The
    bitsliced labeller (`design/0015`) labels a depth-5 chain in ~0.4 s, but is
    still exact and exponential: spaces above `2**26` are refused. S-box-scale
@@ -172,6 +180,10 @@ Full records in [`design/`](design/README.md).
 ---
 
 ## 7. Next actions (ordered)
+
+0. **Paper (`design/0018`):** author checks every proof in `docs/theory.md`;
+   run the citation check on the items in its §5; then write the paper around
+   the theorem in §3, with the witnesses in `experiments/claims/` as artifact.
 
 1. ~~Build a faster safety labeller~~ — **done** for chain scale (`design/0015`).
    A symbolic labeller is deferred until a benchmark exceeds `2**26`. Labelling
@@ -212,7 +224,7 @@ Full records in [`design/`](design/README.md).
 
 ```bash
 uv sync
-uv run pytest -q                                    # 77 tests (5 skip without the oracle)
+uv run pytest -q                                    # 89 tests (5 skip without the oracle)
 uv run python experiments/premise_test/run.py       # premise, in-house
 bash experiments/oracle_crosscheck/setup_oracles.sh # one-off, outside the repo
 uv run python experiments/oracle_crosscheck/crosscheck.py --random 20
@@ -309,3 +321,8 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
   extractor restores glitch security by placing registers, including on
   unregistered ISW and DOM. Verdict: go for the theory (register ≈ refresh),
   no gains.
+- **2026-10-18** — **Scope adds the glitch-extended model** (`design/0018`,
+  superseding `0002`'s glitch-free restriction; deliverable is now a workshop
+  paper). Drafted `docs/theory.md` — claims C1–C8 for value-preserving,
+  leakage-changing operators (refresh, register) — with one executable witness
+  per claim in `experiments/claims/test_claims.py` (12 tests).
