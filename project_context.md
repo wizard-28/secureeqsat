@@ -114,6 +114,8 @@ Full records in [`design/`](design/README.md).
 | `docs/probing-secure-eqsat-proposal.md` | Proposal (revision 3: soundness, repair, congruence obstruction) |
 | `docs/team-briefing-plan-a.md` | Team-facing argument for why the original direction is dead |
 | `docs/feasibility-report.md` | **Consolidated feasibility checks and confidence levels** |
+| `findings/` | **Verification folder**: index of findings F1–F10, `verify.py` re-runs each and writes `outputs/MANIFEST.json` |
+| `docs/adversarial-search-4.md` | Fourth adversarial pass: citation check of the theory (T1–T4) |
 | `docs/theory.md` | **Theory draft for the paper**: claims C1–C8 with proofs and witnesses |
 | `experiments/claims/` | `test_claims.py` — one executable witness per claim in `docs/theory.md` |
 | `docs/getting-up-to-speed.md` | 15-minute orientation for new readers |
@@ -153,7 +155,9 @@ Full records in [`design/`](design/README.md).
    *Update 2026-10-11 (MEDIUM → LOW for R2/R3):* they are expressible one layer
    up, where sharings are identified by value (`design/0016`); the price is that
    safety stops being a per-class label and extraction must be term-based.
-3. **Novelty window (MEDIUM → partially realised).** superVer (EGRAPHS 2024)
+3. **Novelty window (MEDIUM → partially realised; re-checked 2026-10-18,
+   `docs/adversarial-search-4.md`: theory claims survive narrowly, glitch
+   phenomenon and register placement not claimable).** superVer (EGRAPHS 2024)
    verifies probing security with e-graphs; **eVer (2026) now optimizes refresh
    sequences and gadgets** with re-verification. Reposition onto the soundness +
    congruence framing, which they have not claimed (`design/0011`).
@@ -182,8 +186,10 @@ Full records in [`design/`](design/README.md).
 ## 7. Next actions (ordered)
 
 0. **Paper (`design/0018`):** author checks every proof in `docs/theory.md`;
-   run the citation check on the items in its §5; then write the paper around
-   the theorem in §3, with the witnesses in `experiments/claims/` as artifact.
+   ~~citation check~~ done (`docs/adversarial-search-4.md`) — still read eVer's
+   PDF, AGEMA's register handling and the extraction papers; author decides any
+   novelty wording; then write the paper around the theorem in §3, with
+   `findings/` as the artifact.
 
 1. ~~Build a faster safety labeller~~ — **done** for chain scale (`design/0015`).
    A symbolic labeller is deferred until a benchmark exceeds `2**26`. Labelling
@@ -326,3 +332,9 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
   paper). Drafted `docs/theory.md` — claims C1–C8 for value-preserving,
   leakage-changing operators (refresh, register) — with one executable witness
   per claim in `experiments/claims/test_claims.py` (12 tests).
+- **2026-10-18** — **Citation check of the theory** (`docs/adversarial-search-4.md`):
+  PCR citation verified (ICDT 2025, §3.1); register-moving optimizations
+  breaking masking is known (Fraunhofer/BSI 2024) and register placement is
+  not claimable; T1–T3 survive at medium confidence. `docs/theory.md` now
+  answers pass 3's decode-kernel objection. Added `findings/` — an index of
+  findings F1–F10 and `verify.py`, which re-runs each and records a manifest.

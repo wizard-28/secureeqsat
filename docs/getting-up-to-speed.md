@@ -77,6 +77,7 @@ wires — where so far they only remove slack.
 | Path | What it is | Read it when |
 |---|---|---|
 | `project_context.md` | Live status, decision log, risks, next actions, change log | Always first |
+| `findings/` | Every finding, its numbers, and a script that re-runs and checks all of them | You want to verify the results |
 | `AGENTS.md` | Working rules for humans and agents | Before your first commit |
 | `docs/probing-secure-eqsat-proposal.md` | The proposal (revision 3) | You need the full argument |
 | `docs/feasibility-report.md` | Results 1–5 with confidence levels | You need the evidence |
