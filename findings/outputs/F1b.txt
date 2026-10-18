@@ -1,0 +1,6 @@
+egglog run(4) [full rules] in 0.00s
+  extracted c0 = B.var("a0") & B.var("b0") ^ B.var("r")
+  extracted c1 = B.var("r") ^ B.var("a0") & B.var("b1") ^ B.var("a1") & (B.var("b0") ^ B.var("b1"))
+  egglog unconstrained extraction (ISW): 7 gates (3 AND + 4 XOR), INSECURE (2 wire(s))
+      leaking: xor(b0,b1)
+      leaking: and(a1,xor(b0,b1))

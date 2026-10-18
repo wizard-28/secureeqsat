@@ -1,0 +1,23 @@
+e-graph after saturation: 25 classes, 75 nodes
+
+extractions:
+  1. original ISW AND                 8 gates (4 AND + 4 XOR)   SECURE
+  2. unconstrained (cost-only)        7 gates (3 AND + 4 XOR)   INSECURE (2)
+  3. security-constrained             8 gates (4 AND + 4 XOR)   SECURE
+
+  constrained output functionally equivalent to ISW: True
+
+safety labels: 19/25 classes safe
+unsafe classes (function depends on a secret):
+    ((b1 and a0) xor (a1 and b0))
+    (((b0 xor b1) and a1) xor (b1 and a0))
+    ((b0 xor b1) and a1)
+    (b0 xor b1)
+    ((a1 xor a0) and b1)
+    (a1 xor a0)
+
+summary:
+  unconstrained optimum : 7 gates, INSECURE
+  constrained optimum   : 8 gates, secure
+  price of security     : 1 gate(s)
+  constrained vs known construction: +0 gate(s)

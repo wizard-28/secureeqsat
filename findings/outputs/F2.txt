@@ -1,0 +1,59 @@
+== hand fixtures ==
+  ok        masked_buffer: all safe
+  ok        isw_and: all safe
+  ok        dom_and: all safe
+  ok        isw_wrong_order: 2 unsafe
+  ok        naive_unmasked_intermediate: 3 unsafe
+== ISW reassociation variants ==
+  ok        isw_perm_p2_p3_p4_r: 2 unsafe
+  ok        isw_perm_p2_p3_r_p4: 1 unsafe
+  ok        isw_perm_p2_p4_p3_r: 2 unsafe
+  ok        isw_perm_p2_p4_r_p3: 1 unsafe
+  ok        isw_perm_p2_r_p3_p4: all safe
+  ok        isw_perm_p2_r_p4_p3: all safe
+  ok        isw_perm_p3_p2_p4_r: 2 unsafe
+  ok        isw_perm_p3_p2_r_p4: 1 unsafe
+  ok        isw_perm_p3_p4_p2_r: 2 unsafe
+  ok        isw_perm_p3_p4_r_p2: 1 unsafe
+  ok        isw_perm_p3_r_p2_p4: all safe
+  ok        isw_perm_p3_r_p4_p2: all safe
+  ok        isw_perm_p4_p2_p3_r: 2 unsafe
+  ok        isw_perm_p4_p2_r_p3: 1 unsafe
+  ok        isw_perm_p4_p3_p2_r: 2 unsafe
+  ok        isw_perm_p4_p3_r_p2: 1 unsafe
+  ok        isw_perm_p4_r_p2_p3: all safe
+  ok        isw_perm_p4_r_p3_p2: all safe
+  ok        isw_perm_r_p2_p3_p4: all safe
+  ok        isw_perm_r_p2_p4_p3: all safe
+  ok        isw_perm_r_p3_p2_p4: all safe
+  ok        isw_perm_r_p3_p4_p2: all safe
+  ok        isw_perm_r_p4_p2_p3: all safe
+  ok        isw_perm_r_p4_p3_p2: all safe
+== random circuits (n=20, seed=0) ==
+  ok        random_000: 3 unsafe
+  ok        random_001: 1 unsafe
+  ok        random_002: all safe
+  ok        random_003: all safe
+  ok        random_004: 2 unsafe
+  ok        random_005: 1 unsafe
+  ok        random_006: all safe
+  ok        random_007: all safe
+  ok        random_008: all safe
+  ok        random_009: 3 unsafe
+  ok        random_010: all safe
+  ok        random_011: 3 unsafe
+  ok        random_012: 3 unsafe
+  ok        random_013: 2 unsafe
+  ok        random_014: all safe
+  ok        random_015: all safe
+  ok        random_016: 1 unsafe
+  ok        random_017: 5 unsafe
+  ok        random_018: 2 unsafe
+  ok        random_019: 5 unsafe
+
+cases=49  wires=703  safe_wires=649  conservative_tps_alarms=0  (2.1s)
+RESULT: no violations.
+  - our verdict == VerifMSI exact independence on every wire (two-sided)
+  - bitsliced labeller == VerifMSI exact independence on every wire
+  - no tps certificate contradicted us (one-sided)
+  - conservative tps alarms counted and explained, not failures
