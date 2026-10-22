@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-for sub in ("labeller", "resharing", "glitch_probe", "premise_test"):
+for sub in ("labeller", "resharing", "glitch_probe", "premise_test", "composition"):
     sys.path.insert(0, str(ROOT / "experiments" / sub))
 
 from extract import Evaluator, kbest  # noqa: E402
@@ -302,3 +302,34 @@ def test_c8_circuit_secure_iff_every_root_cone_secure():
             whole = all(verdict[w] for w in in_cones)
             parts = all(all(check(_cone(c, r), SEC, free).values()) for r in roots)
             assert whole == parts
+
+
+# ---- C9: for PINI-built terms, safety is class-local again ---------------------
+
+
+def test_c9_pini_restricted_dag_extraction_is_secure():
+    from analysis import composable_classes, extract_composable
+
+    eg, _ = saturate(FIXTURES["square"], ("R2", "R3"), 6)
+    classes, root = export(eg)
+    assert root in composable_classes(classes)
+    term = extract_composable(classes, root)  # one node per class, PINI nodes
+    assert term[0] == "hpc1" and term[1] == term[2]  # same sharing, both operands
+    assert not leaks(term)
+
+
+def test_c9_random_pini_terms_with_fan_out_are_secure():
+    rng = random.Random(9)
+    pini_ops = ("xor", "not", "refresh", "hpc1")
+    for _ in range(80):
+        shared = random_value_term(rng, 1, leaves=(A, B))
+        t = shared
+        for _ in range(rng.randint(1, 3)):
+            op = rng.choice(pini_ops)
+            if op in ("not", "refresh"):
+                t = (op, t)
+            else:
+                t = (op, t, rng.choice((shared, D, t)))  # fan-out of `shared`
+        if any(g in repr(t) for g in ("isw", "dom")):
+            continue
+        assert not leaks(t), t

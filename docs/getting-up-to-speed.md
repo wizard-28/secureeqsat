@@ -88,6 +88,7 @@ wires — where so far they only remove slack.
 | `experiments/constrained_extraction/` | Security-constrained extraction | Results 3–4 |
 | `experiments/egglog_port/` | Same premise on the real engine; k-best frontier | Results 1, 4, 5 |
 | `experiments/labeller/` | Bitsliced exact labeller | Result 5 |
+| `experiments/composition/` | PINI composition analysis: class-level extraction that scales past exact checking | Theory claim C9 |
 | `experiments/resharing/` | Shared-value layer: lowering, egglog rules, extraction, fixtures | Results 6–7 |
 | `docs/original/` | Historical first direction — **do not edit** | Only for history |
 
@@ -98,13 +99,13 @@ does and does **not** show, and raw output.
 
 ```bash
 uv sync                      # builds .venv from uv.lock (needs uv)
-uv run pytest -q             # 89 tests; 5 skip without the VerifMSI oracle
+uv run pytest -q             # 117 tests; 13 skip without the VerifMSI oracle
 uv run python experiments/premise_test/run.py      # result 1, narrated
 uv run python experiments/resharing/run.py         # results 6-7 ablation
 ```
 
 The dev container (see `README.md`) also installs the VerifMSI oracle. Without it,
-the 5 cross-check tests **skip**, and a skip is not a pass:
+the 13 cross-check tests **skip**, and a skip is not a pass:
 `bash experiments/oracle_crosscheck/setup_oracles.sh` installs it outside the repo.
 
 ## 7. Reading order
