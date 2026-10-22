@@ -1,0 +1,183 @@
+{
+  "generated_utc": "2026-10-22T13:06:33+00:00",
+  "git_commit": "c3571b577d3bbe30d8e24b7458bfca39d6e890bb",
+  "git_dirty": false,
+  "python": "3.14.7",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.35",
+  "egglog": "14.0.0",
+  "uv_lock_sha256": "b345f5de71a2065df84712dda2fc2897b6807fce10a80ed641668d638868194b",
+  "verifmsi_commit": "0172790ff4b4ff25809d88dabcfb168876d445e4",
+  "steps": [
+    {
+      "id": "G1",
+      "finding": "gate",
+      "status": "pass",
+      "seconds": 0.2,
+      "command": "-m ruff check .",
+      "expected": [
+        "All checks passed!"
+      ],
+      "output": "findings/outputs/G1.txt",
+      "output_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "id": "G2",
+      "finding": "gate",
+      "status": "pass",
+      "seconds": 0.5,
+      "command": "-m ruff format --check .",
+      "expected": [
+        "formatted"
+      ],
+      "output": "findings/outputs/G2.txt",
+      "output_sha256": "19a92c58959b1f6fb6427b78e201fbed4b62201f1e4af7e700ab9f2b4cbf7ce1"
+    },
+    {
+      "id": "G3",
+      "finding": "gate",
+      "status": "pass",
+      "seconds": 8.2,
+      "command": "-m pytest -q",
+      "expected": [
+        " passed"
+      ],
+      "output": "findings/outputs/G3.txt",
+      "output_sha256": "302428d606877a3f94353b0ddffaf47b18e69db563f434d7e1def59ed949acdc"
+    },
+    {
+      "id": "F1",
+      "finding": "unsoundness (in-house)",
+      "status": "pass",
+      "seconds": 0.1,
+      "command": "experiments/premise_test/run.py",
+      "expected": [
+        "PREMISE HOLDS"
+      ],
+      "output": "findings/outputs/F1.txt",
+      "output_sha256": "9adf37ec27cf98a7ec0a804c1352b63da2205a2452399c83821f118b08d4df35"
+    },
+    {
+      "id": "F1b",
+      "finding": "unsoundness (egglog)",
+      "status": "pass",
+      "seconds": 0.3,
+      "command": "experiments/egglog_port/port.py --circuit isw",
+      "expected": [
+        "7 gates",
+        "INSECURE"
+      ],
+      "output": "findings/outputs/F1b.txt",
+      "output_sha256": "f9cf3e6a6f1de752b9cfb1e6e4470fab1a43693d88ca783bcd10878fd6c18996"
+    },
+    {
+      "id": "F2",
+      "finding": "trust boundary",
+      "status": "pass",
+      "seconds": 2.6,
+      "command": "experiments/oracle_crosscheck/crosscheck.py --random 20",
+      "expected": [
+        "RESULT: no violations."
+      ],
+      "output": "findings/outputs/F2.txt",
+      "output_sha256": "d540e589e36cec2ee377c793fb85e6a9a0180e86f7110cbd222e0f3255aea3b1"
+    },
+    {
+      "id": "F3",
+      "finding": "repair (constrained extraction)",
+      "status": "pass",
+      "seconds": 0.1,
+      "command": "experiments/constrained_extraction/run_constrained.py",
+      "expected": [
+        "constrained optimum   : 8 gates, secure"
+      ],
+      "output": "findings/outputs/F3.txt",
+      "output_sha256": "c1fab49fdc258e9d27c90b8fddb772d4bf16299f254fe1b022e57e30d5f0982f"
+    },
+    {
+      "id": "F4",
+      "finding": "no payoff at chain scale",
+      "status": "pass",
+      "seconds": 2.5,
+      "command": "experiments/egglog_port/kbest.py --rules full --k 40",
+      "expected": [
+        "cheapest extraction overall : 14 gates, INSECURE",
+        "none found"
+      ],
+      "output": "findings/outputs/F4.txt",
+      "output_sha256": "b38713d590fa9b90997679b273ad9dbe1e7f988d560d20bd8db2ba6948a63f4a"
+    },
+    {
+      "id": "F5",
+      "finding": "labelling cost",
+      "status": "pass",
+      "seconds": 86.1,
+      "command": "experiments/labeller/measure.py",
+      "expected": [
+        "labels identical"
+      ],
+      "output": "findings/outputs/F5.txt",
+      "output_sha256": "e315d00e580750964b85892fe2690aa48dd1cc8c8ddc6606f560142a5e16204b"
+    },
+    {
+      "id": "F6",
+      "finding": "shared-value layer + tight starts",
+      "status": "pass",
+      "seconds": 20.9,
+      "command": "experiments/resharing/run.py --crosscheck",
+      "expected": [
+        "0 violations"
+      ],
+      "output": "findings/outputs/F6.txt",
+      "output_sha256": "c6f8393d7f17a886280f558c065b19e2e5e18b7385a47c9be3ae6c594f52e154"
+    },
+    {
+      "id": "F6s",
+      "finding": "shared-value layer scale sweep",
+      "status": "pass",
+      "seconds": 163.2,
+      "command": "experiments/resharing/run.py --scale",
+      "expected": [
+        "depth 5"
+      ],
+      "output": "findings/outputs/F6s.txt",
+      "output_sha256": "a225dd28c80d4858530bd35b4c8652f939bb73bd00892c022d4fe392b1db023f"
+    },
+    {
+      "id": "F8",
+      "finding": "glitch model probe",
+      "status": "pass",
+      "seconds": 14.9,
+      "command": "experiments/glitch_probe/probe.py",
+      "expected": [
+        "0 disagreements"
+      ],
+      "output": "findings/outputs/F8.txt",
+      "output_sha256": "2ebc2e48358b7d749f717774d835471344f347fcc2b531f6794ffe7f51b72bf9"
+    },
+    {
+      "id": "F11",
+      "finding": "PINI composition analysis",
+      "status": "pass",
+      "seconds": 4.4,
+      "command": "experiments/composition/run_composition.py",
+      "expected": [
+        "234 terms checked exactly, 0 leaking",
+        "VerifMSI certifies 212/212"
+      ],
+      "output": "findings/outputs/F11.txt",
+      "output_sha256": "74ad44f19a7a20819cfb9981724762729108917335d98138a181ed1b29578a92"
+    },
+    {
+      "id": "F9",
+      "finding": "theory witnesses C1-C9",
+      "status": "pass",
+      "seconds": 0.8,
+      "command": "-m pytest -q experiments/claims",
+      "expected": [
+        " passed"
+      ],
+      "output": "findings/outputs/F9.txt",
+      "output_sha256": "8b031ea2020cb0faeb68e774f5aef7ef8c834c93991117711f8578201cecfe91"
+    }
+  ]
+}

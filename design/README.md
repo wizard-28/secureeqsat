@@ -56,7 +56,7 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | ADR | Title | Status |
 |---|---|---|
 | [0001](0001-pivot-to-probing-secure-eqsat.md) | Pivot to probing-secure equality saturation | accepted |
-| [0002](0002-scope-first-order-2-share-glitch-free.md) | Scope: first order, 2 shares, straight-line, glitch-free | accepted |
+| [0002](0002-scope-first-order-2-share-glitch-free.md) | Scope: first order, 2 shares, straight-line, glitch-free | superseded by 0018 |
 | [0003](0003-toolchain-uv-ruff-devcontainer.md) | Toolchain: uv, ruff, pytest, devcontainer-managed | accepted |
 | [0004](0004-minimal-egraph-for-premise-test.md) | Minimal in-repo e-graph for the premise test; egglog for the real engine | accepted |
 | [0005](0005-security-checker-and-trust-boundary.md) | Security checker and the external-oracle trust boundary | accepted — **gate closed** |
@@ -71,3 +71,6 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0014](0014-provision-the-oracle.md) | Provision the VerifMSI oracle for every teammate | accepted |
 | [0015](0015-bitsliced-exact-labeller.md) | Bitsliced exact labeller for safety labelling | accepted |
 | [0016](0016-shared-value-layer-for-resharing.md) | A shared-value layer for re-sharing equivalences | accepted |
+| [0017](0017-glitch-feasibility-probe.md) | Feasibility probe: glitch-extended probing | accepted (probe) — go |
+| [0018](0018-scope-adds-glitch-extended-probing.md) | Scope: add the glitch-extended model; target a workshop paper | accepted |
+| [0019](0019-pini-composition-analysis.md) | PINI composition as an e-class analysis | accepted |

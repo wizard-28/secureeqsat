@@ -1,6 +1,6 @@
 # 0002 — Scope: first order, 2 shares, straight-line, glitch-free
 
-- **Status:** accepted
+- **Status:** superseded by 0018 (glitch-free-only restriction)
 - **Date:** 2026-10-06
 - **Deciders:** project team
 

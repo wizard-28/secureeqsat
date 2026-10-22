@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-11 (shared-value layer; tight starts)
+**Last updated:** 2026-10-22 (PINI composition analysis)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -18,9 +18,12 @@
 - **Context:** compiler-design research project.
 - **Review 1 deliverable:** title + novelty claim + plan (30% implementation is a
   later milestone; its foundations are already built — see §3).
-- **Team:** _to be filled in (names + track ownership, see proposal §19)_
-- **Primary venue target:** EGRAPHS workshop (PLDI) fits the EqSat framing; a
-  security/HW venue fits the masking framing. Decide after Review 1.
+- **Team:** Shreyash Panigrahy, solo since 2026-10-17. Earlier work was done
+  as a team (with Sourajyoti Basak and J. Nandhakishor); code authorship is in
+  the git history, and earlier contributions must be credited in the paper and
+  report.
+- **Primary venue target:** EGRAPHS workshop class (theory + negative results),
+  decided in `design/0018`.
 
 ---
 
@@ -61,6 +64,9 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ✅ done | **Labelling bottleneck resolved at chain scale** — bitsliced exact labeller (`design/0015`): depth-5 chain labelled in ~0.4 s vs ~50 min (est.); identical verdicts vs reference and VerifMSI (22,463 wires, 0 violations) |
 | ⏳ deferred | **Symbolic labeller** (ANF/BDD, VerifMSI oracle, pre-filters) — only needed past the bitsliced `2**26` cap (S-box scale) |
 | ✅ done | **Re-sharing representation** — shared-value layer in egglog (`design/0016`): R2 (ISW = DOM = HPC1) and R3 (refresh) are ordinary rules there; constrained extraction blocks a cheaper leaking refresh removal; gains only where the start circuit has slack (redundant refreshes 30→18, factoring 20→11); hand-written chain still 18. VerifMSI: 914 wires, 0 violations |
+| ✅ done | **PINI composition analysis** (`design/0019`, `experiments/composition/`): on the PINI fragment safety is a class label again and plain DAG extraction is sound (theory C9). Gadget verdicts agree with VerifMSI; 234 random PINI terms, 0 leaks; Keccak χ to 32 bits (2^128 points) decided in ≤ 0.03 s and certified by VerifMSI; cost premium up to +33 % |
+| ✅ done | **Scope widened to the glitch-extended model; theory drafted** (`design/0018`). `docs/theory.md` states the result once for both models (claims C1–C8), each with an executable witness in `experiments/claims/` |
+| ✅ probe | **Glitch model: go for the theory, no gains** (`design/0017`). In-house glitch-extended checker agrees with VerifMSI (167 probes, 0 disagreements). Opaque registers block rewriting; transparent registers reproduce the premise (registered DOM 10→5, leaks); occurrence-aware extraction repairs it by placing registers, exactly as with refresh (`experiments/glitch_probe/`) |
 | ⚠️ negative | **Tight starts gain nothing.** Keccak chi (3- and 5-bit rows, direct ISW masking) is unchanged under every rule class; the unmodelled lever is randomness reuse (`experiments/resharing/RESULTS.md`) |
 | ⚠️ new limit | **Term-based extraction** is now the bottleneck at the value layer (~144 s at chain depth 5) |
 | 🔔 realised | **eVer (ePrint 2026/208) now optimizes refresh sequences and gadgets** with re-verification. Repositioned: claim the e-graph + congruence angle, never "optimize refreshes" |
@@ -79,7 +85,7 @@ Full records in [`design/`](design/README.md).
 | ADR | Decision | Status |
 |---|---|---|
 | `0001` | Pivot from LLM/agent-guided EqSat to probing-secure EqSat (Plan A) | accepted |
-| `0002` | Scope: first order, 2 shares, straight-line, glitch-free | accepted |
+| `0002` | Scope: first order, 2 shares, straight-line, glitch-free | superseded by `0018` |
 | `0003` | Toolchain: uv + ruff + pytest, devcontainer-managed, no manual installs | accepted |
 | `0004` | Minimal in-repo e-graph for the premise test; `egglog`/`egg` for the real engine | accepted |
 | `0005` | In-house checker + external-oracle cross-check as the trust boundary | **closed** (0 violations) |
@@ -93,6 +99,9 @@ Full records in [`design/`](design/README.md).
 | `0013` | Publication scope: PDFs tracked, teammate PPTX untracked, no licence until public | accepted |
 | `0014` | Provision the VerifMSI oracle for every teammate (shared volume + auto-setup, non-fatal) | accepted |
 | `0015` | Bitsliced exact labeller replaces per-class materialisation; symbolic routes deferred | accepted |
+| `0019` | PINI composition as an e-class analysis; class-level extraction on the composable fragment | accepted |
+| `0018` | Scope: first order, 2 shares, glitch-free **and** glitch-extended; deliverable is a workshop paper | accepted |
+| `0017` | Feasibility probe of the glitch-extended model, core scope unchanged | accepted (probe) |
 | `0016` | Shared-value layer: sharings identified by value; R2/R3 as rules; lowering + term-based constrained extraction; cost = gates + randoms | accepted |
 
 ---
@@ -107,12 +116,19 @@ Full records in [`design/`](design/README.md).
 | `docs/probing-secure-eqsat-proposal.md` | Proposal (revision 3: soundness, repair, congruence obstruction) |
 | `docs/team-briefing-plan-a.md` | Team-facing argument for why the original direction is dead |
 | `docs/feasibility-report.md` | **Consolidated feasibility checks and confidence levels** |
+| `findings/` | **Verification folder**: index of findings F1–F10, `verify.py` re-runs each and writes `outputs/MANIFEST.json` |
+| `docs/adversarial-search-4.md` | Fourth adversarial pass: citation check of the theory (T1–T4) |
+| `docs/theory.md` | **Theory draft for the paper**: claims C1–C8 with proofs and witnesses |
+| `experiments/composition/` | PINI checker, VerifMSI PINI/certificate drivers, composition analysis, `run_composition.py`, tests, `RESULTS.md` |
+| `docs/adversarial-search-5.md` | Fifth adversarial pass: PINI theorem verification and composition prior art |
+| `experiments/claims/` | `test_claims.py` — one executable witness per claim in `docs/theory.md` |
 | `docs/getting-up-to-speed.md` | 15-minute orientation for new readers |
 | `experiments/premise_test/` | `egraph.py`, `masked.py`, `run.py`, `test_premise.py`, `RESULTS.md` |
 | `experiments/oracle_crosscheck/` | VerifMSI driver, cross-check protocol, tests, `RESULTS.md` |
 | `experiments/constrained_extraction/` | `constrained.py`, `run_constrained.py`, `run_chain.py` |
 | `experiments/egglog_port/` | `port.py`, `kbest.py`, `RESULTS.md` |
 | `experiments/labeller/` | Bitsliced exact labeller: `labeller.py`, `test_labeller.py`, `measure.py`, `RESULTS.md` |
+| `experiments/glitch_probe/` | Glitch feasibility probe: `glitch.py` (checker), `glitch_driver.py` (VerifMSI), `gextract.py`, `probe.py`, `test_glitch.py`, `RESULTS.md` |
 | `experiments/resharing/` | Shared-value layer: `gadgets.py` (lowering), `layer.py` (egglog rules), `extract.py`, `fixtures.py`, `run.py`, `test_resharing.py`, `RESULTS.md` |
 | `AGENTS.md` | **Canonical working norms** — read natively by most agents |
 | `CLAUDE.md` | Thin `@AGENTS.md` pointer; Claude Code stops reading `AGENTS.md` once any `CLAUDE.md`/`CLAUDE.local.md` exists |
@@ -143,12 +159,15 @@ Full records in [`design/`](design/README.md).
    *Update 2026-10-11 (MEDIUM → LOW for R2/R3):* they are expressible one layer
    up, where sharings are identified by value (`design/0016`); the price is that
    safety stops being a per-class label and extraction must be term-based.
-3. **Novelty window (MEDIUM → partially realised).** superVer (EGRAPHS 2024)
+3. **Novelty window (MEDIUM → partially realised; re-checked 2026-10-18,
+   `docs/adversarial-search-4.md`: theory claims survive narrowly, glitch
+   phenomenon and register placement not claimable).** superVer (EGRAPHS 2024)
    verifies probing security with e-graphs; **eVer (2026) now optimizes refresh
    sequences and gadgets** with re-verification. Reposition onto the soundness +
    congruence framing, which they have not claimed (`design/0011`).
-4. **Scope (MEDIUM).** First order, 2 shares, glitch-free only. No claim about
-   robust probing, glitches, PINI or higher orders.
+4. **Scope (MEDIUM).** First order, 2 shares, glitch-free and glitch-extended
+   (`design/0018`). No claim about PINI/SNI, higher orders, transitions or
+   register timing.
 5. **Labelling bottleneck (HIGH → LOW at chain scale, measured).** The
    bitsliced labeller (`design/0015`) labels a depth-5 chain in ~0.4 s, but is
    still exact and exponential: spaces above `2**26` are refused. S-box-scale
@@ -169,6 +188,12 @@ Full records in [`design/`](design/README.md).
 ---
 
 ## 7. Next actions (ordered)
+
+0. **Paper (`design/0018`):** author checks every proof in `docs/theory.md`;
+   ~~citation check~~ done (`docs/adversarial-search-4.md`) — still read eVer's
+   PDF, AGEMA's register handling and the extraction papers; author decides any
+   novelty wording; then write the paper around the theorem in §3, with
+   `findings/` as the artifact.
 
 1. ~~Build a faster safety labeller~~ — **done** for chain scale (`design/0015`).
    A symbolic labeller is deferred until a benchmark exceeds `2**26`. Labelling
@@ -209,7 +234,7 @@ Full records in [`design/`](design/README.md).
 
 ```bash
 uv sync
-uv run pytest -q                                    # 65 tests (4 skip without the oracle)
+uv run pytest -q                                    # 117 tests (13 skip without the oracle)
 uv run python experiments/premise_test/run.py       # premise, in-house
 bash experiments/oracle_crosscheck/setup_oracles.sh # one-off, outside the repo
 uv run python experiments/oracle_crosscheck/crosscheck.py --random 20
@@ -297,3 +322,30 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
 - **2026-10-11** — Added `docs/getting-up-to-speed.md` (orientation for new
   readers) and linked it from the README; corrected the README's test counts
   (65 passed, 4 oracle skips).
+- **2026-10-18** — **Glitch feasibility probe** (`design/0017`,
+  `experiments/glitch_probe/`). New glitch-extended checker, cross-checked
+  against VerifMSI's own leakage sets (167 probes, 0 disagreements;
+  `checkSecurity` agrees on all 10 circuits). Opaque registers block Boolean
+  rewriting; transparent registers make cost-optimal extraction drop them
+  (registered DOM 10 → 5, chain 20 → 10, both leaking); the occurrence-aware
+  extractor restores glitch security by placing registers, including on
+  unregistered ISW and DOM. Verdict: go for the theory (register ≈ refresh),
+  no gains.
+- **2026-10-18** — **Scope adds the glitch-extended model** (`design/0018`,
+  superseding `0002`'s glitch-free restriction; deliverable is now a workshop
+  paper). Drafted `docs/theory.md` — claims C1–C8 for value-preserving,
+  leakage-changing operators (refresh, register) — with one executable witness
+  per claim in `experiments/claims/test_claims.py` (12 tests).
+- **2026-10-18** — **Citation check of the theory** (`docs/adversarial-search-4.md`):
+  PCR citation verified (ICDT 2025, §3.1); register-moving optimizations
+  breaking masking is known (Fraunhofer/BSI 2024) and register placement is
+  not claimable; T1–T3 survive at medium confidence. `docs/theory.md` now
+  answers pass 3's decode-kernel objection. Added `findings/` — an index of
+  findings F1–F10 and `verify.py`, which re-runs each and records a manifest.
+- **2026-10-22** — **PINI composition analysis** (`design/0019`,
+  `experiments/composition/`, `docs/adversarial-search-5.md`). Exhaustive 1-PINI
+  checker per gadget (XOR, NOT, refresh, HPC1 pass; ISW, DOM fail; VerifMSI
+  agrees on all 6); composable-class analysis and PINI-only DAG extraction;
+  theory claim C9 with witnesses. Scales past the exact range: Keccak χ on a
+  32-bit row (2^128 points) in ≤ 0.03 s, every wire certified by VerifMSI's
+  symbolic check. Cost premium up to +33 %; glitch-free only.

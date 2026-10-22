@@ -4,6 +4,7 @@ Equality saturation (e-graphs) for optimizing masked cryptographic circuits unde
 a first-order probing-security constraint.
 
 > **New here?** Start with [`docs/getting-up-to-speed.md`](docs/getting-up-to-speed.md) — a 15-minute orientation.
+> **Checking the results?** [`findings/`](findings/README.md) indexes every finding and re-runs it: `uv run python findings/verify.py`.
 
 > **Status: mid-flight.** This repository is at Review 1. The headline result is a
 > *soundness* finding plus a repair, **not** an optimization win. See
@@ -42,10 +43,10 @@ That is the whole setup. `postCreateCommand` provisions everything:
 1. `uv`, `ruff`, `pyright`, and `.venv` from the committed `uv.lock`
 2. the **VerifMSI oracle**, shallow-cloned into a named volume at `~/oracles`
 
-Expect **65 passed** on a fresh container. There is nothing else to install.
+Expect **117 passed** on a fresh container. There is nothing else to install.
 
 If the oracle clone fails — offline, or a blocked network — the container still
-comes up, and the four cross-check tests **skip**. A skip is not a pass: re-run
+comes up, and the thirteen cross-check tests **skip**. A skip is not a pass: re-run
 `bash experiments/oracle_crosscheck/setup_oracles.sh` and re-check before making
 any security claim (`AGENTS.md` §6.3).
 

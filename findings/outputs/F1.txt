@@ -1,0 +1,33 @@
+========================================================================
+STEP 1 - validate the first-order checker on known fixtures
+========================================================================
+  masked buffer (a0^r, a1^r):        SECURE
+  ISW masked AND:                    SECURE
+  naive unmasked-intermediate AND:   INSECURE (3 unsafe wires)
+    unsafe: ['xor(a0,a1)', 'xor(b0,b1)', 'and(xor(a0,a1),xor(b0,b1))']
+
+========================================================================
+STEP 2 - unconstrained equality saturation of ISW AND
+========================================================================
+[core rules (no distributivity/factoring)]
+  saturation: 3 iters, saturated=True, hit_limit=False, 0.00s
+  e-graph: 23 classes, 67 nodes
+  extracted: 4 AND, 4 XOR, 8 gates total
+  functionally equivalent to ISW AND: True
+  security: SECURE
+
+[full rules (with distributivity/factoring)]
+  saturation: 3 iters, saturated=True, hit_limit=False, 0.00s
+  e-graph: 25 classes, 75 nodes
+  extracted: 3 AND, 4 XOR, 7 gates total
+  functionally equivalent to ISW AND: True
+  security: INSECURE (2 unsafe wires)
+  unsafe wires (2):
+    - xor(b0,b1)
+    - and(xor(b0,b1),a1)
+
+========================================================================
+VERDICT
+========================================================================
+  PREMISE HOLDS: unconstrained rewriting produced a functionally equivalent but INSECURE circuit.
+  The cost-optimal extraction introduced the unmasked-secret wire(s) listed above.

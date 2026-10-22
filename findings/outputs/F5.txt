@@ -1,0 +1,19 @@
+== single circuit: 12 gates, 2 secrets, k randoms ==
+randoms  reference  bitsliced
+      2     0.000s    0.0001s
+      6     0.004s    0.0001s
+     10     0.081s    0.0001s
+     12     0.352s    0.0003s
+     14     1.414s    0.0010s
+     16          -    0.0048s
+     20          -    0.1305s
+     22          -    0.5487s
+
+== chain e-graphs: label every class ==
+depth rules bits classes  saturate    reference  bitsliced   speedup
+    1  full    5      25      0.0s        0.00s     0.000s       10x
+    2  core    8      42      0.0s        0.03s     0.000s       75x
+    3  full   11    1039      1.3s        8.81s     0.012s      726x
+    2  full    8    4353     49.9s        4.06s     0.025s      162x
+    5  full   17    4315     15.5s   ~2861s est     0.432s    6,616x
+labels identical wherever the reference labeller ran in full

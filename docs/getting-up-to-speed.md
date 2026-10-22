@@ -61,8 +61,9 @@ wires — where so far they only remove slack.
 
 ## 4. What we do *not* claim
 
-- Anything beyond **first order, 2 shares, glitch-free, straight-line** circuits
-  (`design/0002`). No glitches, no PINI/SNI composition, no higher orders.
+- Anything beyond **first order, 2 shares, straight-line** circuits in the
+  glitch-free and glitch-extended models (`design/0018`). No PINI/SNI
+  composition, no higher orders, no register timing.
 - That refresh removal, factoring before masking, or gadget choice are new —
   masking compilers already do these. Our contribution is the soundness finding,
   the repair, and the representation.
@@ -76,6 +77,7 @@ wires — where so far they only remove slack.
 | Path | What it is | Read it when |
 |---|---|---|
 | `project_context.md` | Live status, decision log, risks, next actions, change log | Always first |
+| `findings/` | Every finding, its numbers, and a script that re-runs and checks all of them | You want to verify the results |
 | `AGENTS.md` | Working rules for humans and agents | Before your first commit |
 | `docs/probing-secure-eqsat-proposal.md` | The proposal (revision 3) | You need the full argument |
 | `docs/feasibility-report.md` | Results 1–5 with confidence levels | You need the evidence |
@@ -86,6 +88,7 @@ wires — where so far they only remove slack.
 | `experiments/constrained_extraction/` | Security-constrained extraction | Results 3–4 |
 | `experiments/egglog_port/` | Same premise on the real engine; k-best frontier | Results 1, 4, 5 |
 | `experiments/labeller/` | Bitsliced exact labeller | Result 5 |
+| `experiments/composition/` | PINI composition analysis: class-level extraction that scales past exact checking | Theory claim C9 |
 | `experiments/resharing/` | Shared-value layer: lowering, egglog rules, extraction, fixtures | Results 6–7 |
 | `docs/original/` | Historical first direction — **do not edit** | Only for history |
 
@@ -96,13 +99,13 @@ does and does **not** show, and raw output.
 
 ```bash
 uv sync                      # builds .venv from uv.lock (needs uv)
-uv run pytest -q             # 65 tests; 4 skip without the VerifMSI oracle
+uv run pytest -q             # 117 tests; 13 skip without the VerifMSI oracle
 uv run python experiments/premise_test/run.py      # result 1, narrated
 uv run python experiments/resharing/run.py         # results 6-7 ablation
 ```
 
 The dev container (see `README.md`) also installs the VerifMSI oracle. Without it,
-the 4 cross-check tests **skip**, and a skip is not a pass:
+the 13 cross-check tests **skip**, and a skip is not a pass:
 `bash experiments/oracle_crosscheck/setup_oracles.sh` installs it outside the repo.
 
 ## 7. Reading order
