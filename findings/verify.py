@@ -107,6 +107,14 @@ STEPS = [
         1,
     ),
     (
+        "F11",
+        "PINI composition analysis",
+        [PY, "experiments/composition/run_composition.py"],
+        ["234 terms checked exactly, 0 leaking", "VerifMSI certifies 212/212"],
+        0,
+        1,
+    ),
+    (
         "F9",
         "theory witnesses C1-C8",
         [PY, "-m", "pytest", "-q", "experiments/claims"],

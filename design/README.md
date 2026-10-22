@@ -73,3 +73,4 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0016](0016-shared-value-layer-for-resharing.md) | A shared-value layer for re-sharing equivalences | accepted |
 | [0017](0017-glitch-feasibility-probe.md) | Feasibility probe: glitch-extended probing | accepted (probe) — go |
 | [0018](0018-scope-adds-glitch-extended-probing.md) | Scope: add the glitch-extended model; target a workshop paper | accepted |
+| [0019](0019-pini-composition-analysis.md) | PINI composition as an e-class analysis | accepted |

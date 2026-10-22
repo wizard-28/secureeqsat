@@ -182,6 +182,37 @@ observation depends only on its own cone, which is the same in the whole
 circuit and in that output's cone. ∎ This fails at higher orders, where a
 probe *tuple* can span cones. *Witness:* `test_c8_*`.
 
+### C9 — For PINI-built terms, safety is class-local again
+
+*Claim.* Call an e-class *composable* if it holds a node whose operator is
+1-PINI and whose children are composable (inputs are composable). For a term
+built only from 1-PINI operators over independent input sharings, the lowered
+circuit is first-order probing secure (glitch-free model), whatever its
+fan-out. Hence on composable classes safety is a class label, and
+one-node-per-class extraction restricted to PINI nodes is sound.
+
+*Proof.* Each operator's lowering is checked 1-PINI exhaustively
+(`experiments/composition/pini.py`; share-wise XOR, NOT, refresh and HPC1 pass,
+ISW and DOM do not; cross-checked with VerifMSI's PINI mode). A composite of
+d-PINI gadgets is d-PINI (Cassiers & Standaert, *Trivially and Efficiently
+Composing Masked Gadgets with Probe Isolating Non-Interference*, IEEE TIFS
+2020, ePrint 2018/438, Property 12); a d-PINI gadget is d-probing secure when
+its input encodings are independent (Property 11). Our primary inputs are
+independent sharings; lowering gives each gadget instance fresh randoms; the
+terms are acyclic (the paper's backward-induction proof assumes this); and
+composition allows a gadget output to feed several later gadgets, so shared
+subterms are covered. ∎
+
+*Relation to C5.* C5's obstruction remains for ISW/DOM: a class can hold both
+a leaking and a secure term. C9 restores class-locality on the PINI fragment
+only, at a cost premium (e.g. ISW chain 18 → 24, `experiments/composition`).
+With R2, `square` extracts as `hpc1(z, z)` — the same sharing on both operands
+— and is secure. *Witness:* `test_c9_*`.
+
+*Scope.* Glitch-free model only; the glitch-robust variant needs registered
+gadgets, which are not modelled. *Author to verify:* the exact statements of
+Properties 11 and 12 and their preconditions, against the paper's text.
+
 ---
 
 ## 3. The result, stated once
@@ -202,6 +233,9 @@ probe *tuple* can span cones. *Witness:* `test_c8_*`.
 5. Occurrence-aware term extraction with the monotone leak cut (C7), per output
    (C8), is sound in both models and recovers secure circuits where DAG
    extraction cannot.
+6. On the fragment built from PINI gadgets, safety is a class label again
+   (C9): ordinary one-node-per-class extraction is sound there, with no
+   enumeration, at any circuit size, at the price of costlier gadgets.
 
 ## 4. What the paper must not claim
 
