@@ -72,7 +72,7 @@
             [19 classes, saturate 0.01s, 960 terms evaluated, converged=True]
   R2+R3     unconstrained  11 = 10g + 1r  LEAKS (2 wires)  dom(xor(a, b), xor(a, b))
   R2+R3     constrained    14 = 12g + 2r  secure           dom(refresh(xor(a, b)), xor(a, b))
-            [4 classes, saturate 0.00s, 16 terms evaluated, converged=True]
+            [4 classes, saturate 0.01s, 16 terms evaluated, converged=True]
   R1+R2+R3  unconstrained  11 = 10g + 1r  LEAKS (2 wires)  dom(xor(a, b), xor(a, b))
   R1+R2+R3  constrained    14 = 12g + 2r  secure           dom(refresh(xor(a, b)), xor(a, b))
             [19 classes, saturate 0.01s, 2089 terms evaluated, converged=True]
@@ -109,7 +109,7 @@
             [5 classes, saturate 0.00s, 5 terms evaluated, converged=True]
   R1        unconstrained  24 = 20g + 4r  secure           hpc1(hpc1(a, b), d)
   R1        constrained    24 = 20g + 4r  secure           hpc1(hpc1(a, b), d)
-            [7 classes, saturate 0.00s, 17 terms evaluated, converged=True]
+            [7 classes, saturate 0.01s, 17 terms evaluated, converged=True]
   R2        unconstrained  18 = 16g + 2r  secure           dom(dom(a, b), d)
   R2        constrained    18 = 16g + 2r  secure           dom(dom(a, b), d)
             [5 classes, saturate 0.00s, 15 terms evaluated, converged=True]
@@ -118,7 +118,7 @@
             [5 classes, saturate 0.00s, 22 terms evaluated, converged=True]
   R1+R2     unconstrained  18 = 16g + 2r  secure           isw(dom(a, b), d)
   R1+R2     constrained    18 = 16g + 2r  secure           isw(dom(a, b), d)
-            [7 classes, saturate 0.00s, 39 terms evaluated, converged=True]
+            [7 classes, saturate 0.01s, 39 terms evaluated, converged=True]
   R1+R3     unconstrained  24 = 20g + 4r  secure           hpc1(hpc1(a, b), d)
   R1+R3     constrained    24 = 20g + 4r  secure           hpc1(hpc1(a, b), d)
             [7 classes, saturate 0.01s, 58 terms evaluated, converged=True]
@@ -141,7 +141,7 @@
             [14 classes, saturate 0.00s, 57 terms evaluated, converged=True]
   R3        unconstrained  36 = 33g + 3r  secure           out(xor(x0, isw(not(x1), x2)), out(xor(x1, isw(not(x2), x0)), xor(x2, isw(not(x0), x1))))
   R3        constrained    36 = 33g + 3r  secure           out(xor(x0, isw(not(x1), x2)), out(xor(x1, isw(not(x2), x0)), xor(x2, isw(not(x0), x1))))
-            [14 classes, saturate 0.00s, 206 terms evaluated, converged=True]
+            [14 classes, saturate 0.01s, 206 terms evaluated, converged=True]
   R1+R2     unconstrained  36 = 33g + 3r  secure           out(xor(dom(x2, not(x1)), x0), out(xor(dom(x0, not(x2)), x1), xor(dom(x1, not(x0)), x2)))
   R1+R2     constrained    36 = 33g + 3r  secure           out(xor(dom(x2, not(x1)), x0), out(xor(dom(x0, not(x2)), x1), xor(dom(x1, not(x0)), x2)))
             [23 classes, saturate 0.01s, 436 terms evaluated, converged=True]
@@ -164,7 +164,7 @@
             [39 classes, saturate 0.01s, 636 terms evaluated, converged=True]
   R2        unconstrained  60 = 55g + 5r  secure           out(xor(x0, dom(not(x1), x2)), out(xor(x1, dom(not(x2), x3)), out(xor(x2, dom(not(x3), x4)), out(xor(x3, dom(not(x4), x0)), xor(x4, dom(not(x0), x1))))))
   R2        constrained    60 = 55g + 5r  secure           out(xor(x0, dom(not(x1), x2)), out(xor(x1, dom(not(x2), x3)), out(xor(x2, dom(not(x3), x4)), out(xor(x3, dom(not(x4), x0)), xor(x4, dom(not(x0), x1))))))
-            [24 classes, saturate 0.00s, 121 terms evaluated, converged=True]
+            [24 classes, saturate 0.01s, 121 terms evaluated, converged=True]
   R3        unconstrained  60 = 55g + 5r  secure           out(xor(x0, isw(not(x1), x2)), out(xor(x1, isw(not(x2), x3)), out(xor(x2, isw(not(x3), x4)), out(xor(x3, isw(not(x4), x0)), xor(x4, isw(not(x0), x1))))))
   R3        constrained    60 = 55g + 5r  secure           out(xor(x0, isw(not(x1), x2)), out(xor(x1, isw(not(x2), x3)), out(xor(x2, isw(not(x3), x4)), out(xor(x3, isw(not(x4), x0)), xor(x4, isw(not(x0), x1))))))
             [24 classes, saturate 0.01s, 386 terms evaluated, converged=True]
@@ -194,4 +194,4 @@
   depth 2:    7 classes,    45 nodes, saturate 0.01s, constrained extract 0.0s (51 terms), cost 18
   depth 3:   15 classes,   168 nodes, saturate 0.01s, constrained extract 0.3s (1303 terms), cost 27
   depth 4:   31 classes,   575 nodes, saturate 0.01s, constrained extract 5.4s (9927 terms), cost 36
-  depth 5:   63 classes,  1824 nodes, saturate 0.02s, constrained extract 136.8s (48268 terms), cost 45
+  depth 5:   63 classes,  1824 nodes, saturate 0.02s, constrained extract 142.4s (48268 terms), cost 45

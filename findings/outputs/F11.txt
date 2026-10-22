@@ -1,0 +1,42 @@
+== 1. which gadgets are 1-PINI
+  xor      ours: PINI      VerifMSI: PINI      agree
+  not      ours: PINI      VerifMSI: PINI      agree
+  refresh  ours: PINI      VerifMSI: PINI      agree
+  isw      ours: not PINI  VerifMSI: not PINI  agree
+  dom      ours: not PINI  VerifMSI: not PINI  agree
+  hpc1     ours: PINI      VerifMSI: PINI      agree
+  operators used by the analysis: ['hpc1', 'not', 'out', 'refresh', 'xor']
+
+== 2. composable vs exact term extraction (cost = gates + randoms)
+  chain          R2        composable:  24 secure (0.0 ms)  exact:  18 (0.00 s)  composable classes 100%
+  chain          R1+R2+R3  composable:  24 secure (0.0 ms)  exact:  18 (0.00 s)  composable classes 100%
+  overrefreshed  R2        composable:  36 secure (0.0 ms)  exact:  30 (0.00 s)  composable classes 100%
+  overrefreshed  R1+R2+R3  composable:  24 secure (0.0 ms)  exact:  18 (0.00 s)  composable classes 100%
+  square         R2        composable:  17 secure (0.0 ms)  exact:  14 (0.00 s)  composable classes 100%
+  square         R1+R2+R3  composable:  14 secure (0.2 ms)  exact:  14 (0.10 s)  composable classes 100%
+  factor         R2        composable:  26 secure (0.0 ms)  exact:  20 (0.00 s)  composable classes 100%
+  factor         R1+R2+R3  composable:  14 secure (0.0 ms)  exact:  11 (0.01 s)  composable classes 100%
+  hpc_chain      R2        composable:  24 secure (0.0 ms)  exact:  18 (0.00 s)  composable classes 100%
+  hpc_chain      R1+R2+R3  composable:  24 secure (0.0 ms)  exact:  18 (0.00 s)  composable classes 100%
+  chi3           R2        composable:  45 secure (0.0 ms)  exact:  36 (0.01 s)  composable classes 100%
+  chi3           R1+R2+R3  composable:  45 secure (0.2 ms)  exact:  36 (0.05 s)  composable classes 100%
+  chi5           R2        composable:  75 secure (0.1 ms)  exact:  60 (0.09 s)  composable classes 100%
+  chi5           R1+R2+R3  composable:  75 secure (0.3 ms)  exact:  60 (0.45 s)  composable classes 100%
+
+== 3. soundness: random PINI-only terms, exact checker verdict
+  234 terms checked exactly, 0 leaking (must be 0)
+
+== 4. scale: composable extraction where the exact checkers refuse
+  start (ISW gadgets), rewritten with R2; exact range is 2**26 points
+  Keccak chi, 3-bit row    cost    45  space 2**12   exact: secure   composition: secure (0.00 s)  VerifMSI certifies 52/52 wires
+  Keccak chi, 5-bit row    cost    75  space 2**20   exact: secure   composition: secure (0.01 s)  VerifMSI certifies 86/86 wires
+  Keccak chi, 6-bit row    cost    90  space 2**24   exact: secure   composition: secure (0.01 s)  VerifMSI certifies 103/103 wires
+  Keccak chi, 8-bit row    cost   120  space 2**32   exact: refused  composition: secure (0.01 s)  VerifMSI certifies 137/137 wires
+  Keccak chi, 12-bit row   cost   180  space 2**48   exact: refused  composition: secure (0.01 s)  VerifMSI certifies 205/205 wires
+  Keccak chi, 16-bit row   cost   240  space 2**64   exact: refused  composition: secure (0.01 s)  VerifMSI certifies 273/273 wires
+  Keccak chi, 24-bit row   cost   360  space 2**96   exact: refused  composition: secure (0.03 s)  VerifMSI certifies 409/409 wires
+  Keccak chi, 32-bit row   cost   480  space 2**128  exact: refused  composition: secure (0.03 s)  VerifMSI certifies 545/545 wires
+  ISW chain, depth 2       cost    24  space 2**10   exact: secure   composition: secure (0.00 s)  VerifMSI certifies 30/30 wires
+  ISW chain, depth 5       cost    60  space 2**22   exact: secure   composition: secure (0.00 s)  VerifMSI certifies 72/72 wires
+  ISW chain, depth 10      cost   120  space 2**42   exact: refused  composition: secure (0.00 s)  VerifMSI certifies 142/142 wires
+  ISW chain, depth 15      cost   180  space 2**62   exact: refused  composition: secure (0.00 s)  VerifMSI certifies 212/212 wires

@@ -51,7 +51,7 @@
   ok        random_018: 2 unsafe
   ok        random_019: 5 unsafe
 
-cases=49  wires=703  safe_wires=649  conservative_tps_alarms=0  (2.1s)
+cases=49  wires=703  safe_wires=649  conservative_tps_alarms=0  (2.5s)
 RESULT: no violations.
   - our verdict == VerifMSI exact independence on every wire (two-sided)
   - bitsliced labeller == VerifMSI exact independence on every wire
