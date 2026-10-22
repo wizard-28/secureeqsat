@@ -116,7 +116,7 @@ STEPS = [
     ),
     (
         "F9",
-        "theory witnesses C1-C8",
+        "theory witnesses C1-C9",
         [PY, "-m", "pytest", "-q", "experiments/claims"],
         [" passed"],
         0,
