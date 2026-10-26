@@ -1,0 +1,5 @@
+# a full adder: two outputs, one XOR-only and one with AND gadgets
+input a, b, cin
+p = a ^ b
+out sum = p ^ cin
+out cout = (a & b) ^ (cin & p)

@@ -1,0 +1,3 @@
+# a&b ^ a&c: the optimiser can factor this into a & (b ^ c)
+input a, b, c
+out y = (a & b) ^ (a & c)

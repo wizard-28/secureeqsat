@@ -71,6 +71,7 @@ CPython 3.14).
 | `uv run python experiments/premise_test/run.py` | Narrative premise test |
 | `uv run python experiments/constrained_extraction/run_constrained.py` | Constrained extraction |
 | `uv run python experiments/egglog_port/port.py --circuit chain --rules full --iters 4` | `egglog` engine check |
+| `uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.sec` | Compile a source program to a masked netlist |
 | `uv run python experiments/labeller/measure.py` | Labelling cost: reference vs bitsliced labeller |
 
 `uv run <cmd>` is the only sanctioned way to execute Python. `ruff` and `pyright`

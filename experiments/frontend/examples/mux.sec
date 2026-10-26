@@ -1,0 +1,3 @@
+# a 2-to-1 multiplexer: s ? a : b
+input s, a, b
+out y = (s & a) ^ (~s & b)

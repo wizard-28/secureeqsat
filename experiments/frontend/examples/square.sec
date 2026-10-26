@@ -1,0 +1,5 @@
+# z & z: the same sharing meets itself, so a refresh is NECESSARY.
+# Compile with --policy naive to see the optimiser's temptation.
+input a, b
+z = a ^ b
+out y = z & z

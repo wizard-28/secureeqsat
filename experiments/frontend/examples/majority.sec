@@ -1,0 +1,5 @@
+# majority of three bits, in the compact two-AND form: (a & b) ^ (c & (a ^ b))
+# The direct form (a & b) | (b & c) | (a & c) desugars to five AND gadgets and
+# takes about 78 s to compile (design/0016 explains why extraction is the limit).
+input a, b, c
+out m = (a & b) ^ (c & (a ^ b))

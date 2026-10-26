@@ -1,6 +1,6 @@
 # Project Context — SecureEqSat
 
-**Last updated:** 2026-10-22 (PINI composition analysis)
+**Last updated:** 2026-10-26 (language front end)
 **Maintainer:** update this file on every meaningful change (see `AGENTS.md` §7).
 
 ---
@@ -64,6 +64,7 @@ substitution) are equivalences **up to re-sharing**, not Boolean equalities.
 | ✅ done | **Labelling bottleneck resolved at chain scale** — bitsliced exact labeller (`design/0015`): depth-5 chain labelled in ~0.4 s vs ~50 min (est.); identical verdicts vs reference and VerifMSI (22,463 wires, 0 violations) |
 | ⏳ deferred | **Symbolic labeller** (ANF/BDD, VerifMSI oracle, pre-filters) — only needed past the bitsliced `2**26` cap (S-box scale) |
 | ✅ done | **Re-sharing representation** — shared-value layer in egglog (`design/0016`): R2 (ISW = DOM = HPC1) and R3 (refresh) are ordinary rules there; constrained extraction blocks a cheaper leaking refresh removal; gains only where the start circuit has slack (redundant refreshes 30→18, factoring 20→11); hand-written chain still 18. VerifMSI: 914 wires, 0 violations |
+| ✅ done | **Language front end** (`design/0020`, `experiments/frontend/`): a parser, a masking pass, the existing pipeline and a netlist/Verilog emitter. Source programs compile end to end; every compiled circuit is functionally equal to its source and has 0 leaking wires, cross-checked against VerifMSI (6 runs, 0 disagreements). No new research claim |
 | ✅ done | **PINI composition analysis** (`design/0019`, `experiments/composition/`): on the PINI fragment safety is a class label again and plain DAG extraction is sound (theory C9). Gadget verdicts agree with VerifMSI; 234 random PINI terms, 0 leaks; Keccak χ to 32 bits (2^128 points) decided in ≤ 0.03 s and certified by VerifMSI; cost premium up to +33 % |
 | ✅ done | **Scope widened to the glitch-extended model; theory drafted** (`design/0018`). `docs/theory.md` states the result once for both models (claims C1–C8), each with an executable witness in `experiments/claims/` |
 | ✅ probe | **Glitch model: go for the theory, no gains** (`design/0017`). In-house glitch-extended checker agrees with VerifMSI (167 probes, 0 disagreements). Opaque registers block rewriting; transparent registers reproduce the premise (registered DOM 10→5, leaks); occurrence-aware extraction repairs it by placing registers, exactly as with refresh (`experiments/glitch_probe/`) |
@@ -102,6 +103,7 @@ Full records in [`design/`](design/README.md).
 | `0019` | PINI composition as an e-class analysis; class-level extraction on the composable fragment | accepted |
 | `0018` | Scope: first order, 2 shares, glitch-free **and** glitch-extended; deliverable is a workshop paper | accepted |
 | `0017` | Feasibility probe of the glitch-extended model, core scope unchanged | accepted (probe) |
+| `0020` | Language front end: parser, masking pass, emitter over the existing pipeline | accepted |
 | `0016` | Shared-value layer: sharings identified by value; R2/R3 as rules; lowering + term-based constrained extraction; cost = gates + randoms | accepted |
 
 ---
@@ -119,6 +121,7 @@ Full records in [`design/`](design/README.md).
 | `findings/` | **Verification folder**: index of findings F1–F10, `verify.py` re-runs each and writes `outputs/MANIFEST.json` |
 | `docs/adversarial-search-4.md` | Fourth adversarial pass: citation check of the theory (T1–T4) |
 | `docs/theory.md` | **Theory draft for the paper**: claims C1–C8 with proofs and witnesses |
+| `experiments/frontend/` | **Compiler front end**: `lang.py` (parser), `seqc.py` (mask, optimise, verify, emit; CLI), `examples/*.sec`, tests, `RESULTS.md` |
 | `experiments/composition/` | PINI checker, VerifMSI PINI/certificate drivers, composition analysis, `run_composition.py`, tests, `RESULTS.md` |
 | `docs/adversarial-search-5.md` | Fifth adversarial pass: PINI theorem verification and composition prior art |
 | `experiments/claims/` | `test_claims.py` — one executable witness per claim in `docs/theory.md` |
@@ -234,13 +237,14 @@ Full records in [`design/`](design/README.md).
 
 ```bash
 uv sync
-uv run pytest -q                                    # 117 tests (13 skip without the oracle)
+uv run pytest -q                                    # 171 tests (18 skip without the oracle)
 uv run python experiments/premise_test/run.py       # premise, in-house
 bash experiments/oracle_crosscheck/setup_oracles.sh # one-off, outside the repo
 uv run python experiments/oracle_crosscheck/crosscheck.py --random 20
 uv run python experiments/constrained_extraction/run_constrained.py
 uv run python experiments/egglog_port/port.py --circuit chain --rules full --iters 4
 uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
+uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.sec --crosscheck
 ```
 
 ---
@@ -349,3 +353,11 @@ uv run python experiments/labeller/measure.py       # labelling cost, ~1.5 min
   theory claim C9 with witnesses. Scales past the exact range: Keccak χ on a
   32-bit row (2^128 points) in ≤ 0.03 s, every wire certified by VerifMSI's
   symbolic check. Cost premium up to +33 %; glitch-free only.
+- **2026-10-26** — **Language front end** (`design/0020`, `experiments/frontend/`). Added a
+  hand-written parser for a small Boolean language, a masking pass with two policies
+  (`refresh`, `naive`), the `seqc.py` driver (parse, mask, saturate, extract with and without
+  the security constraint, verify, emit) and netlist/Verilog emitters. Examples: factor,
+  square, mux, full adder, majority. All compiled circuits equal their source on every input and
+  have 0 leaking wires; VerifMSI agrees on 6 runs (0 disagreements). On `square`, the headline
+  result holds on a compiled program: cost 11 leaks, constrained 14 is secure. 54 new tests
+  (about 1.6 s). No change to any claim; Verilog is glitch-free-model only.
