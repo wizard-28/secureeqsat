@@ -376,3 +376,5 @@ uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.
 - **2026-10-26** — **Stale PINI scope lines fixed** to "PINI composition in the
   glitch-free model only (C9)" in `findings/README.md`, `docs/theory.md` §4, this
   file §6 risk 4 and §8, and `docs/getting-up-to-speed.md` §4 and §9.
+- **2026-10-26** — **README rewritten** findings-first: nine findings with their numbers,
+  then the working method, the experiments in order, and how to reproduce (`README.md`).

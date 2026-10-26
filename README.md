@@ -1,36 +1,192 @@
 # SecureEqSat — Probing-Secure Equality Saturation
 
-Equality saturation (e-graphs) for optimizing masked cryptographic circuits under
-a first-order probing-security constraint.
+What happens when you optimize **masked cryptographic circuits** with
+**equality saturation** (e-graphs), the rewrite-everything-then-pick-the-cheapest
+technique from modern compilers? This repository answers that question
+experimentally and theoretically for first-order, 2-share, straight-line
+circuits.
 
-> **New here?** Start with [`docs/getting-up-to-speed.md`](docs/getting-up-to-speed.md) — a 15-minute orientation.
-> **Checking the results?** [`findings/`](findings/README.md) indexes every finding and re-runs it: `uv run python findings/verify.py`.
+**Short answer:** it silently breaks the masking. It can be repaired, but the
+optimizations that matter for masking are not plain equalities of circuits, and
+that changes how extraction has to work.
 
-> **Status: mid-flight.** This repository is at Review 1. The headline result is a
-> *soundness* finding plus a repair, **not** an optimization win. See
-> [`project_context.md`](project_context.md) for the live snapshot, and
-> [`docs/adversarial-search-3.md`](docs/adversarial-search-3.md) for the
-> calibrated novelty claims and their residual risks. Explicit non-claims are
-> listed in the proposal, §11.2.
+> **Scope of every result:** first order, 2 shares, straight-line Boolean
+> circuits; glitch-free probing unless the glitch-extended model is named
+> (`design/0018`). Every security verdict is cross-checked against an
+> independent tool, VerifMSI.
+>
+> **Checking the results?** [`findings/README.md`](findings/README.md) indexes
+> every finding, and `uv run python findings/verify.py --full` re-runs all of
+> them (14 steps, about 5 minutes; last full run: 14 of 14 pass).
+>
+> **New here?** [`docs/getting-up-to-speed.md`](docs/getting-up-to-speed.md) is
+> a 15-minute orientation. [`project_context.md`](project_context.md) is the live
+> project state.
 
-## What we found
+---
 
-Applying ordinary Boolean equality saturation to a masked circuit is **unsound**:
-running distributivity backwards refolds the shares and materialises the unmasked
-secret — and cost-optimal extraction *prefers* that outcome, because it is
-cheaper (7 gates vs 8). Reproduced on two independent engines, leaking on
-identical wires.
+## Findings
 
-The leak is found by an in-house exact checker that has itself been
-cross-validated against VerifMSI over 1,216 circuits / 21,760 wires (0
-disagreements).
+Each finding has an ID that matches [`findings/README.md`](findings/README.md)
+and a step in `findings/verify.py`.
 
-The repair is security-constrained extraction. The open research question is why
-the optimizations that matter — refresh insertion/removal, randomness reuse,
-gadget substitution — are **not congruences** of the wire-term algebra, and so
-cannot be the equality relation of a plain e-graph.
+### 1. Equality saturation is unsound for masked circuits (F1)
 
-## Onboarding
+Take the secure 8-gate ISW masked AND, add ordinary, correct Boolean rewrite
+rules (commutativity, associativity, distributivity, factoring), saturate, and
+extract the cheapest circuit. You get **7 gates that compute `b0 ⊕ b1`, the
+unmasked secret `b`**. The optimizer prefers the leak *because* it is cheaper.
+The same leak appears on the in-house e-graph and on egglog.
+
+### 2. The checkers are trustworthy (F2)
+
+The in-house exact checker agrees with VerifMSI on **1,216 circuits / 21,760
+wires**, and the fast bitsliced labeller on **1,265 circuits / 22,463 wires**,
+with **0 disagreements**. No security claim here rests on the in-house checker
+alone.
+
+### 3. Security-constrained extraction repairs it (F3)
+
+In the glitch-free model, a wire's safety depends only on the function it
+computes, so each e-class can be labelled safe or unsafe once. Extracting only
+from safe classes recovers the **secure 8-gate ISW**: security costs 1 gate
+over the cheapest insecure circuit.
+
+### 4. Plain Boolean rewriting does not pay at chain scale (F4, F5)
+
+On a hand-written two-gadget ISW chain (16 gates, secure), the cheapest
+extraction is 14 gates and insecure, and **none of 240 sampled cheaper
+circuits is secure**. Search and labelling are not the bottleneck: egglog
+saturates a depth-5 chain in under 0.01 s, and the bitsliced labeller labels
+it in about 0.4 s.
+
+### 5. One level up, masking moves become rewrites, but only remove slack (F6, F7)
+
+At a **shared-value layer**, where sharings are identified by the value they
+reconstruct, refresh removal (`refresh(x) = x`) and gadget substitution
+(`isw = dom = hpc1`) are ordinary e-graph rewrites. Results, with cost = gates +
+random bits:
+
+- over-refreshed chain **30 → 18**;
+- `a&b ⊕ a&d` **20 → 11** (factoring);
+- dropping a refresh that is *needed* is cheaper (11) and leaks; the
+  constrained extractor keeps it (14).
+
+**Tight published constructions gain nothing:** the chain (18) and Keccak χ on
+3- and 5-bit rows (36, 60) are unchanged under every rule class. Every gain
+removes slack someone put in the start circuit.
+
+### 6. Same class, different security: extraction must be occurrence-aware (theory C3–C7)
+
+Refresh, and registers in the glitch model, are **value-preserving but
+leakage-changing**. They put a secure term and a leaking term in the same
+e-class: `isw(z, z)` leaks while `isw(z, refresh(z))` is secure. So safety is
+no longer a label of the class, and extraction must choose per occurrence.
+The repair is term-based extraction with a **monotone leak cut**: a leaking
+subterm leaks in every context, so it can be discarded for good.
+
+With refresh removal alone (rule set R3), ordinary one-node-per-class
+extraction of `square` misses every secure circuit. With the Boolean rules
+added (R1 + R3), secure DAG extractions exist again (16 of 338; VerifMSI
+agrees). The obstruction depends on the rule set (`design/0021`).
+
+### 7. The story carries over to glitches (F8, theory C6)
+
+In the glitch-extended model, safety is **not** a function of the wire: two
+wires computing the same function can differ in glitch security, depending on
+where registers sit. If registers are treated as removable, a registered DOM
+gadget shrinks **10 → 5** and a chain **20 → 10**, and both leak.
+Occurrence-aware extraction puts the registers back (**10** and **20**,
+secure). The glitch checker agrees with VerifMSI's own leakage sets on **167
+probes**, with 0 disagreements.
+
+### 8. On PINI gadgets, safety is a class label again, at any size (F11, theory C9)
+
+Built only from gadgets that compose safely (**PINI**: share-wise XOR and NOT,
+refresh, HPC1), any composition is first-order secure, so ordinary
+one-node-per-class extraction is sound with no enumeration at all.
+
+- Gadget PINI verdicts agree with VerifMSI on all 6 operators.
+- 234 random PINI-only terms: 0 leaking.
+- Keccak χ on a 32-bit row (a 2^128-point space) and ISW chains to depth 15
+  are decided in ≤ 0.03 s and certified wire by wire by VerifMSI.
+- **Price:** up to **+33 %** cost over the exact optimum. **Glitch-free model
+  only.**
+
+### 9. What we do *not* claim (F10)
+
+- **No win over any tight, published construction.**
+- The optimizations themselves (refresh removal, factoring, gadget choice,
+  register placement) are known in masking compilers.
+- That optimizers can break (glitch-robust) masking is known.
+- PINI composition is used in the glitch-free model only; nothing on SNI,
+  higher orders or glitch-robust composition.
+- Extraction is exact only on its k-best frontier.
+
+What may be new is narrow: the unsoundness result, the shared-value
+representation, the same-class-different-security obstruction and its two
+repairs. Prior-art passes put this at **medium confidence**
+([`docs/adversarial-search-4.md`](docs/adversarial-search-4.md),
+[`-5.md`](docs/adversarial-search-5.md)); a sixth pass is still outstanding.
+
+---
+
+## How we found it
+
+### The working method
+
+1. **Kill the idea before building it.** The project began as LLM-guided
+   equality saturation for general compiler IR. Two adversarial literature
+   searches showed that direction was occupied, and it was closed
+   ([`docs/team-briefing-plan-a.md`](docs/team-briefing-plan-a.md)). Every later
+   claim went through a further pass with a recorded query log
+   (`docs/adversarial-search-*.md`).
+2. **A claim that is not a test is a hope.** Every experiment ends in
+   assertions that fail if the finding is wrong, and every directory has a
+   `RESULTS.md` (question, method, results, what it does and does not show).
+3. **An external trust boundary.** Security verdicts are cross-checked against
+   [VerifMSI](https://github.com/quentin-meunier/VerifMSI), run as a separate
+   process (it is GPL). A disagreement is a stopping condition.
+4. **Decisions are written down** as ADRs in [`design/`](design/), one per
+   decision, append-only.
+
+### The experiments, in order
+
+| Step | Question | How | Where |
+|---|---|---|---|
+| Premise test | Does ordinary rewriting break masking? | A minimal in-repo e-graph saturates ISW AND with Boolean rules; an exact first-order checker compares each wire's **distribution** (not its values) across all secret assignments | `experiments/premise_test/` |
+| Engine check | Is that an artifact of our e-graph? | The same circuits on egglog, with its own extractor and a k-best frontier | `experiments/egglog_port/` |
+| Trust boundary | Can we trust our checker? | 1,216 circuits (fixtures plus random circuits) lowered to VerifMSI and checked wire by wire | `experiments/oracle_crosscheck/` |
+| Repair | Can extraction avoid the leak? | Label every e-class safe/unsafe, extract the cheapest circuit from safe classes only | `experiments/constrained_extraction/` |
+| Scale | Is labelling the bottleneck? | A **bitsliced** labeller: each function is one truth table packed into an integer, and a wire is safe iff its 1-count is equal in every secret block | `experiments/labeller/` |
+| Re-sharing | Can refresh and gadget choice be rewrites? | A shared-value sort in egglog with rule classes R1 (Boolean), R2 (gadget swap) and R3 (refresh); terms are lowered to 2-share circuits; term-based, occurrence-aware k-best extraction (cost = gates + randoms) with a leak cut | `experiments/resharing/` |
+| Glitches | Does the story survive the glitch-extended model? | A stable-set checker (inputs and registers in a wire's cone); registers **opaque** vs **transparent** in egglog; VerifMSI's own leakage sets and `checkSecurity(withGlitches=True)` as the oracle | `experiments/glitch_probe/` |
+| Theory | Why does it happen? | Claims C1–C9 in [`docs/theory.md`](docs/theory.md), each with an executable witness | `experiments/claims/` |
+| Composition | Can extraction scale past exact checking? | An exhaustive 1-PINI checker per gadget, an e-class analysis ("composable" classes, least fixed point), and PINI-only DAG extraction; VerifMSI PINI mode and a symbolic certificate | `experiments/composition/` |
+| Front end | Does it work as a compiler? | `seqc.py`: parse a small Boolean language, mask, saturate, extract with and without the constraint, verify, emit a netlist or Verilog | `experiments/frontend/` |
+
+The proofs in `docs/theory.md` are being checked by hand
+([`docs/proof-review-1.md`](docs/proof-review-1.md)). The executable witnesses
+show each claim holds on the instances they try; they do not replace the
+proofs.
+
+### Reproduce everything
+
+```bash
+uv sync --python 3.14
+bash experiments/oracle_crosscheck/setup_oracles.sh   # VerifMSI, outside the repo (GPL)
+uv run python findings/verify.py --full               # 14 steps, ~5 min
+uv run pytest -q                                      # 173 tests
+```
+
+A step that needs VerifMSI is **skipped** without it, and a skip is not a pass.
+`findings/outputs/MANIFEST.json` records the commit, tool versions, VerifMSI
+commit and a SHA-256 per output. Pass `--python 3.14`: without it, `uv` may
+pick a newer interpreter for which egglog has no build.
+
+---
+
+## Setup
 
 ```bash
 git clone <repo-url> && cd <repo>
@@ -46,7 +202,7 @@ That is the whole setup. `postCreateCommand` provisions everything:
 Expect **173 passed** on a fresh container (19 skip if the VerifMSI oracle is absent). There is nothing else to install.
 
 If the oracle clone fails — offline, or a blocked network — the container still
-comes up, and the thirteen cross-check tests **skip**. A skip is not a pass: re-run
+comes up, and the 19 oracle-dependent tests **skip**. A skip is not a pass: re-run
 `bash experiments/oracle_crosscheck/setup_oracles.sh` and re-check before making
 any security claim (`AGENTS.md` §6.3).
 
@@ -176,19 +332,18 @@ duplicated per tool:
 
 | Path | Contents |
 |---|---|
-| [`project_context.md`](project_context.md) | **Live project state — read this first** |
+| [`findings/`](findings/README.md) | **Every finding, with `verify.py` to re-run it** |
+| [`project_context.md`](project_context.md) | Live project state and change log |
+| [`docs/theory.md`](docs/theory.md) | Claims C1–C9 and their proofs |
+| [`docs/getting-up-to-speed.md`](docs/getting-up-to-speed.md) | 15-minute orientation |
 | [`AGENTS.md`](AGENTS.md) | Working norms: research, engineering, documentation, git |
 | [`design/`](design/) | ADRs, one file per non-trivial decision |
-| [`docs/probing-secure-eqsat-proposal.md`](docs/probing-secure-eqsat-proposal.md) | The Review 1 proposal (revision 3) |
-| [`docs/feasibility-report.md`](docs/feasibility-report.md) | Consolidated feasibility checks and confidence levels |
-| [`docs/adversarial-search-2.md`](docs/adversarial-search-2.md) | Second adversarial pass, with its query log |
-| [`docs/adversarial-search-3.md`](docs/adversarial-search-3.md) | Third adversarial pass + scaling measurements |
-| [`docs/team-briefing-plan-a.md`](docs/team-briefing-plan-a.md) | Why the original direction was closed, and what replaced it |
-| [`experiments/`](experiments/) | Premise test, oracle cross-check, constrained extraction, `egglog` port |
+| [`experiments/`](experiments/) | One directory per experiment, each with a `RESULTS.md` |
+| [`docs/adversarial-search-2.md`](docs/adversarial-search-2.md) … [`-5.md`](docs/adversarial-search-5.md) | Prior-art passes, with query logs |
+| [`docs/probing-secure-eqsat-proposal.md`](docs/probing-secure-eqsat-proposal.md) | The Review 1 proposal |
+| [`docs/feasibility-report.md`](docs/feasibility-report.md) | Feasibility checks and confidence levels |
+| [`docs/team-briefing-plan-a.md`](docs/team-briefing-plan-a.md) | Why the original direction was closed |
 | `docs/original/` | Historical record of the closed direction — **do not edit** |
-
-Negative results in this repository carry the exact queries that produced them,
-and novelty claims are calibrated rather than asserted. See `AGENTS.md` §5.
 
 ## Licence
 
