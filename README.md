@@ -43,7 +43,7 @@ That is the whole setup. `postCreateCommand` provisions everything:
 1. `uv`, `ruff`, `pyright`, and `.venv` from the committed `uv.lock`
 2. the **VerifMSI oracle**, shallow-cloned into a named volume at `~/oracles`
 
-Expect **117 passed** on a fresh container. There is nothing else to install.
+Expect **173 passed** on a fresh container (19 skip if the VerifMSI oracle is absent). There is nothing else to install.
 
 If the oracle clone fails — offline, or a blocked network — the container still
 comes up, and the thirteen cross-check tests **skip**. A skip is not a pass: re-run

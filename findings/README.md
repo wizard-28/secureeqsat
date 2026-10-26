@@ -41,8 +41,9 @@ Slow-step timings in `outputs/` vary by machine; the checked strings do not.
 - **Novelty of the optimizations** (refresh removal, factoring, gadget choice,
   register placement), or that optimizers breaking masking is new
   (`docs/adversarial-search-4.md` §5).
-- **Higher orders, more shares, PINI/SNI composition, transitions, register
-  timing**, or behaviour of real synthesis tools.
+- **Higher orders, more shares, transitions, register timing**, or behaviour
+  of real synthesis tools. On composition: PINI composition in the glitch-free
+  model only (C9); nothing on SNI, higher orders or glitch-robust composition.
 - **Optimality**: extraction is exact only on its k-best frontier.
 
 ## Provenance

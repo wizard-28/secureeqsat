@@ -104,6 +104,7 @@ Full records in [`design/`](design/README.md).
 | `0018` | Scope: first order, 2 shares, glitch-free **and** glitch-extended; deliverable is a workshop paper | accepted |
 | `0017` | Feasibility probe of the glitch-extended model, core scope unchanged | accepted (probe) |
 | `0020` | Language front end: parser, masking pass, emitter over the existing pipeline | accepted |
+| `0021` | Theory claim C5(b) stated for R3 alone; R1 + R3 admits a secure DAG extraction | proposed |
 | `0016` | Shared-value layer: sharings identified by value; R2/R3 as rules; lowering + term-based constrained extraction; cost = gates + randoms | accepted |
 
 ---
@@ -169,8 +170,9 @@ Full records in [`design/`](design/README.md).
    sequences and gadgets** with re-verification. Reposition onto the soundness +
    congruence framing, which they have not claimed (`design/0011`).
 4. **Scope (MEDIUM).** First order, 2 shares, glitch-free and glitch-extended
-   (`design/0018`). No claim about PINI/SNI, higher orders, transitions or
-   register timing.
+   (`design/0018`). PINI composition in the glitch-free model only (C9,
+   `design/0019`); nothing on SNI, higher orders or glitch-robust composition,
+   and no claim about transitions or register timing.
 5. **Labelling bottleneck (HIGH → LOW at chain scale, measured).** The
    bitsliced labeller (`design/0015`) labels a depth-5 chain in ~0.4 s, but is
    still exact and exponential: spaces above `2**26` are refused. S-box-scale
@@ -192,7 +194,8 @@ Full records in [`design/`](design/README.md).
 
 ## 7. Next actions (ordered)
 
-0. **Paper (`design/0018`):** author checks every proof in `docs/theory.md`;
+0. **Paper (`design/0018`):** author checks every proof in `docs/theory.md`
+   (second-reader notes in `docs/proof-review-1.md`; confirm `design/0021`);
    ~~citation check~~ done (`docs/adversarial-search-4.md`) — still read eVer's
    PDF, AGEMA's register handling and the extraction papers; author decides any
    novelty wording; then write the paper around the theorem in §3, with
@@ -226,7 +229,9 @@ Full records in [`design/`](design/README.md).
 - LLM/agent-guided equality saturation for general compiler IR (dead — see
   `docs/team-briefing-plan-a.md`)
 - Constant-time-constrained EqSat on LLVM/MLIR (dead on novelty and feasibility)
-- Higher-order / glitch-extended / PINI security claims
+- Higher-order security claims, SNI or glitch-robust composition claims
+  (glitch-extended probing is in scope since `design/0018`; PINI composition,
+  glitch-free only, since `design/0019`)
 - Building a production masking compiler or a replacement for
   Tornado/AGEMA/COMPRESS
 - New side-channel attacks or new leakage models
@@ -361,3 +366,13 @@ uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.
   have 0 leaking wires; VerifMSI agrees on 6 runs (0 disagreements). On `square`, the headline
   result holds on a compiled program: cost 11 leaks, constrained 14 is secure. 54 new tests
   (about 1.6 s). No change to any claim; Verilog is glitch-free-model only.
+- **2026-10-26** — **Verification re-run** on a clean checkout of `4607443`: 14 of 14
+  steps pass with VerifMSI present; pytest counted 171 tests (117 + 54 front end); 173 after `test_c5b_*`.
+  `uv sync` needs `--python 3.14` (no interpreter pin; egglog does not build on 3.15).
+- **2026-10-26** — **Proof review #1** (`docs/proof-review-1.md`). C5(b) holds for R3
+  alone and fails for R1 + R3 (16 secure DAG extractions of `square`, VerifMSI agrees);
+  claim narrowed and test added (`design/0021`, `test_c5b_*`). Other gaps listed for the
+  author, not patched.
+- **2026-10-26** — **Stale PINI scope lines fixed** to "PINI composition in the
+  glitch-free model only (C9)" in `findings/README.md`, `docs/theory.md` §4, this
+  file §6 risk 4 and §8, and `docs/getting-up-to-speed.md` §4 and §9.

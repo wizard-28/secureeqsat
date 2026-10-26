@@ -75,3 +75,4 @@ Links to experiments, fetched sources, or an explicit note that this was judgeme
 | [0018](0018-scope-adds-glitch-extended-probing.md) | Scope: add the glitch-extended model; target a workshop paper | accepted |
 | [0019](0019-pini-composition-analysis.md) | PINI composition as an e-class analysis | accepted |
 | [0020](0020-language-frontend.md) | A small language front end for the compiler pipeline | accepted |
+| [0021](0021-state-c5b-for-r3-only.md) | State theory claim C5(b) for R3 alone | proposed |

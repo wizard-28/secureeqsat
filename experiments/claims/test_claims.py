@@ -11,6 +11,8 @@ import random
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 for sub in ("labeller", "resharing", "glitch_probe", "premise_test", "composition"):
     sys.path.insert(0, str(ROOT / "experiments" / sub))
@@ -199,6 +201,61 @@ def test_c5_no_secure_dag_extraction_of_square_but_a_term_extraction_exists():
     assert dags and all(leaks(t) for t in dags)  # here: exactly one, isw(z, z)
     best, _ = kbest(classes, root, secure=True)
     assert best is not None and not leaks(best[1])
+
+
+def _pick_for(classes, c, term, pick):
+    """Extend `pick` so class `c` extracts to `term`, one node per class; or None."""
+    for i, node in enumerate(classes[c]):
+        if c in pick and pick[c] != i:
+            continue
+        if node[0] == "in":
+            if term == node:
+                return {**pick, c: i}
+            continue
+        if term[0] != node[0] or len(term) - 1 != len(node[1]):
+            continue
+        trial = {**pick, c: i}
+        for kid, sub in zip(node[1], term[1:], strict=True):
+            trial = _pick_for(classes, kid, sub, trial)
+            if trial is None:
+                break
+        if trial is not None:
+            return trial
+    return None
+
+
+SQUARE_DAG_SECURE = ("xor", ("isw", A, Z), ("isw", B, Z))
+
+
+def test_c5b_is_specific_to_r3_alone():
+    """C5(b) does not generalise: with R1 + R3 (no self-refreshing gadget) a
+    secure one-node-per-class extraction of `square` exists.
+
+    a&(a^b) ^ b&(a^b) = a ^ (a&b) ^ (a&b) ^ b = a ^ b, the square of z = a ^ b,
+    reached by distributivity; each gadget's operands are independent sharings.
+    VerifMSI agreement: test_c5b_counterexample_agrees_with_verifmsi.
+    """
+    eg, _ = saturate(FIXTURES["square"], ("R1", "R3"), 6)
+    classes, root = export(eg)
+    pick = _pick_for(classes, root, SQUARE_DAG_SECURE, {})
+    assert pick is not None  # expressible with one node per class
+    full = {c: pick.get(c, 0) for c in classes}
+    assert _build_dag(classes, full, root) == SQUARE_DAG_SECURE  # and acyclic
+    assert not leaks(SQUARE_DAG_SECURE)
+
+
+def test_c5b_counterexample_agrees_with_verifmsi():
+    crosscheck = pytest.importorskip("crosscheck")
+    if not crosscheck.oracle_available():
+        pytest.skip("VerifMSI oracle not installed")
+    from gadgets import secret_groups
+
+    low = lower([SQUARE_DAG_SECURE])
+    out = crosscheck.compare(
+        low.circ, secret_groups(secrets_of(SQUARE_DAG_SECURE)), low.randoms
+    )
+    assert out["violations"] == []
+    assert all(v["independent"] for v in out["oracle"].values())
 
 
 # ---- C6: glitch-extended safety is not a function of the wire -----------------

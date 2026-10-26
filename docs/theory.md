@@ -124,8 +124,8 @@ choice (`docs/adversarial-search-4.md`, T1).
 
 *Claim.* (a) In the value-layer e-graph with R3, `isw(z, z)` and
 `isw(z, refresh(z))` are in the same class, yet the first leaks and the second
-is secure. (b) For that fixture, every one-node-per-class extraction leaks,
-while a secure term exists.
+is secure. (b) For that fixture under R3 alone, every one-node-per-class
+extraction leaks, while a secure term exists.
 
 *Proof.* (a) `refresh(z) ≡ z` under R3, so both gadget terms are congruent.
 `isw(z, z)` has the internal wire `z0 ∧ z1 = z0 ∧ (z0 ⊕ z)`, whose
@@ -137,7 +137,9 @@ The term `isw(z, refresh(z))` chooses differently per occurrence. ∎
 
 *Remark.* With R2 also on, `hpc1(z, z)` is secure and DAG-extractable, because
 HPC1 contains its refresh internally. (b) is a statement about the rule set,
-not about every rule set.
+not about every rule set: with R1 + R3 it fails too, since distributivity
+reaches `isw(a, z) ⊕ isw(b, z)` (with `z = a ⊕ b`), a secure one-node-per-class
+extraction (in-house checker and VerifMSI agree; `test_c5b_*`, `design/0021`).
 
 In the glitch-extended model the same holds for `reg` (registered vs
 unregistered DOM, `experiments/glitch_probe`). *Witness:* `test_c5_*` (the
@@ -248,8 +250,10 @@ Properties 11 and 12 and their preconditions, against the paper's text.
   re-timing and LLVM reassociation (pass 3, pass 4).
 - That context-dependence in e-graphs is new — contextual equality saturation
   exists (Hou, Laddad, Hellerstein, arXiv 2507.11897).
-- Anything about higher orders, more shares, PINI/SNI, transitions, timing, or
-  real synthesis tools treating registers as transparent.
+- Anything about higher orders, more shares, transitions, timing, or real
+  synthesis tools treating registers as transparent. On composition: PINI
+  composition in the glitch-free model only (C9); nothing on SNI, higher
+  orders or glitch-robust composition.
 - Optimality of extraction: exact only on its k-best frontier.
 
 ## 5. Open items before submission
@@ -261,5 +265,6 @@ Properties 11 and 12 and their preconditions, against the paper's text.
       registers break masking) and register placement are **not** claimable;
       T1–T3 survive narrowly at medium confidence. Still open: read eVer's PDF
       directly, AGEMA's register handling, and the extraction papers.
-- [ ] Decide whether C5(b) should be stated for all rule sets without
-      self-refreshing gadgets, with a proof, or kept as a witnessed instance.
+- [x] C5(b) kept as a witnessed instance, for R3 alone (2026-10-26,
+      `design/0021`): the general statement is false, since R1 + R3 admits a
+      secure DAG extraction of `square` (`test_c5b_*`).

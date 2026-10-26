@@ -62,8 +62,9 @@ wires — where so far they only remove slack.
 ## 4. What we do *not* claim
 
 - Anything beyond **first order, 2 shares, straight-line** circuits in the
-  glitch-free and glitch-extended models (`design/0018`). No PINI/SNI
-  composition, no higher orders, no register timing.
+  glitch-free and glitch-extended models (`design/0018`). PINI composition
+  in the glitch-free model only (C9); nothing on SNI, higher orders or
+  glitch-robust composition; no register timing.
 - That refresh removal, factoring before masking, or gadget choice are new —
   masking compilers already do these. Our contribution is the soundness finding,
   the repair, and the representation.
@@ -99,7 +100,7 @@ does and does **not** show, and raw output.
 
 ```bash
 uv sync                      # builds .venv from uv.lock (needs uv)
-uv run pytest -q             # 117 tests; 13 skip without the VerifMSI oracle
+uv run pytest -q             # 173 tests; 19 skip without the VerifMSI oracle
 uv run python experiments/premise_test/run.py      # result 1, narrated
 uv run python experiments/resharing/run.py         # results 6-7 ablation
 ```
@@ -135,10 +136,15 @@ the 13 cross-check tests **skip**, and a skip is not a pass:
    Naive reuse leaked on the chain; modelling it needs a new ADR.
 2. **Extraction speed** — term-based extraction at the value level takes ~144 s
    at chain depth 5.
-3. **Bigger benchmarks** — S-box scale exceeds the exact labeller's `2**26`
-   cap; that needs the deferred symbolic labeller.
-4. **Citation check** on the shared-value representation before any novelty
-   wording.
+3. **Bigger benchmarks** — partly answered by F11: on the PINI fragment,
+   composition decides Keccak χ on a 32-bit row (a 2^128-point space) in
+   ≤ 0.03 s, certified by VerifMSI, at a cost premium of up to +33 %. Outside
+   that fragment, S-box scale still exceeds the exact labeller's `2**26` cap
+   and needs the deferred symbolic labeller.
+4. **Citation check** — done for the representation and composition claims
+   (`docs/adversarial-search-4.md`, `-5.md`; medium confidence). A sixth pass
+   remains: eVer's PDF, AGEMA's register handling, e-boost and SmoothE, the
+   Fraunhofer AISEC/BSI study itself, maskComp and Tornado.
 
 ## 10. Glossary
 
