@@ -11,6 +11,8 @@
 #      .devcontainer/personal/devcontainer.json
 #
 # See README "Dev container" and `design/0012`.
+# -e: stop at the first failing command; -u: unset variables are errors; -o pipefail:
+# a failure anywhere in a pipeline fails the whole pipeline.
 set -euo pipefail
 
 export PATH="$HOME/.local/bin:$PATH"
@@ -21,6 +23,8 @@ STATE_DIRS=(
   "$HOME/.cache/opencode"
 )
 
+# `mountpoint -q` succeeds quietly if the first state directory is a mounted volume.
+# `${STATE_DIRS[0]}` is the first element of the array.
 if mountpoint -q "${STATE_DIRS[0]}"; then
   # Belt and braces: scripts/setup-tools.sh already fixed ownership, but this
   # script is documented as runnable standalone.
@@ -32,6 +36,9 @@ else
   echo "         Use .devcontainer/personal/devcontainer.json to persist them." >&2
 fi
 
+# -f: fail on HTTP errors; -sS: silent but still show errors; -L: follow redirects.
+# The downloaded installer is piped into bash (this per-user script is the sanctioned
+# place for that; see the rule in AGENTS.md section 3).
 curl -fsSL https://opencode.ai/v2/install | bash
 
 echo "setup-opencode: ok"

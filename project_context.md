@@ -378,3 +378,14 @@ uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.
   file §6 risk 4 and §8, and `docs/getting-up-to-speed.md` §4 and §9.
 - **2026-10-26** — **README rewritten** findings-first: nine findings with their numbers,
   then the working method, the experiments in order, and how to reproduce (`README.md`).
+- **2026-10-27** — Documented nine files with purpose, per-function docstrings,
+  step-by-step algorithm notes and inline comments on variables (purpose plus an example
+  value), bitwise operations and non-obvious lines (`premise_test/{masked,egraph,run}.py`,
+  `egglog_port/{port,kbest}.py`, `constrained_extraction/{constrained,run_constrained,run_chain}.py`,
+  `oracle_crosscheck/crosscheck.py`). Comments and docstrings only: the syntax trees match
+  the originals, ruff is clean, 171 tests pass.
+- **2026-10-27** — Extended the same documentation (purpose section, docstrings, step-by-step
+  algorithm notes, inline comments on variables and bitwise operations) to every other
+  Python file under `experiments/` and `findings/verify.py`, and added explanatory comments
+  to the three shell scripts and `pyproject.toml`. Comments and docstrings only: each file's
+  syntax tree matches HEAD, ruff is clean, 171 tests pass.
