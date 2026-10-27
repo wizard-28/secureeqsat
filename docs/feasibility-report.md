@@ -105,7 +105,7 @@ ISW construction**. The constraint costs a gate and buys nothing.
 **Chain scale (two ISW gadgets, 16 gates hand-written):**
 - unconstrained optimum: **14 gates, INSECURE** (4 leaking wires);
 - the k-best extraction frontier (k = 40, 240 pairs tested) contained
-  **no secure extraction at all**.
+  **no secure extraction at all** (28 pairs cost fewer than 16 gates, 58 exactly 16, 154 more).
 
 Every sampled cheap extraction is insecure. The secure circuits exist — the
 hand-written chain is one, and core-rules extraction finds a secure 16-gate form
@@ -217,7 +217,7 @@ re-sharing gap that explains where the payoff must come from.**
 | Unconstrained Boolean EqSat is unsound for masked-circuit optimization, with a concrete mechanism | **high** | Reproduced on two engines with identical leaking wires |
 | Security-constrained extraction is implementable and correct | **high** | Working prototype, verified output |
 | The constraint yields no gain at gadget scale | **high** | Constrained optimum == known construction |
-| The cheap frontier is insecure at chain scale | **medium-high** | 240 sampled pairs, none secure; sampled, not exhaustive |
+| The cheap frontier is insecure at chain scale | **medium-high** | none of 240 sampled extractions secure (28 cheaper than 16 gates); sampled, not exhaustive |
 | Re-sharing is **not a congruence**, so it cannot be an e-graph's equality relation | **high** | Follows from the definition of congruence plus PCR semantics (ICDT 2025); guarded/dynamic rewrites verified not to repair it |
 | The abstraction-level explanation in §6 | **medium** | Coherent and consistent with the negative results; not yet demonstrated constructively |
 | A re-sharing-aware formulation is achievable | **speculative** | Not attempted; it is the proposed next research step |

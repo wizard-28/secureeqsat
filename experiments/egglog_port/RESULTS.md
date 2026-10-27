@@ -58,7 +58,7 @@ cheapest extraction overall : 14 gates, INSECURE
 cheapest SECURE extraction  : none found in the k-best frontier
 ```
 
-**Every** sampled cheap extraction is insecure. The secure circuits do exist —
+**Every** sampled extraction is insecure (cost distribution: 28 pairs below 16 gates, 58 at 16, 154 above; 0 secure). The secure circuits do exist —
 the hand-written chain is one, and the core-rules run extracts a secure 16-gate
 form — but they lie outside the cheap frontier.
 

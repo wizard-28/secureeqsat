@@ -55,8 +55,9 @@ over the cheapest insecure circuit.
 ### 4. Plain Boolean rewriting does not pay at chain scale (F4, F5)
 
 On a hand-written two-gadget ISW chain (16 gates, secure), the cheapest
-extraction is 14 gates and insecure, and **none of 240 sampled cheaper
-circuits is secure**. Search and labelling are not the bottleneck: egglog
+extraction is 14 gates and insecure, and **none of the 240 sampled
+extractions is secure** (28 are cheaper than the 16-gate chain, 58 equal it, 154
+cost more). Search and labelling are not the bottleneck: egglog
 saturates a depth-5 chain in under 0.01 s, and the bitsliced labeller labels
 it in about 0.4 s.
 

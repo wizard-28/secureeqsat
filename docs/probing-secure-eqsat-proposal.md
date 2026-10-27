@@ -501,7 +501,7 @@ property, so extraction is wrapped in a verify-and-refine loop: extract the
 cheapest candidate satisfying known constraints, run the exact checker, add a
 blocking constraint on violation, iterate. The measured k-best frontier shows
 why enumeration cannot substitute for this loop: on the chain, **240 sampled
-pairs contained no secure extraction at all**, so the secure circuits are not
+pairs contained no secure extraction at all** (28 of them cheaper than 16 gates), so the secure circuits are not
 near the cheap frontier.
 
 ## 10.5 End-to-End Algorithm
@@ -1015,7 +1015,7 @@ tracks now map to the remaining work.
 - Scalability: chain saturates in `egglog` in <0.01 s; the in-house harness hit a
   3,000-class cap in 62.5 s.
 - Payoff: chain unconstrained 14 gates INSECURE vs 16 gates SECURE hand-written;
-  240 sampled pairs, **none secure**.
+  240 sampled pairs, **none secure** (28 cheaper than 16 gates).
 - Search scaling (`egglog`, full rules, `run(4)`): chain depths 2→5 give
   90/305/532/759 AND nodes and 666/1551/2446/3341 XOR nodes, all in < 0.01 s —
   near-linear, so **search-side scalability is closed**.
@@ -1034,7 +1034,7 @@ tracks now map to the remaining work.
 | The failure is systematic (insecure option is cheaper) | **High** | 7 vs 8 gates on ISW; entire sampled chain frontier insecure |
 | Constrained extraction works | **High** | Working prototype, verified output |
 | No gain at gadget scale | **High** | Constrained optimum == known construction |
-| Cheap frontier insecure at chain scale | **Medium-high** | 240 sampled pairs; sampled, not exhaustive |
+| Cheap frontier insecure at chain scale | **Medium-high** | none of 240 sampled pairs secure (28 cheaper than 16 gates); sampled, not exhaustive |
 | Re-sharing is not a congruence of the wire-term algebra | **High** | PCR semantics (Suciu et al., ICDT 2025) + our own counterexample; guards cannot repair it |
 | Re-sharing-aware e-graph optimization is unclaimed | **Medium** | Adversarial pass (30+ queries), negative result |
 | Search scales (`egglog`) | **High** | Measured to chain depth 5: 759 AND nodes, < 0.01 s |
