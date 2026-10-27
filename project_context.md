@@ -384,3 +384,8 @@ uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.
   `egglog_port/{port,kbest}.py`, `constrained_extraction/{constrained,run_constrained,run_chain}.py`,
   `oracle_crosscheck/crosscheck.py`). Comments and docstrings only: the syntax trees match
   the originals, ruff is clean, 171 tests pass.
+- **2026-10-27** — Extended the same documentation (purpose section, docstrings, step-by-step
+  algorithm notes, inline comments on variables and bitwise operations) to every other
+  Python file under `experiments/` and `findings/verify.py`, and added explanatory comments
+  to the three shell scripts and `pyproject.toml`. Comments and docstrings only: each file's
+  syntax tree matches HEAD, ruff is clean, 171 tests pass.

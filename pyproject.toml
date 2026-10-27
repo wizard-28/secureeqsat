@@ -1,25 +1,33 @@
+# Project metadata. There are NO runtime dependencies on purpose: the premise test is
+# standard-library only (adding one needs an ADR first, AGENTS.md section 3).
 [project]
 name = "secureeqsat"
 version = "0.1.0"
 description = "Probing-secure equality saturation: premise test and prototype"
 readme = "experiments/premise_test/RESULTS.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12"  # the container actually uses CPython 3.14
 dependencies = []
 
+# Development-only tools, installed by `uv sync`. `uv.lock` pins exact versions.
 [dependency-groups]
 dev = [
-    "egglog>=14.0.0",
-    "pytest>=8",
-    "ruff>=0.16",
+    "egglog>=14.0.0",  # the real e-graph engine (the value layer needs 14.x)
+    "pytest>=8",  # the test runner
+    "ruff>=0.16",  # linter and formatter
 ]
 
+# Lint and format settings. The project bar is: ruff check and ruff format --check pass.
 [tool.ruff]
-line-length = 88
+line-length = 88  # maximum line width the formatter and E501 enforce
 target-version = "py312"
 
 [tool.ruff.lint]
+# E/F: pycodestyle and pyflakes errors; I: import order; UP: modern syntax;
+# B: likely bugs; SIM: simplifications.
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+# `pythonpath` lets tests import modules from these folders by bare name, e.g.
+# `from masked import ...`; `testpaths` is where pytest looks for tests.
 [tool.pytest.ini_options]
 pythonpath = ["experiments/premise_test", "experiments/oracle_crosscheck"]
 testpaths = ["experiments"]

@@ -1,4 +1,14 @@
-"""Tests for the composition analysis (design/0019)."""
+"""Tests for the composition analysis (design/0019).
+
+Purpose
+-------
+These tests pin down the PINI story: which gadgets are PINI, that composable
+extraction returns secure circuits on every fixture and on random PINI-only terms, that
+it works beyond the exact checkers' range, and (if VerifMSI is installed) that
+VerifMSI agrees on the gadget verdicts and certifies a large circuit. A negative control
+checks that the certificate is not vacuous. Run with:
+    uv run pytest experiments/composition -q
+"""
 
 import random
 import sys
@@ -31,17 +41,24 @@ from run_composition import (  # noqa: E402
     verifmsi_pini,
 )
 
-A, B = ("in", "a"), ("in", "b")
-Z = ("xor", A, B)
-ALL_OPS = ("xor", "not", "refresh", *GADGETS)
+A, B = ("in", "a"), ("in", "b")  # secret input terms
+Z = ("xor", A, B)  # a share-wise XOR of a and b
+ALL_OPS = (
+    "xor",
+    "not",
+    "refresh",
+    *GADGETS,
+)  # every operator whose PINI status we check
 
 
 def leaks(term):
+    """True iff the term's lowered circuit has at least one leaking wire."""
     return bool(Evaluator()(term)[1])
 
 
 @pytest.mark.parametrize("op", ALL_OPS)
 def test_gadget_pini_verdicts(op):
+    """XOR, NOT, refresh and HPC1 are PINI; ISW and DOM are not."""
     expected = op in ("xor", "not", "refresh", "hpc1")
     assert gadget_is_pini(op)[0] == expected
 
@@ -56,10 +73,12 @@ def test_output_share_with_the_wrong_index_is_not_pini():
 
 
 def test_pini_operators_are_exactly_the_verified_ones():
+    """The analysis uses exactly xor, not, refresh, hpc1 and out as PINI operators."""
     assert pini_operators() == frozenset({"xor", "not", "refresh", "hpc1", "out"})
 
 
 def test_square_needs_a_pini_gadget_to_be_composable():
+    """Only ISW (not PINI): square is not composable; with R2 it becomes HPC1."""
     eg, _ = saturate(FIXTURES["square"], ("R3",), 6)
     classes, root = export(eg)
     assert root not in composable_classes(classes)  # only isw: not PINI
@@ -71,6 +90,7 @@ def test_square_needs_a_pini_gadget_to_be_composable():
 
 @pytest.mark.parametrize("name", sorted({**FIXTURES, **TIGHT}))
 def test_composable_extraction_is_secure_on_every_fixture(name):
+    """The composable extraction returns a secure circuit for every fixture."""
     eg, _ = saturate({**FIXTURES, **TIGHT}[name], ("R2",), 6)
     classes, root = export(eg)
     term = extract_composable(classes, root)
@@ -78,18 +98,20 @@ def test_composable_extraction_is_secure_on_every_fixture(name):
 
 
 def test_random_pini_terms_never_leak():
-    rng = random.Random(190)
+    """Soundness: no random PINI-only term leaks (and enough were tested)."""
+    rng = random.Random(190)  # fixed seed
     checked = 0
     for _ in range(150):
         t = random_pini_term(rng, 3, [("in", s) for s in "abd"])
         if t[0] == "in" or bits_of(t)[0] > DEFAULT_MAX_BITS:
-            continue
+            continue  # skip trivial terms and ones too large for the exact checker
         checked += 1
         assert not leaks(t), t
-    assert checked > 100
+    assert checked > 100  # the test must not be vacuous
 
 
 def test_composition_reaches_beyond_the_exact_range():
+    """A 8-bit chi row exceeds the exact checker's cap, yet composition handles it."""
     eg, _ = saturate(chi(8), ("R2",), 2)
     classes, root = export(eg)
     term = extract_composable(classes, root)
@@ -97,17 +119,20 @@ def test_composition_reaches_beyond_the_exact_range():
     assert Evaluator()(term)[1] is None  # the exact checker refuses it
 
 
+# Skip the VerifMSI tests (rather than fail them) when it is not installed.
 needs_oracle = pytest.mark.skipif(not ORACLE_PY.exists(), reason="VerifMSI absent")
 
 
 @needs_oracle
 @pytest.mark.parametrize("op", ALL_OPS)
 def test_pini_verdicts_agree_with_verifmsi(op):
+    """Our PINI verdict equals VerifMSI's own PINI verdict for every gadget."""
     assert verifmsi_pini(op) == gadget_is_pini(op)[0]
 
 
 @needs_oracle
 def test_verifmsi_certifies_a_large_composable_circuit():
+    """VerifMSI's symbolic check certifies every wire of a large composable circuit."""
     eg, _ = saturate(chi(8), ("R2",), 2)
     classes, root = export(eg)
     ok, missing = verifmsi_certify(extract_composable(classes, root))

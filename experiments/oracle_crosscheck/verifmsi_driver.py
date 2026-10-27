@@ -15,6 +15,15 @@ Translation of our circuits into VerifMSI's symbolic model (2 shares):
 
 IMPORTANT: checkTpsVal returns the 3-tuple (res, usedBitExp, time) — the README's
 `if res:` idiom is wrong because a non-empty tuple is always truthy. Use res[0].
+
+Purpose
+-------
+The bridge to the independent referee. `crosscheck.py` sends a circuit here as JSON;
+this script rebuilds every wire as a VerifMSI symbolic expression and returns two
+verdicts per wire: the EXACT independence check (`getDistribWithExev`) and VerifMSI's
+sound-but-incomplete symbolic certificate (`checkTpsVal`). It runs as a SEPARATE PROCESS
+inside VerifMSI's virtual environment because VerifMSI is GPL and must never be linked
+into our own code.
 """
 
 import json
@@ -24,8 +33,22 @@ from verif_msi import checkTpsVal, constant, getDistribWithExev, symbol
 
 
 def main():
-    data = json.load(sys.stdin)
-    env = {}
+    """Read a circuit as JSON on stdin; print `RESULT_JSON:{wire: verdicts}`.
+
+    Algorithm, step by step:
+      1. For each secret (only 2-share maskings are supported), create a secret symbol
+         `s` and a mask symbol `m0`. Share 0 is `m0` and share 1 is `s ^ m0`, so the
+         shares XOR to the secret and share 0 is uniform.
+      2. Give each fresh random its own uniform 1-bit symbol.
+      3. Walk the wires in order, building each wire's symbolic expression from its
+         operands' expressions (`^` and `&` on symbols build expressions).
+      4. For each wire run both checks: the certificate (`tps`) and the exact check
+         (`uniform`, `independent`). A failure to evaluate is recorded as an error.
+      5. Print the results on one line tagged `RESULT_JSON:` so the caller can find it
+         even if VerifMSI prints diagnostics.
+    """
+    data = json.load(sys.stdin)  # the circuit description sent by crosscheck.py
+    env = {}  # wire name -> its symbolic expression
 
     for secret, shares in data["shares"].items():
         if len(shares) != 2:
@@ -33,27 +56,27 @@ def main():
                 f"driver only models 2-share maskings; got {len(shares)} shares "
                 f"for {secret!r}"
             )
-        s = symbol(secret, "S", 1)
-        m0 = symbol(f"{secret}__m0", "M", 1)
-        env[shares[0]] = m0
-        env[shares[1]] = s ^ m0
+        s = symbol(secret, "S", 1)  # the secret: a 1-bit "S" (secret) symbol
+        m0 = symbol(f"{secret}__m0", "M", 1)  # a uniform 1-bit "M" (mask) symbol
+        env[shares[0]] = m0  # share 0 = the mask
+        env[shares[1]] = s ^ m0  # share 1 = secret XOR mask
 
     for r in data["randoms"]:
-        env[r] = symbol(r, "M", 1)
+        env[r] = symbol(r, "M", 1)  # each fresh random is a uniform 1-bit mask
 
-    out = {}
+    out = {}  # wire name -> {"tps": bool, "uniform": bool, "independent": bool}
     for w in data["wires"]:
         op = w["op"]
         if op == "input":
             e = env[w["args"]]
         elif op == "const":
-            e = constant(int(w["args"]), 1)
+            e = constant(int(w["args"]), 1)  # a 1-bit constant
         elif op == "xor":
-            a, b = w["args"]
-            e = env[a] ^ env[b]
+            a, b = w["args"]  # the two operand wire names
+            e = env[a] ^ env[b]  # symbolic XOR
         elif op == "and":
             a, b = w["args"]
-            e = env[a] & env[b]
+            e = env[a] & env[b]  # symbolic AND
         else:
             raise SystemExit(f"unsupported op {op!r}")
         env[w["name"]] = e
