@@ -13,10 +13,11 @@ any step fails. A skipped step is NOT a pass.
 Purpose
 -------
 A claim that is not re-checkable is a hope (AGENTS.md). This script is the single
-command that re-runs every experiment behind the findings F1 to F11 and checks that each
-one still prints the key result it is supposed to print (for example "PREMISE HOLDS" for
-F1, "constrained optimum   : 8 gates, secure" for F3). The manifest it writes records
-the exact commit and tool versions, so a result can be tied to the code that made it.
+command that re-runs every experiment behind the findings F1 to F12 (plus the extended
+cross-check F13) and checks that each one still prints the key result it is supposed
+to print (for example "PREMISE HOLDS" for F1, "constrained optimum   : 8 gates,
+secure" for F3). The manifest it writes records the exact commit and tool versions, so
+a result can be tied to the code that made it.
 
 How a step passes: the command exits with status 0 AND its output contains every
 expected substring. A step that needs VerifMSI is SKIPPED (never passed) if VerifMSI is
@@ -134,6 +135,22 @@ STEPS = [
         [" passed"],
         0,
         0,
+    ),
+    (
+        "F12",
+        "front-end table (paper Table V), with the OR-form majority",
+        [PY, "experiments/frontend/table.py", "--with-or"],
+        ["FRONT-END TABLE: ALL ROWS MATCH"],
+        1,
+        1,
+    ),
+    (
+        "F13",
+        "extended cross-check: F4 extractions and F11 random terms vs VerifMSI",
+        [PY, "experiments/oracle_crosscheck/extended.py"],
+        ["EXTENDED CROSS-CHECK: AGREE"],
+        1,
+        1,
     ),
 ]
 

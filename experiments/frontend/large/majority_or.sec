@@ -1,0 +1,6 @@
+# majority of three bits, written directly with ORs: (a & b) | (b & c) | (a & c)
+# `|` desugars to x ^ y ^ (x & y), so this has five AND gadgets. It is the largest
+# program in the front-end table and takes about a minute to compile, because
+# term-based extraction is the limit (design/0016).
+input a, b, c
+out m = (a & b) | (b & c) | (a & c)

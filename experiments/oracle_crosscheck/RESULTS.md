@@ -131,3 +131,17 @@ conservatism counts, and **0 violations** for both the original checker and the
 bitsliced labeller (1,265 circuits / 22,463 wires). A deliberately wrong
 labeller was confirmed to trip RULE 1b. Raw summary lines are in
 `experiments/labeller/RESULTS.md`.
+
+## Extended cross-check (`extended.py`, step `F13`)
+
+Two circuit sets had been decided by the in-house exact checker alone. `extended.py`
+regenerates both exactly (same rules, k and seed) and applies the protocol above to every
+wire:
+
+| Set | Circuits | Wires | Circuits with a leaking wire | Disagreements |
+|---|---|---|---|---|
+| k-best extractions of the two-gadget ISW chain (F4) | 240 | 6,054 | 240 | 0 |
+| Random PINI-built terms (F11, section 3, seed 19) | 234 | 4,608 | 0 | 0 |
+
+So VerifMSI confirms both headline facts independently: none of the 240 sampled chain
+extractions is secure, and none of the 234 PINI-built terms leaks.

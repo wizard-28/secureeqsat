@@ -51,9 +51,13 @@ wires under the in-house exact checker. The test suite (`test_frontend.py`, 54 t
 1.6 s) checks this, the parser, the emitted netlist and Verilog (evaluated against the
 program), and the VerifMSI agreement.
 
-The larger form `(a&b) | (b&c) | (a&c)` desugars to five AND gadgets: start cost 65, optimised
-to 41, and **about 78 s to compile**. That is the term-based extraction limit of
-`design/0016`, not a front-end cost.
+The larger form `(a&b) | (b&c) | (a&c)` (`large/majority_or.sec`, kept out of `examples/` so the test suite stays fast) desugars to five AND
+gadgets: start cost 65, optimised to 41, secure, equal to its source, and VerifMSI agrees on
+all 48 wires. It takes **about 78 to 100 s to compile** (two machines). That is the
+term-based extraction limit of `design/0016`, not a front-end cost.
+
+`table.py` reproduces this whole table, checking every row against the numbers above; it is
+step `F12` of `findings/verify.py --full`.
 
 ## What this shows
 
