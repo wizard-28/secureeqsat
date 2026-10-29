@@ -348,5 +348,4 @@ duplicated per tool:
 
 ## Licence
 
-Not yet chosen — the repository is private. Add a licence before making it
-public.
+MIT License
