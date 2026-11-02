@@ -68,7 +68,7 @@
 \maketitle
 
 \begin{abstract}
-Chips that hold secret keys can give those keys away through their power use. The standard defence, masking, splits every secret into random pieces so that no single wire inside the chip reveals anything, but masked circuits are large, so it is tempting to let a compiler optimise them. We ask whether equality saturation, a compiler technique that collects every equivalent version of a program and then picks the cheapest, can do this safely. By default, it cannot. Starting from the textbook 8-gate masked AND gate (ISW), a cost-only optimiser picks a 7-gate version that exposes a secret on a single wire, and for this gadget with two shares it always happens, because every gate-saving rewrite we enumerated puts a secret back together. Checking security when the final circuit is chosen repairs this at the cost of one gate. We then show that the tricks masking designers actually use, such as refreshes and gadget swaps, cannot be expressed as equalities in a standard wire-level e-graph, build a second e-graph over secret values that can, and show that choosing one circuit per class can be unsafe there. Two safe ways to choose follow: checking each candidate, and a PINI-based method that certifies a 32-bit Keccak~$\chi$ row, with $2^{128}$ possible inputs, in 0.05\,s. Everything is packaged as seqc, a small compiler from Boolean programs to masked Verilog, and every security verdict about our own circuits was confirmed by an independent verifier, with zero disagreements in more than 400,000 wire checks. On twelve small programs seqc needs no more AND gadgets than AGEMA and COMPRESS on ten, with mixed results in area; the scope is first order, two shares, and glitch-free output.
+A chip that holds secret keys can give them away through its power use. Masking, the standard defence, splits each secret into random shares so that no single wire reveals anything, but masked circuits are large, and handing them to a compiler for optimisation is tempting. We ask whether equality saturation, which collects every equivalent version of a program and then picks the cheapest, can do this safely. Left alone, it cannot. Starting from the textbook 8-gate masked AND gadget (ISW), a cost-only optimiser picks a 7-gate version that exposes a secret on one wire; with two shares this happens for this gadget every time, because each gate-saving rewrite we enumerated puts a secret back together. Checking security when the final circuit is chosen repairs the problem for the price of one gate. The tricks that masking designers actually rely on, such as refreshes and gadget swaps, cannot be stated as equalities in a standard wire-level e-graph. We therefore build a second e-graph over secret values, and we show that choosing one circuit per class can be unsafe there. Two safe ways of choosing follow: checking every candidate, and a method based on PINI that certifies a 32-bit Keccak~$\chi$ row, with $2^{128}$ possible inputs, in 0.05\,s. We package the work as seqc, a small compiler from Boolean programs to masked Verilog, and every security verdict about our own circuits was confirmed by an independent verifier, with zero disagreements in more than 400,000 wire checks. On twelve small programs, seqc needs no more AND gadgets than AGEMA and COMPRESS on ten, with mixed results in area. The scope is first order, two shares and glitch-free output.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -78,19 +78,19 @@ masking, side-channel security, probing security, equality saturation, e-graphs,
 % =====================================================================
 \section{Introduction}
 % =====================================================================
-You do not need to break the mathematics of a cipher to steal its key. A chip's power use and electromagnetic field depend on the values flowing through its wires, so an attacker with the right equipment can, in effect, read a wire. This is called a \emph{probe}.
+Breaking the mathematics of a cipher is not the only way to recover its key. A chip's power draw and electromagnetic field depend on the values moving through its wires, so an attacker with suitable equipment can, in effect, read a single wire. We call this a \emph{probe}.
 
-The standard defence is \emph{masking}. Each secret is never stored directly; instead it is split into random \emph{shares}, and only all the shares together reveal it. Any single wire then looks like coin flips, whatever the secret is. Masking works, but it is expensive: every AND gate has to be replaced by a protected \emph{gadget} that uses extra gates and fresh random bits.
+The standard defence is \emph{masking}. A secret is never stored directly: it is split into random \emph{shares}, and only all of them together reveal it, so any single wire looks like coin flips whatever the secret is. The protection is costly. Every AND gate must be replaced by a \emph{gadget}, which adds gates and fresh random bits.
 
-So it is natural to hand masked circuits to an optimiser. The trouble is that an optimiser only promises to keep a program's \emph{meaning}. For masked hardware that is not enough. Two circuits can produce exactly the same output and still differ in security, because security depends on the wires in between.
+Handing masked circuits to an optimiser is the obvious next step, and it runs into a problem. An optimiser promises only to preserve a program's \emph{meaning}, which is not enough for masked hardware: two circuits can compute exactly the same output and still differ in security, because security depends on the wires in between.
 
-We study one popular optimisation technique, equality saturation \cite{willsey2021egg,zhang2023egglog}. It stores every equivalent version of a program in a data structure called an \emph{e-graph}, then picks the cheapest one. Our question is simple:
+We study one widely used technique, equality saturation \cite{willsey2021egg,zhang2023egglog}. It stores every equivalent version of a program in a data structure called an \emph{e-graph} and then extracts the cheapest one. The question is a narrow one:
 
 \begin{finding}{Research question.}
 Can an equality-saturation optimiser make masked circuits cheaper without making them leak?
 \end{finding}
 
-We expected the answer to be ``not by default'', since computing the same answer does not guarantee security. We split the question into four parts; Table~\ref{tab:rq} gives the short answers.
+We expected the answer to be ``not by default'', since the same output does not imply the same security, and we split the question into four parts. Table~\ref{tab:rq} gives short answers.
 
 \begin{table}[t]
 \caption{Our Four Questions and Short Answers}\label{tab:rq}
@@ -105,10 +105,10 @@ RQ4 & \emph{Does this work with timing glitches and bigger circuits?} \textbf{Ye
 \end{tabularx}
 \end{table}
 
-Although the security ideas come from hardware, these are really compiler questions. Which rewrites are safe? How should the optimiser choose between equal versions? What should the cost model count, and what must the intermediate representation remember? To answer them in practice, we also built a complete compiler, from a small source language down to Verilog (Sec.~\ref{sec:compiler}).
+The security ideas come from hardware, but the questions are compiler questions. Which rewrites are safe? How should an optimiser choose between equal versions? What should the cost model count, and what must the intermediate representation remember? To study them in practice we also built a complete compiler, from a small source language down to Verilog (Sec.~\ref{sec:compiler}).
 
 \subsection{What is new here}
-Existing tools fall into two groups. \emph{Security tools}, such as masking compilers and verifiers, mostly keep the circuit's structure fixed: they choose gadgets, place registers or check a finished design, and do not rewrite the logic (a recent evolutionary search over gadget netlists is the exception, see Sec.~\ref{sec:related}). \emph{Optimisers}, such as synthesis tools and e-graph engines, do rewrite the logic, but they know nothing about security. This project sits between the two. Our contributions are:
+Existing tools fall into two groups. \emph{Security tools}, such as masking compilers and verifiers, mostly keep the circuit's structure fixed: they choose gadgets, place registers or check a finished design, and do not rewrite the logic (a recent evolutionary search over gadget netlists is the exception, see Sec.~\ref{sec:related}). \emph{Optimisers}, such as synthesis tools and e-graph engines, do rewrite the logic but know nothing about security. Our work combines the optimiser's freedom to rewrite with the security tools' checks. Our contributions are:
 \begin{enumerate}
 \item \textbf{We show the optimiser breaks masking, and explain why.} For the two-share ISW gadget, the cheaper circuit leaks \emph{because} every gate-saving rewrite we enumerated recombines a secret.
 \item \textbf{A simple fix.} Keep every rewrite rule, but refuse leaking wires when choosing the final circuit. This costs one gate.
@@ -117,7 +117,7 @@ Existing tools fall into two groups. \emph{Security tools}, such as masking comp
 \item \textbf{Two safe ways to choose}: one that checks each candidate and discards leaking pieces early, and one based on PINI that scales to very large circuits.
 \item \textbf{A working compiler, seqc} (architecture in Sec.~\ref{sec:arch}, performance in Sec.~\ref{sec:perf}), with every security verdict about our circuits confirmed by an independent verifier (zero disagreements in more than 400,000 wire checks) and a measured comparison with AGEMA and COMPRESS on twelve small programs, which is a supporting result, not the main claim (it is first order, two shares and glitch-free, and seqc is behind both tools on one program).
 \end{enumerate}
-Table~\ref{tab:compare} places this work next to the alternatives. Among the approaches we know of, it is the only one that saturates an e-graph of equivalent circuits and checks every result; search-based gadget optimisation \cite{koblah2025evo} also explores rewritten gadgets under a security check, but by sampling rather than saturation. It is also the least mature; Sec.~\ref{sec:limits} sets out its scope.
+Table~\ref{tab:compare} places this work next to the alternatives. Among the approaches we know of, it is the only one that saturates an e-graph of equivalent circuits and checks every result; search-based gadget optimisation \cite{koblah2025evo} also explores rewritten gadgets under a security check, but by sampling rather than saturation. It is also the least mature, and Sec.~\ref{sec:limits} sets out its scope.
 
 \begin{table*}[t]
 \caption{How Approaches Handle Making a Masked Circuit Cheaper Without Making It Leak (cells summarise each group; tools within a group differ; superVer rewrites expressions to check them, not to optimise)}\label{tab:compare}
@@ -142,7 +142,7 @@ Search-based gadget optimisation & evolutionary search \cite{koblah2025evo} & \p
 \subsection{Masking and gadgets}
 With two shares, a secret bit $s$ is stored as a pair $(s_0,s_1)$, where $s_0$ is a fresh random bit and $s_1=s_0\oplus s$. Each share on its own is a fair coin flip, and XOR-ing the two gives the secret back (Fig.~\ref{fig:masking}).
 
-XOR and NOT are easy to mask: just apply them to each share separately. AND is harder, because multiplying shares mixes them together:
+XOR and NOT are easy to mask, since each can be applied to the shares separately. AND is harder, because multiplying shares mixes them together:
 \[
 a\wedge b=a_0b_0\oplus a_0b_1\oplus a_1b_0\oplus a_1b_1 .
 \]
@@ -151,7 +151,7 @@ A masked AND therefore needs a \emph{gadget}. The classic one is ISW \cite{ishai
 c_0 &= a_0b_0\oplus r,\\
 c_1 &= \big((r\oplus a_0b_1)\oplus a_1b_0\big)\oplus a_1b_1 .
 \end{align*}
-The order matters. Because $r$ goes in first, every partial sum is hidden by randomness. ISW costs 8 gates and one random bit, and its two outputs XOR to $a\wedge b$. DOM \cite{gross2016dom} and HPC1 \cite{cassiers2020hpc} are other gadgets that compute the same thing in different ways. Finally, a \emph{refresh} gives a value fresh shares without changing it: $(x_0,x_1)\mapsto(x_0\oplus r,\,x_1\oplus r)$.
+The order of the XORs matters: because $r$ enters first, every partial sum is hidden by randomness. ISW costs 8 gates and one random bit, and its two outputs XOR to $a\wedge b$. DOM \cite{gross2016dom} and HPC1 \cite{cassiers2020hpc} compute the same product in different ways. A \emph{refresh}, finally, gives a value fresh shares without changing it: $(x_0,x_1)\mapsto(x_0\oplus r,\,x_1\oplus r)$.
 
 \begin{figure}[!t]
 \centering
@@ -213,10 +213,10 @@ We consider an attacker who can probe one wire (this is called \emph{first order
 \end{figure}
 
 \subsection{PINI}
-Checking every input stops being possible for large circuits. PINI \cite{cassiers2020pini} offers a shortcut. A gadget is PINI if a probe inside it can reveal at most one share of each input, and one share alone is just noise. The useful part is that PINI gadgets can be chained: a circuit built only from PINI gadgets is secure at any size. So each gadget is checked once, and the whole circuit never needs to be enumerated.
+Enumerating every input is impossible for large circuits, and PINI \cite{cassiers2020pini} offers a way around it. A gadget is PINI if a probe inside it can reveal at most one share of each input, and one share alone is noise. PINI gadgets can be chained, and a circuit built only from them is secure at any size, so each gadget is checked once and the circuit as a whole never has to be enumerated.
 
 \subsection{E-graphs and equality saturation}
-An e-graph groups expressions that are known to be equal into \emph{e-classes} (Fig.~\ref{fig:egraph}). Equality saturation works in two steps. First, it applies every rewrite rule wherever it can, until nothing new appears; this way the order of the rules no longer matters. Second, it \emph{extracts} a result, normally by picking the cheapest node in each class. Every use of a class then becomes the same wire. One more rule is important later: e-graph equalities must be a \emph{congruence} (formally a partial congruence \cite{suciu2025semantic}), meaning that if $x=y$ then $f(x)=f(y)$ in every context. We use the egglog engine \cite{zhang2023egglog}.
+An e-graph groups expressions that are known to be equal into \emph{e-classes} (Fig.~\ref{fig:egraph}). Equality saturation then works in two steps. It first applies every rewrite rule wherever it matches, until nothing new appears, so the order of the rules stops mattering. It then \emph{extracts} a result, normally by picking the cheapest node in each class, and every use of a class becomes the same wire. One more property matters later: e-graph equalities must be a \emph{congruence} (formally a partial congruence \cite{suciu2025semantic}), meaning that if $x=y$ then $f(x)=f(y)$ in every context. We use the egglog engine \cite{zhang2023egglog}.
 
 \begin{figure}[!t]
 \centering
@@ -237,7 +237,7 @@ An e-graph groups expressions that are known to be equal into \emph{e-classes} (
 \end{figure}
 
 \begin{finding}{Key point.}
-Saturation finds the options; extraction chooses one. The choice is made on cost alone, with no idea of security. That is where things go wrong.
+Saturation finds the options and extraction chooses one. That choice is made on cost alone, with no notion of security, and this is where the trouble starts.
 \end{finding}
 
 % =====================================================================
@@ -300,10 +300,10 @@ $b$ & $b_0$ & $b_1=b\oplus b_0$ & $b_0\oplus b_1$\\\midrule
 \begin{proposition}[Cost-only extraction is unsafe]
 There is a secure circuit and a set of correct Boolean rewrite rules for which the cheapest extracted circuit is insecure.
 \end{proposition}
-The example above is the proof. No rule is wrong; the leaking circuit wins only because it is cheaper.
+The example above serves as the proof: no rule is wrong, and the leaking circuit wins only because it is cheaper.
 
 \begin{finding}{Why the cheaper circuit leaks.}
-This is not a coincidence. A two-share ISW gadget turns $a\wedge b$ into four share products. Reordering and regrouping them never saves a gate; only factoring out a common term does. Two products share a term only if they share a share index, and factoring them then gives $a_i(b_0\oplus b_1)=a_i\wedge b$, or the same with $a$ and $b$ swapped. So with two shares, \textbf{every gate-saving factoring puts a secret back together}.
+The reason is structural. A two-share ISW gadget turns $a\wedge b$ into four share products. Reordering and regrouping them never saves a gate; only factoring out a common term does. Two products share a term only if they share a share index, and factoring them then gives $a_i(b_0\oplus b_1)=a_i\wedge b$, or the same with $a$ and $b$ swapped. So with two shares, \textbf{every gate-saving factoring puts a secret back together}.
 \end{finding}
 
 \subsection{Is this only a two-share effect?}\label{sec:shares}
@@ -365,9 +365,9 @@ Full, constrained extraction & 25 & 8 & \ok\\
 \caption{Security-constrained extraction. Same rules and same e-graph; every class is labelled safe or unsafe, and the unsafe class $S=b_0\oplus b_1$ is never used as an internal wire. Ignoring security gives 7 gates and leaks; enforcing it gives 8 gates and is secure.}\label{fig:repair}
 \end{figure}
 
-\emph{Why not simply ban the factoring rule?} Three reasons. Factoring is useful elsewhere (later it takes a circuit from 20 to 11 and stays secure). Other moves leak too, such as moving $r$ to the end in ISW or dropping a needed refresh. And a leak depends on which wires end up in the circuit, not on which rule produced them. So we let every rule fire and check the result.
+\emph{Why not simply ban the factoring rule?} Three observations argue against it. Factoring is useful elsewhere (later it takes a circuit from 20 to 11 and stays secure). Other moves leak too, such as moving $r$ to the end in ISW or dropping a needed refresh. And a leak depends on which wires end up in the circuit, not on which rule produced them. So we let every rule fire and check the result.
 
-\emph{Is there a cheaper secure circuit somewhere?} We tried a larger example: two ISW gadgets in a row, computing $(a\wedge b)\wedge d$, which takes 16 gates by hand and is secure. We took egglog's 40 cheapest extractions of the second output and the 6 distinct ones it found for the first, and paired them in all $6\times40=240$ ways. Not one is secure, and the 28 that are cheaper than the hand design all leak (Fig.~\ref{fig:chain}). This is a sample, not a proof, but the message is clear: ordinary algebra alone gives no free savings here. The reason has to do with how the circuit is represented, which is the next finding.
+\emph{Is there a cheaper secure circuit somewhere?} We tried a larger example: two ISW gadgets in a row, computing $(a\wedge b)\wedge d$, which takes 16 gates by hand and is secure. We took egglog's 40 cheapest extractions of the second output and the 6 distinct ones it found for the first, and paired them in all $6\times40=240$ ways. Not one is secure, and the 28 that are cheaper than the hand design all leak (Fig.~\ref{fig:chain}). This is a sample, not a proof, and it suggests that ordinary algebra alone offers no free savings here. The explanation lies in how the circuit is represented, which the next finding takes up.
 
 \begin{figure}[!t]
 \centering
@@ -423,14 +423,14 @@ $x$ & $y$ & $r$ & $x_0$ & $y_0=x_0\oplus r$ & $x_1$ & $y_1=x_1\oplus r$\\\midrul
 \caption{Why re-sharing is not a congruence. $x$ and $y=\rf(x)$ always hold the same secret (columns $x$ and $y$), but share 0 differs in rows 3 and 4, so the context ``read share 0 gives $f(x)=0$ and $f(y)=1$.''}\label{fig:congruence}
 \end{figure}
 
-In other words, a wire-level optimiser cannot even \emph{see} the designers' moves. We found no earlier statement of this point for e-graphs; it applies the known fact that e-graph equalities form a congruence \cite{suciu2025semantic} to masked circuits (search record in Appendix~\ref{app:search}).
+A wire-level optimiser therefore cannot \emph{see} the designers' moves at all. We found no earlier statement of this point for e-graphs; it applies the known fact that e-graph equalities form a congruence \cite{suciu2025semantic} to masked circuits (search record in Appendix~\ref{app:search}).
 
 \subsection{A second e-graph, over secret values}
 Our answer is to move the e-graph up a level, so that each class stands for a secret value rather than a particular set of wires (Fig.~\ref{fig:value}). A term is built from inputs, XOR, NOT, refresh, registers and gadgets:
 \[
 x ::= \mathsf{in}(s)\mid \mathsf{xor}(x,x)\mid\mathsf{not}(x)\mid\rf(x)\mid\reg(x)\mid g(x,x),
 \]
-where $g$ is one of $\isw$, $\dom$ or $\hpc$. Its value is what you would expect: $\val{g(x,y)}=\val x\wedge\val y$, and refresh and registers do not change the value. Three groups of rules act on it: \textbf{R1} is ordinary Boolean algebra on values (including factoring), \textbf{R2} says the three gadgets are interchangeable, and \textbf{R3} says a refresh can be removed. To measure cost, we turn a term back into a two-share circuit (\emph{lowering}), with a fresh random bit for every gadget and refresh, and count gates plus random bits.
+where $g$ is one of $\isw$, $\dom$ or $\hpc$. Its value is the obvious one: $\val{g(x,y)}=\val x\wedge\val y$, and refresh and registers do not change the value. Three groups of rules act on it: \textbf{R1} is ordinary Boolean algebra on values (including factoring), \textbf{R2} says the three gadgets are interchangeable, and \textbf{R3} says a refresh can be removed. To measure cost, we turn a term back into a two-share circuit (\emph{lowering}), with a fresh random bit for every gadget and refresh, and count gates plus random bits.
 
 \begin{figure}[!t]
 \centering
@@ -461,7 +461,7 @@ If $\val x=\val{x'}$ and $\val y=\val{y'}$, then $\val{\mathsf{op}(x,y)}=\val{\m
 \end{proposition}
 \emph{Proof.} The value of a term is defined piece by piece from the values of its parts, and lowering is correct by induction (a refresh is correct because $r$ cancels out, and each gadget by its own correctness).\hfill$\square$
 
-Notice that security is no longer part of the equality at all. It has to be enforced when the circuit is chosen, and that is where the next surprise appears.
+Security is no longer part of the equality at all, so it has to be enforced when the circuit is chosen. There the choice turns out to be subtler than at the wire level, as Proposition~\ref{prop:vplc} shows.
 
 % =====================================================================
 \section{Finding 4: One Label Per Class Is No Longer Enough}\label{sec:extract}
@@ -469,7 +469,7 @@ Notice that security is no longer part of the equality at all. It has to be enfo
 \begin{proposition}[Safety is not a property of the e-class]\label{prop:vplc}
 With refresh removal (R3), $\isw(z,z)$ and $\isw(z,\rf(z))$ end up in the same e-class, yet the first leaks and the second is secure. With R3 as the only rule, picking one node per class always returns $\isw(z,z)$, while picking whole terms can return the secure one.
 \end{proposition}
-Here is the intuition. In $\isw(z,z)$, both inputs are the same pair of shares, so one product wire is 1 half the time when $z=0$ and never when $z=1$; it leaks $z$. With a refresh on one input, every product wire is 1 a quarter of the time, whatever $z$ is (Fig.~\ref{fig:class}). Because R3 makes the refresh a loop back into $z$'s own class, the usual one-node-per-class extraction cannot use it, so both inputs become the same wire (full proof in Appendix~\ref{app:proofs}). This is a statement about refresh removal alone. We recounted every acyclic one-node-per-class choice for this example. With refresh removal alone there is one choice and it leaks. With distributivity (R1) added there are 338 choices and 16 are secure, for instance $\isw(a,a\oplus b)\oplus\isw(b,a\oplus b)$. With gadget swaps (R2) added instead, the HPC1 gadget, which refreshes its second operand itself, is also secure, and with all three rule groups 2,226 of 8,502 choices are secure. So the claim is not that one-node-per-class extraction can never find a secure circuit, only that it can miss every one. At the wire level a single label per class still works.
+The intuition is as follows. In $\isw(z,z)$, both inputs are the same pair of shares, so one product wire is 1 half the time when $z=0$ and never when $z=1$; it leaks $z$. With a refresh on one input, every product wire is 1 a quarter of the time, whatever $z$ is (Fig.~\ref{fig:class}). Because R3 makes the refresh a loop back into $z$'s own class, the usual one-node-per-class extraction cannot use it, so both inputs become the same wire (full proof in Appendix~\ref{app:proofs}). This holds for refresh removal alone. Recounting every acyclic one-node-per-class choice for this example shows how quickly it fails once more rules are present. With refresh removal alone there is one choice, and it leaks. With distributivity (R1) added there are 338 choices and 16 are secure, for instance $\isw(a,a\oplus b)\oplus\isw(b,a\oplus b)$. With gadget swaps (R2) added instead, the HPC1 gadget, which refreshes its second operand itself, is also secure, and with all three rule groups 2,226 of 8,502 choices are secure. The claim is therefore not that one-node-per-class extraction can never find a secure circuit, only that it can miss every one. At the wire level, a single label per class still works.
 
 \begin{figure*}[!t]
 \centering
@@ -489,7 +489,7 @@ $z$ & $z_0$ & $r$ & $z_1$ & $z_1'=z_1\oplus r$ & $z_0z_1'$\\\midrule
 \end{figure*}
 
 \subsection{Safe method 1: check each candidate, cut leaks early}
-Instead of choosing one node per class, we choose whole \emph{terms}, so the same class can be built differently in different places. Each class keeps its $k=8$ cheapest terms (the results were identical for $k=2$, 8 and 32 on the value-level fixtures, but not on the $2{\times}2$ multiplier, where the secure optimum is 69 for $k$ from 2 to 8 and 75 for $k=16$ and 32, so extraction is a search: the costs we report are the best found, not proven optima. The extractor ranks child terms by their standalone cost, while the cost of a term depends on what it shares, so a wider frontier can push out a term that is cheap in context). Each candidate is lowered to wires, and every wire is checked exactly.
+Instead of choosing one node per class, we choose whole \emph{terms}, so the same class can be built differently in different places. Each class keeps its $k=8$ cheapest terms. On the value-level fixtures the results were identical for $k=2$, 8 and 32. The $2{\times}2$ multiplier behaves differently: its secure optimum is 69 for $k$ from 2 to 8 and 75 for $k=16$ and 32. Extraction is therefore a search, and the costs we report are the best found, not proven optima. The extractor ranks child terms by their standalone cost, while the cost of a term depends on what it shares, so a wider frontier can push out a term that is cheap in context. Each candidate is lowered to wires, and every wire is checked exactly.
 
 \begin{proposition}[Leak cut]\label{prop:cut}
 In both models, if a piece of a circuit has a leaking wire, then every larger circuit containing that piece also leaks.
@@ -735,7 +735,7 @@ PRESENT S-box & 134 & 101, \ok & 101 & 25\% & 12$\to$8 & 132\,s\\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:larger} adds six larger programs, including the 5-bit S-box of Ascon and the 4-bit S-box of PRESENT. Each program was first checked against its specification (the published S-box tables, or integer arithmetic) on every input, and each compiled result matches its source, has no leaking wire, and agrees with VerifMSI on all 443 wires. Savings are between 11\% and 25\% except on the multiplier, where the cost-only optimum is again cheaper and leaks, and the secure circuit saves only 1\%. The emitted Verilog of all twelve programs also passes an Icarus simulation in which every input value is driven with eight random sharings and the two output shares must XOR to the value the source computes; a copy of the adder with one XOR turned into an AND fails it. This checks function, not security. All twelve programs, these six included, are compared with AGEMA and COMPRESS in Table~\ref{tab:h2h}.
+Table~\ref{tab:larger} adds six larger programs, including the 5-bit S-box of Ascon and the 4-bit S-box of PRESENT. Each program was first checked against its specification (the published S-box tables, or integer arithmetic) on every input, and each compiled result matches its source, has no leaking wire, and agrees with VerifMSI on all 443 wires. Savings are between 11\% and 25\% except on the multiplier, where the cost-only optimum is again cheaper and leaks, and the secure circuit saves only 1\%. The emitted Verilog of all twelve programs also passes an Icarus simulation: every input value is driven with eight random sharings, and the two output shares must XOR to the value the source computes. A copy of the adder with one XOR turned into an AND fails it. This checks function, not security. All twelve programs, these six included, are compared with AGEMA and COMPRESS in Table~\ref{tab:h2h}.
 
 % =====================================================================
 \section{Performance Comparison}\label{sec:perf}
@@ -743,7 +743,7 @@ Table~\ref{tab:larger} adds six larger programs, including the 5-bit S-box of As
 We compare seqc with four baselines, run on the programs of the tables below (the hand-written design only where one exists): a \emph{cost-only optimiser} (the same e-graph and rules with ordinary extraction, which is what standard equality-saturation tools do), the \emph{hand-written} masked design, and two published masking tools, AGEMA \cite{knichel2021agema} and COMPRESS \cite{cassiers2024compress}.
 
 \subsection{Security: ours versus a cost-only optimiser}
-Fig.~\ref{fig:price} lists every case of the gadget, chain and glitch experiments where the cost-only optimiser and our tool disagree. Among the compiled programs, $z\wedge z$ is in it and the multiplier of Table~\ref{tab:larger} is a second case, where the cost-only result (66) leaks and the secure one costs 69. Each time, the cost-only result is cheaper and leaks, and ours is secure. The gap is the price of security: one gate on ISW, three on squaring, three on the unregistered ISW gadget (one gate and two registers), two on the two-gadget ISW chain, and the full set of registers on DOM circuits. On top of this, none of egglog's 784 cheapest DOM-chain candidates is glitch-secure, and none of the 240 sampled chain circuits is secure.
+Fig.~\ref{fig:price} lists every case of the gadget, chain and glitch experiments where the cost-only optimiser and our tool disagree. Among the compiled programs, $z\wedge z$ is in it and the multiplier of Table~\ref{tab:larger} is a second case, where the cost-only result (66) leaks and the secure one costs 69. Each time, the cost-only result is cheaper and leaks, and ours is secure. The gap is the price of security: one gate on ISW, three on squaring, three on the unregistered ISW gadget (one gate and two registers), two on the two-gadget ISW chain, and the full set of registers on DOM circuits. In addition, none of egglog's 784 cheapest DOM-chain candidates is glitch-secure, and none of the 240 sampled chain circuits is secure.
 
 \begin{figure}[t]
 \centering
@@ -822,7 +822,7 @@ Three findings stand out. First, \textbf{seqc needs no more gadgets than either 
 On speed, all on the machine above, AGEMA takes 8--17\,ms per run and COMPRESS's solver 0.04--0.68\,s over all latencies tried. seqc takes at most 0.2\,s on the five smallest programs and between 6\,s and 132\,s on the larger ones, where its exact checking is the limit (83\,s for the OR-form majority, 75\,s for the 2-bit adder, 132\,s for the PRESENT S-box).
 
 \subsection{Do the savings need equality saturation?}
-A fair objection is that any logic minimiser might find the same savings. Table~\ref{tab:noegraph} compares seqc with a plain minimiser, Yosys with ABC mapping to AND and XOR gates, on twelve programs (the six above and the six of Table~\ref{tab:larger}). The minimiser has no idea of masking. It needs more AND gates than seqc on eight programs, the same number on two, and fewer on two: $z\wedge z$, where it applies $x\wedge x=x$, and the multiplier. On eight programs it even needs more ANDs than the source already had, since ABC maps for area, not for the number of ANDs. This is a weak baseline, and a minimiser built to reduce the AND count would do better: for the PRESENT S-box it is known exactly that the minimum number of ANDs is 4 \cite{courtois2011}, against 8 gadgets for seqc and 9 as written. We did not run such a minimiser, and a circuit with the fewest ANDs is not by itself secure, but seqc is clearly not optimal in gadget count there. Table~\ref{tab:noegraph} also gives the area of seqc's own Verilog (Yosys 0.70, Nangate45, 1 GE $=0.798\,\mu$m$^2$, no registers, glitch-free model only). These are the same seqc areas as in Table~\ref{tab:h2h}.
+A fair objection is that any logic minimiser might find the same savings. Table~\ref{tab:noegraph} compares seqc with a plain minimiser, Yosys with ABC mapping to AND and XOR gates, on twelve programs (the six above and the six of Table~\ref{tab:larger}). The minimiser knows nothing about masking. It needs more AND gates than seqc on eight programs, the same number on two, and fewer on two: $z\wedge z$, where it applies $x\wedge x=x$, and the multiplier. On eight programs it even needs more ANDs than the source already had, since ABC maps for area, not for the number of ANDs. This is a weak baseline, and a minimiser built to reduce the AND count would do better: for the PRESENT S-box it is known exactly that the minimum number of ANDs is 4 \cite{courtois2011}, against 8 gadgets for seqc and 9 as written. We did not run such a minimiser, and a circuit with the fewest ANDs is not by itself secure, but on this evidence seqc is not optimal in gadget count there. Table~\ref{tab:noegraph} also gives the area of seqc's own Verilog (Yosys 0.70, Nangate45, 1 GE $=0.798\,\mu$m$^2$, no registers, glitch-free model only). These are the same seqc areas as in Table~\ref{tab:h2h}.
 
 \begin{table}[t]
 \caption{AND Gadgets Without an E-Graph (Yosys/ABC) Versus seqc, and seqc Area}\label{tab:noegraph}
@@ -920,7 +920,7 @@ PINI verdicts (gadgets) & 6 & 0\\
 \item \textbf{Savings:} only where the starting circuit has waste; tight designs do not improve.
 \item \textbf{Scale:} checking each candidate is exact only among the $k$ cheapest options, and slow on larger circuits; the 0-of-240 result is a sample.
 \item \textbf{Glitches:} the PINI result and the generated Verilog assume no glitches.
-\item \textbf{Evidence:} no hardware test; the emitted Verilog is synthesised for area and simulated for function on all twelve programs, but VerifMSI checked its glitch-free logic but no glitch-extended or simulation-based leakage tool was run on it, and it assumes no glitches; a head-to-head against AGEMA and COMPRESS on twelve small programs only, one machine, and the proofs are written by hand rather than machine-checked.
+\item \textbf{Evidence:} no hardware test; the emitted Verilog is synthesised for area and simulated for function on all twelve programs, VerifMSI checked its glitch-free logic, but no glitch-extended or simulation-based leakage tool was run on it, and it assumes no glitches; a head-to-head against AGEMA and COMPRESS on twelve small programs only, one machine, and the proofs are written by hand rather than machine-checked.
 \end{itemize}
 
 % =====================================================================
