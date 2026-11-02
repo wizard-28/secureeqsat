@@ -395,3 +395,22 @@ uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.
   exhaustive leak-cut test (`experiments/resharing/test_leak_cut_exhaustive.py`, 57,304 checks), and
   a patched paper copy in `docs/paper/` (related work, ablation table, d-share section). No
   claim promoted to a headline; the d >= 3 numbers await the oracle cross-check.
+- **2026-11-02** — **Follow-up on paper review**: VerifMSI provisioned
+  (`setup_oracles.sh`, outside the repo) and the driver generalised to d shares (d = 2
+  unchanged); the d = 2, 3, 4 three-share circuits agree with it on all 159 wires, and
+  `findings/verify.py --full` passes F1-F13 (G1/G2 fail only on the untracked
+  `.agents/skills/kaggle` folder). Six larger seqc programs added (`experiments/frontend/complex/`,
+  `test_complex.py`, results in `experiments/frontend/RESULTS.md`): savings 1-25%, the
+  multiplier's cost-only optimum leaks (66 vs 69), PRESENT S-box 134 -> 101; mux4 and Ascon
+  needed `--k 2`. 182 tests pass. Paper copy in `docs/paper/` compiles (11 pages, local
+  stmaryrd from CTAN). No ADR: no scope, dependency or security-model change.
+- **2026-11-02** — **Head-to-head on twelve programs, one machine** (`experiments/bench_extra/`).
+  AGEMA (built from source) and COMPRESS (Python venv, Yosys 0.70 from oss-cad-suite) run on the six
+  paper programs and six larger ones (Ascon and PRESENT S-boxes, 2-bit adder, comparator,
+  2x2 multiplier, 4:1 mux), all in `~/h2h` outside the repo. The six old COMPRESS rows reproduce
+  exactly; AGEMA area is now measured with its own VHDL gadgets (was an estimate); the old seqc
+  area column does not reproduce and is replaced. seqc needs no more gadgets than both tools on
+  10 of 12; COMPRESS on seqc's logic is smaller on 4, equal on 5, larger on 3. No-e-graph baseline
+  (Yosys/ABC) added (weak by construction). All paper timings re-measured on this laptop only
+  (`bench_extra/timing/`). Paper copy updated (56,579 wire checks, new Table VIII/XII).
+  Workarounds are listed in `bench_extra/RESULTS.md`; no repository dependency changed.

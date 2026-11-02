@@ -1,0 +1,12 @@
+// + XOR
+// & AND
+// # XNOR
+
+INPUTS a b cin
+OUTPUTS sum cout
+
+t2 = a + b
+sum = cin + t2
+t4 = a & b
+t5 = cin & t2
+cout = t4 + t5

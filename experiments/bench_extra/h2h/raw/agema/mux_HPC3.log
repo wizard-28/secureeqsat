@@ -1,0 +1,23 @@
+default attribute reportfile 	"/home/wizard-28/h2h/agema_work/mux/net.v" 	is taken
+default message size 	"1"       	is taken
+reading the library file (HPC3) done
+reading the library file (General) done
+reading the design file..."mux"...done
+0 unconnected cell(s) removed
+the circuit has a logic depth of 4
+1 Buffer(s) removed and 1 signal(s) rerouted
+the circuit has a logic depth of 4
+5 signal(s) and 5 cell(s) are identified to be secured
+5 cell(s) are replaced with the SCA-resistant variant
+0 register(s) are replaced with the SCA-resistant variant
+the circuit has 2 register stage(s)
+6 fresh mask(s) are added to the design
+0 RegBuffer(s) are added to balance the depth of primary outputs
+0 RegBuffer(s) are added to balance the depth of inputs of all gates
+the circuit has 2 register stage(s)
+0 RegBuffer(s) are added to balance the depth of inputs of all registers
+the circuit has 2 register stage(s)
+inputs of each gate are balanced
+inputs of each register are balanced
+done
+EXIT 0 MS 9

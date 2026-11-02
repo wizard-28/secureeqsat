@@ -208,3 +208,37 @@ module masked (
   assign y_s1 = _w12;
 endmodule
 ```
+
+## Larger programs (2026-11-02)
+
+Question: does the compiler still help, and still refuse leaks, on programs bigger than the
+six in Table V? Sources in `complex/`, each checked against an independent specification by
+`test_complex.py` (Ascon and PRESENT S-box tables from their specifications; integer
+arithmetic for the adder, multiplier, comparator and mux).
+
+    uv run python experiments/frontend/seqc.py experiments/frontend/complex/<name>.sec --crosscheck
+
+| Program | Start | Cost-only | Secure | Saving | Random bits | Time | VerifMSI |
+|---|---:|---:|---:|---:|---:|---:|---|
+| 2-bit comparator | 58 | 48 secure | 48 | 17% | 8 -> 4 | 35 s | 57 wires, 0 disagreements |
+| 2-bit adder | 60 | 48 secure | 48 | 20% | 8 -> 4 | 102 s | 58, 0 |
+| 2x2 multiplier | 70 | **66 LEAKS** | 69 | 1% | 10 -> 8 | 16 s | 78, 0 |
+| 4:1 multiplexer (k=2) | 48 | 39 secure | 39 | 19% | 6 -> 3 | 22 s | 51, 0 |
+| Ascon S-box (k=2) | 88 | 78 secure | 78 | 11% | 10 -> 5 | 17 s | 89, 0 |
+| PRESENT S-box | 134 | 101 secure | 101 | 25% | 12 -> 8 | 166 s | 110, 0 |
+
+- Cost = gates + random bits, as in Table V. Time is wall clock on this machine (a 12-core
+  Linux box), not the paper's reference machine.
+- **k = 2 rows:** mux4 and the Ascon S-box did not finish at the default `--k 8` within 40
+  minutes (killed, exit 124): the known limit of term-based extraction (design/0016). They
+  were re-run with `--k 2 --iters 4`. Stability across k was shown on the older fixtures
+  (k = 2, 8, 32 identical), **not re-checked for these two programs**, so their costs are an
+  upper bound on what `k = 8` would find.
+- The multiplier is a second compiled program where the cost-only optimum leaks (66 vs 69).
+- Every compiled result equals its source on all inputs, has 0 leaking wires in the in-house
+  check, and VerifMSI agrees on all 443 wires.
+- AGEMA and COMPRESS on these six programs, and on the six of Table V, are in
+  `experiments/bench_extra/RESULTS.md` (one machine, Yosys 0.70, Nangate45).
+- Limits: still two shares, first order, straight-line, glitch-free; S-boxes are written
+  from their specification (the PRESENT one from its algebraic normal form), not
+  hand-optimised, so the savings measure waste in that particular formulation.

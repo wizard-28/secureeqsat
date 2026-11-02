@@ -1,0 +1,13 @@
+program  4 inputs, 2 outputs, 4 AND, 4 XOR in the source
+mask     policy=refresh
+  start                    cost  58 = 50g + 8r  secure           out(xor(isw(a1, refresh(not(b1))), isw(not(xor(a1, b1)), refresh(isw(a0, refresh(not(b0)))))), isw(not(xor(a1, b1)), refresh(not(xor(a0, b0)))))
+optimise 813 e-classes after saturation (0.11s)
+  security ignored         cost  48 = 44g + 4r  secure           out(xor(isw(dom(a0, not(b0)), a1), isw(not(b1), xor(dom(a0, not(b0)), a1))), isw(not(xor(a0, b0)), not(xor(a1, b1))))
+  security enforced        cost  48 = 44g + 4r  secure           out(xor(isw(dom(a0, not(b0)), a1), isw(not(b1), xor(dom(a0, not(b0)), a1))), isw(not(xor(a0, b0)), not(xor(a1, b1))))
+verify
+  function equals the source on all inputs   ok
+  lowered circuit reconstructs the outputs   ok
+  first-order check, in-house exact          0 leaking wires
+  VerifMSI cross-check                       not run
+emitted  verilog -> experiments/bench_extra/verilog/cmp2.v
+EXIT 0 WALL 30

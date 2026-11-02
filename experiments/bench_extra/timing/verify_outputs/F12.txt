@@ -1,0 +1,9 @@
+front-end table: start -> security ignored -> security enforced (cost = gates + random bits)
+  ab^ac          refresh  26 secure -> 11 secure -> 11 secure   checks ok   VerifMSI 17 wires, 0 disagreements   (0.3 s)   MATCH
+  z&z, z=a^b     refresh  14 secure -> 11 LEAKS -> 14 secure   checks ok   VerifMSI 18 wires, 0 disagreements   (0.5 s)   MATCH
+  mux            refresh  27 secure -> 13 secure -> 13 secure   checks ok   VerifMSI 19 wires, 0 disagreements   (0.4 s)   MATCH
+  full adder     refresh  30 secure -> 24 secure -> 24 secure   checks ok   VerifMSI 30 wires, 0 disagreements   (0.4 s)   MATCH
+  majority       refresh  28 secure -> 22 secure -> 22 secure   checks ok   VerifMSI 28 wires, 0 disagreements   (0.4 s)   MATCH
+  z&z, naive     naive    11 LEAKS -> 11 LEAKS -> 14 secure   checks ok   VerifMSI 18 wires, 0 disagreements   (0.5 s)   MATCH
+  majority (OR)  refresh  65 secure -> 41 secure -> 41 secure   checks ok   VerifMSI 48 wires, 0 disagreements   (82.8 s)   MATCH
+FRONT-END TABLE: ALL ROWS MATCH

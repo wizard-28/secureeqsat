@@ -1,0 +1,13 @@
+factor         start gadgets=2 rnd=4 cost=26 secure | ignored gadgets=1 rnd=1 cost=11 secure | enforced gadgets=1 rnd=1 cost=11 secure | 0s
+square         start gadgets=1 rnd=2 cost=14 secure | ignored gadgets=1 rnd=1 cost=11 LEAKS | enforced gadgets=1 rnd=2 cost=14 secure | 0s
+mux            start gadgets=2 rnd=4 cost=27 secure | ignored gadgets=1 rnd=1 cost=13 secure | enforced gadgets=1 rnd=1 cost=13 secure | 0s
+adder          start gadgets=2 rnd=4 cost=30 secure | ignored gadgets=2 rnd=2 cost=24 secure | enforced gadgets=2 rnd=2 cost=24 secure | 0s
+majority       start gadgets=2 rnd=4 cost=28 secure | ignored gadgets=2 rnd=2 cost=22 secure | enforced gadgets=2 rnd=2 cost=22 secure | 0s
+majority_or    start gadgets=5 rnd=9 cost=65 secure | ignored gadgets=4 rnd=4 cost=41 secure | enforced gadgets=4 rnd=4 cost=41 secure | 83s
+cmp2           start gadgets=4 rnd=8 cost=58 secure | ignored gadgets=4 rnd=4 cost=48 secure | enforced gadgets=4 rnd=4 cost=48 secure | 27s
+add2           start gadgets=4 rnd=8 cost=60 secure | ignored gadgets=4 rnd=4 cost=48 secure | enforced gadgets=4 rnd=4 cost=48 secure | 75s
+mul2           start gadgets=6 rnd=10 cost=70 secure | ignored gadgets=7 rnd=7 cost=66 LEAKS | enforced gadgets=7 rnd=8 cost=69 secure | 6s
+mux4           start gadgets=3 rnd=6 cost=48 secure | ignored gadgets=3 rnd=3 cost=39 secure | enforced gadgets=3 rnd=3 cost=39 secure | 8s
+ascon_sbox     start gadgets=5 rnd=10 cost=88 secure | ignored gadgets=5 rnd=5 cost=78 secure | enforced gadgets=5 rnd=5 cost=78 secure | 14s
+present_sbox   start gadgets=9 rnd=12 cost=134 secure | ignored gadgets=8 rnd=8 cost=101 secure | enforced gadgets=8 rnd=8 cost=101 secure | 132s
+DONE

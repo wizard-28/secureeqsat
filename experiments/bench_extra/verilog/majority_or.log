@@ -1,0 +1,14 @@
+warning: 5 AND operations; term-based extraction slows down sharply beyond a few gadgets (design/0016)
+program  3 inputs, 1 outputs, 5 AND, 2 XOR in the source
+mask     policy=refresh
+  start                    cost  65 = 56g + 9r  secure           xor(xor(xor(xor(isw(a, refresh(b)), isw(b, refresh(c))), isw(isw(a, refresh(b)), refresh(isw(b, refresh(c))))), isw(a, refresh(c))), isw(xor(xor(isw(a, refresh(b)), isw(b, refresh(c))), isw(isw(a, refresh(b)), refresh(isw(b, refresh(c))))), refresh(isw(a, refresh(c)))))
+optimise 856 e-classes after saturation (0.21s)
+  security ignored         cost  41 = 37g + 4r  secure           xor(dom(a, b), isw(isw(c, not(dom(a, b))), xor(xor(isw(c, dom(a, b)), a), b)))
+  security enforced        cost  41 = 37g + 4r  secure           xor(dom(a, b), isw(isw(c, not(dom(a, b))), xor(xor(isw(c, dom(a, b)), a), b)))
+verify
+  function equals the source on all inputs   ok
+  lowered circuit reconstructs the outputs   ok
+  first-order check, in-house exact          0 leaking wires
+  VerifMSI cross-check                       not run
+emitted  verilog -> experiments/bench_extra/verilog/majority_or.v
+EXIT 0 WALL 89

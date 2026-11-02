@@ -1,0 +1,14 @@
+warning: 23 AND operations; term-based extraction slows down sharply beyond a few gadgets (design/0016)
+program  4 inputs, 4 outputs, 23 AND, 21 XOR in the source
+mask     policy=refresh
+  start                    cost 134 = 122g + 12r  secure           out(xor(xor(xor(x0, x2), isw(x1, refresh(x2))), x3), out(xor(xor(xor(xor(xor(xor(x1, isw(isw(x0, refresh(x1)), refresh(x2))), x3), isw(x1, refresh(x3))), isw(isw(x0, refresh(x1)), refresh(x3))), isw(x2, refresh(x3))), isw(isw(x0, refresh(x2)), refresh(x3))), out(not(xor(xor(xor(xor(xor(xor(isw(x0, refresh(x1)), x2), x3), isw(x0, refresh(x3))), isw(x1, refresh(x3))), isw(isw(x0, refresh(x1)), refresh(x3))), isw(isw(x0, refresh(x2)), refresh(x3)))), not(xor(xor(xor(xor(xor(xor(x0, x1), isw(x1, refresh(x2))), isw(isw(x0, refresh(x1)), refresh(x2))), x3), isw(isw(x0, refresh(x1)), refresh(x3))), isw(isw(x0, refresh(x2)), refresh(x3)))))))
+optimise 584 e-classes after saturation (0.25s)
+  security ignored         cost 101 = 93g + 8r  secure           out(xor(xor(dom(not(x1), x2), x0), x3), out(xor(x3, xor(x1, xor(dom(x3, xor(x1, x2)), isw(x0, xor(dom(x3, xor(x1, x2)), dom(x1, x2)))))), out(not(xor(xor(dom(x3, not(x1)), x2), isw(x0, xor(x1, isw(x3, xor(not(x1), x2)))))), not(xor(x3, xor(xor(dom(x1, x2), x1), isw(x0, xor(not(dom(x1, x2)), dom(x3, xor(x1, x2))))))))))
+  security enforced        cost 101 = 93g + 8r  secure           out(xor(xor(dom(not(x1), x2), x0), x3), out(xor(x3, xor(x1, xor(dom(x3, xor(x1, x2)), isw(x0, xor(dom(x3, xor(x1, x2)), dom(x1, x2)))))), out(not(xor(xor(dom(x3, not(x1)), x2), isw(x0, xor(x1, isw(x3, xor(not(x1), x2)))))), not(xor(x3, xor(xor(dom(x1, x2), x1), isw(x0, xor(not(dom(x1, x2)), dom(x3, xor(x1, x2))))))))))
+verify
+  function equals the source on all inputs   ok
+  lowered circuit reconstructs the outputs   ok
+  first-order check, in-house exact          0 leaking wires
+  VerifMSI cross-check                       not run
+emitted  verilog -> experiments/bench_extra/verilog/present_sbox.v
+EXIT 0 WALL 136

@@ -1,0 +1,30 @@
+// + XOR
+// & AND
+// # XNOR
+
+INPUTS x0 x1 x2 x3 x4
+OUTPUTS y0 y1 y2 y3 y4
+
+t4 = x0 + x4
+t5 = x1 + x2
+t3 = t4 + t5
+t6 = x1 & t5
+t2 = t3 + t6
+t8 = t4 & x1
+t10 = x3 + x4
+t9 = x1 + t10
+t7 = t8 + t9
+y0 = t2 + t7
+t13 = t5 & x3
+t14 = x1 + x3
+t12 = t13 + t14
+y1 = t12 + t2
+t17 = t5 + t10
+t18 = x3 & t10
+t16 = t17 + t18
+y2 = !t16
+t21 = x3 + t4
+t22 = t10 & t4
+t20 = t21 + t22
+y3 = t20 + t16
+y4 = t8 + t9

@@ -1,0 +1,17 @@
+// + XOR
+// & AND
+// # XNOR
+
+INPUTS a0 a1 b0 b1 cin
+OUTPUTS s0 s1 cout
+
+t2 = a0 + b0
+s0 = cin + t2
+t4 = a1 + b1
+t6 = a0 & b0
+t7 = cin & t2
+t5 = t6 + t7
+s1 = t4 + t5
+t9 = a1 & b1
+t10 = t5 & t4
+cout = t9 + t10

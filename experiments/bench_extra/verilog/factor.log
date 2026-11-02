@@ -1,0 +1,13 @@
+program  3 inputs, 1 outputs, 2 AND, 1 XOR in the source
+mask     policy=refresh
+  start                    cost  26 = 22g + 4r  secure           xor(isw(a, refresh(b)), isw(a, refresh(c)))
+optimise 7 e-classes after saturation (0.06s)
+  security ignored         cost  11 = 10g + 1r  secure           dom(a, xor(b, c))
+  security enforced        cost  11 = 10g + 1r  secure           dom(a, xor(b, c))
+verify
+  function equals the source on all inputs   ok
+  lowered circuit reconstructs the outputs   ok
+  first-order check, in-house exact          0 leaking wires
+  VerifMSI cross-check                       not run
+emitted  verilog -> experiments/bench_extra/verilog/factor.v
+EXIT 0 WALL 1

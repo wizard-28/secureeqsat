@@ -1,0 +1,16 @@
+// + XOR
+// & AND
+// # XNOR
+
+INPUTS a b c
+OUTPUTS m
+
+t2 = a & b
+t3 = b & c
+t4 = t2 + t3
+t5 = t2 & t3
+t1 = t4 + t5
+t6 = a & c
+t7 = t1 + t6
+t8 = t1 & t6
+m = t7 + t8

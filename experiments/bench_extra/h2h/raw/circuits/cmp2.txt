@@ -1,0 +1,18 @@
+// + XOR
+// & AND
+// # XNOR
+
+INPUTS a0 a1 b0 b1
+OUTPUTS gt eq
+
+t2 = !b1
+t1 = a1 & t2
+t5 = a1 + b1
+t4 = !t5
+t7 = !b0
+t6 = a0 & t7
+t3 = t4 & t6
+gt = t1 + t3
+t9 = a0 + b0
+t8 = !t9
+eq = t4 & t8

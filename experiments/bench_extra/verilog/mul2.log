@@ -1,0 +1,15 @@
+warning: 12 AND operations; term-based extraction slows down sharply beyond a few gadgets (design/0016)
+program  4 inputs, 4 outputs, 12 AND, 2 XOR in the source
+mask     policy=refresh
+  start                    cost  70 = 60g + 10r  secure           out(isw(a0, refresh(b0)), out(xor(isw(a1, refresh(b0)), isw(a0, refresh(b1))), out(xor(isw(a1, refresh(b1)), isw(isw(a1, refresh(b0)), refresh(isw(a0, refresh(b1))))), isw(isw(a1, refresh(b1)), refresh(isw(isw(a1, refresh(b0)), refresh(isw(a0, refresh(b1)))))))))
+optimise 43 e-classes after saturation (0.06s)
+  security ignored         cost  66 = 59g + 7r  LEAKS (2 wires)  out(dom(a0, b0), out(xor(dom(a1, b0), dom(a0, b1)), out(isw(not(dom(a0, b0)), dom(a1, b1)), isw(dom(a0, b0), dom(dom(a1, b1), dom(a1, b1))))))
+  security enforced        cost  69 = 61g + 8r  secure           out(dom(a0, b0), out(xor(dom(a1, b0), dom(a0, b1)), out(isw(not(dom(a0, b0)), dom(a1, b1)), isw(dom(a0, b0), hpc1(dom(a1, b1), dom(a1, b1))))))
+  -> the cheapest equivalent circuit leaks; security costs 3 here
+verify
+  function equals the source on all inputs   ok
+  lowered circuit reconstructs the outputs   ok
+  first-order check, in-house exact          0 leaking wires
+  VerifMSI cross-check                       not run
+emitted  verilog -> experiments/bench_extra/verilog/mul2.v
+EXIT 0 WALL 8

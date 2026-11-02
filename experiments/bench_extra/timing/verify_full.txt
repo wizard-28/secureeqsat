@@ -1,0 +1,21 @@
+start 2026-11-02T14:18:30+05:30 load 2.64 3.27 3.19
+[FAIL] G1   gate (0.1s)
+[FAIL] G2   gate (0.1s)
+[pass] G3   gate (20.0s)
+[pass] F1   unsoundness (in-house) (0.0s)
+[pass] F1b  unsoundness (egglog) (0.4s)
+[pass] F2   trust boundary (3.1s)
+[pass] F3   repair (constrained extraction) (0.0s)
+[pass] F4   no payoff at chain scale (2.6s)
+[pass] F5   labelling cost (104.1s)
+[pass] F6   shared-value layer + tight starts (21.4s)
+[pass] F6s  shared-value layer scale sweep (153.0s)
+[pass] F8   glitch model probe (13.6s)
+[pass] F11  PINI composition analysis (5.1s)
+[pass] F9   theory witnesses C1-C9 (0.9s)
+[pass] F12  front-end table (paper Table V), with the OR-form majority (85.4s)
+[pass] F13  extended cross-check: F4 extractions and F11 random terms vs VerifMSI (76.1s)
+
+14 passed, 2 failed,
+0 skipped 
+end 2026-11-02T14:26:37+05:30

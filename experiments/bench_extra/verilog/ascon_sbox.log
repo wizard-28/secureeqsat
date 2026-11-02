@@ -1,0 +1,14 @@
+warning: 8 AND operations; term-based extraction slows down sharply beyond a few gadgets (design/0016)
+program  5 inputs, 5 outputs, 8 AND, 26 XOR in the source
+mask     policy=refresh
+  start                    cost  88 = 78g + 10r  secure           out(xor(xor(xor(x0, x4), isw(not(x1), refresh(xor(x2, x1)))), xor(xor(x4, x3), isw(not(xor(x0, x4)), refresh(x1)))), out(xor(xor(x1, isw(not(xor(x2, x1)), refresh(x3))), xor(xor(x0, x4), isw(not(x1), refresh(xor(x2, x1))))), out(not(xor(xor(x2, x1), isw(not(x3), refresh(xor(x4, x3))))), out(xor(xor(x3, isw(not(xor(x4, x3)), refresh(xor(x0, x4)))), xor(xor(x2, x1), isw(not(x3), refresh(xor(x4, x3))))), xor(xor(x4, x3), isw(not(xor(x0, x4)), refresh(x1)))))))
+optimise 3210 e-classes after saturation (0.13s)
+  security ignored         cost  78 = 73g + 5r  secure           out(xor(xor(xor(xor(x0, x4), xor(x1, x2)), isw(x1, xor(x1, x2))), xor(isw(xor(x0, x4), x1), xor(x1, xor(x3, x4)))), out(xor(xor(isw(xor(x1, x2), x3), xor(x1, x3)), xor(xor(xor(x0, x4), xor(x1, x2)), isw(x1, xor(x1, x2)))), out(not(xor(xor(xor(x1, x2), xor(x3, x4)), isw(x3, xor(x3, x4)))), out(xor(xor(xor(x3, xor(x0, x4)), isw(xor(x3, x4), xor(x0, x4))), xor(xor(xor(x1, x2), xor(x3, x4)), isw(x3, xor(x3, x4)))), xor(isw(xor(x0, x4), x1), xor(x1, xor(x3, x4)))))))
+  security enforced        cost  78 = 73g + 5r  secure           out(xor(xor(xor(xor(x0, x4), xor(x1, x2)), isw(x1, xor(x1, x2))), xor(isw(xor(x0, x4), x1), xor(x1, xor(x3, x4)))), out(xor(xor(isw(xor(x1, x2), x3), xor(x1, x3)), xor(xor(xor(x0, x4), xor(x1, x2)), isw(x1, xor(x1, x2)))), out(not(xor(xor(xor(x1, x2), xor(x3, x4)), isw(x3, xor(x3, x4)))), out(xor(xor(xor(x3, xor(x0, x4)), isw(xor(x3, x4), xor(x0, x4))), xor(xor(xor(x1, x2), xor(x3, x4)), isw(x3, xor(x3, x4)))), xor(isw(xor(x0, x4), x1), xor(x1, xor(x3, x4)))))))
+verify
+  function equals the source on all inputs   ok
+  lowered circuit reconstructs the outputs   ok
+  first-order check, in-house exact          0 leaking wires
+  VerifMSI cross-check                       not run
+emitted  verilog -> experiments/bench_extra/verilog/ascon_sbox.v
+EXIT 0

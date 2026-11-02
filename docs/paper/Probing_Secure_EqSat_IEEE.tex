@@ -68,7 +68,7 @@
 \maketitle
 
 \begin{abstract}
-Chips that hold secret keys can give those keys away through their power use. The standard defence, masking, splits every secret into random pieces so that no single wire inside the chip reveals anything. The catch is that masked circuits are large, so it is tempting to let a compiler optimise them. We ask whether equality saturation, a modern compiler technique that collects every equivalent version of a program and then picks the cheapest, can do this safely. By default, it cannot. Starting from the textbook 8-gate masked AND gate (ISW), a cost-only optimiser picks a 7-gate version that exposes a secret on a single wire, and we show that with two shares this always happens: the only rewrite that saves a gate is the one that puts a secret back together. We fix this by checking security when the final circuit is chosen, at the cost of one extra gate. We then show that the tricks masking designers actually use cannot be expressed in a standard e-graph at all, build a second e-graph that can express them, and give two safe ways to pick a circuit from it. One of them certifies a 32-bit Keccak~$\chi$ row, with $2^{128}$ possible inputs, in 0.04\,s. Everything is packaged as seqc, a small compiler from Boolean programs to masked Verilog, and every security verdict was confirmed by an independent verifier: 55,977 wire checks, zero disagreements. In a head-to-head run against the masking tools AGEMA and COMPRESS on six programs, seqc needs no more AND gadgets than either tool on five of them, and feeding seqc's optimised logic into COMPRESS cuts its area by up to 45\%.
+Chips that hold secret keys can give those keys away through their power use. The standard defence, masking, splits every secret into random pieces so that no single wire inside the chip reveals anything. The catch is that masked circuits are large, so it is tempting to let a compiler optimise them. We ask whether equality saturation, a modern compiler technique that collects every equivalent version of a program and then picks the cheapest, can do this safely. By default, it cannot. Starting from the textbook 8-gate masked AND gate (ISW), a cost-only optimiser picks a 7-gate version that exposes a secret on a single wire, and we show that with two shares this always happens: the only rewrite that saves a gate is the one that puts a secret back together. We fix this by checking security when the final circuit is chosen, at the cost of one extra gate. We then show that the tricks masking designers actually use cannot be expressed in a standard e-graph at all, build a second e-graph that can express them, and give two safe ways to pick a circuit from it. One of them certifies a 32-bit Keccak~$\chi$ row, with $2^{128}$ possible inputs, in 0.05\,s. Everything is packaged as seqc, a small compiler from Boolean programs to masked Verilog, and every security verdict was confirmed by an independent verifier: 56,579 wire checks, zero disagreements. In a head-to-head run against the masking tools AGEMA and COMPRESS on twelve programs, seqc needs no more AND gadgets than either tool on ten of them, and feeding seqc's optimised logic into COMPRESS cuts its area by up to 45\% on four programs, while making it larger on three.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -115,7 +115,7 @@ Existing tools fall into two groups. \emph{Security tools}, such as masking comp
 \item \textbf{A limit of standard e-graphs.} The designers' main trick, re-sharing, is not the kind of equality an e-graph is allowed to use.
 \item \textbf{A second e-graph} that works with secret values instead of wires, and a proof that the usual way of choosing from it is unsafe.
 \item \textbf{Two safe ways to choose}: one that checks each candidate and discards leaking pieces early, and one based on PINI that scales to very large circuits.
-\item \textbf{A working compiler, seqc} (architecture in Sec.~\ref{sec:arch}, performance in Sec.~\ref{sec:perf}), with every result confirmed by an independent verifier (55,977 wire checks, zero disagreements) and a measured head-to-head against AGEMA and COMPRESS.
+\item \textbf{A working compiler, seqc} (architecture in Sec.~\ref{sec:arch}, performance in Sec.~\ref{sec:perf}), with every result confirmed by an independent verifier (56,579 wire checks, zero disagreements) and a measured head-to-head against AGEMA and COMPRESS.
 \end{enumerate}
 Table~\ref{tab:compare} places this work next to the alternatives. It is the only approach that both explores rewritten circuits and checks every result. It is also the least mature; Sec.~\ref{sec:limits} sets out its scope.
 
@@ -493,7 +493,7 @@ Instead of choosing one node per class, we choose whole \emph{terms}, so the sam
 \begin{proposition}[Leak cut]\label{prop:cut}
 In both models, if a piece of a circuit has a leaking wire, then every larger circuit containing that piece also leaks.
 \end{proposition}
-So a leaking piece can be thrown away as soon as it is found, and every result is secure by construction. On the squaring example, $\isw(z,z)$ (cost 11) is cut and $\isw(z,\rf(z))$ (cost 14) is kept. The price is speed: 0.3\,s on a chain of depth 3, 7.4\,s at depth 4 and 144--193\,s at depth 5.
+So a leaking piece can be thrown away as soon as it is found, and every result is secure by construction. On the squaring example, $\isw(z,z)$ (cost 11) is cut and $\isw(z,\rf(z))$ (cost 14) is kept. The price is speed: 0.3\,s on a chain of depth 3, 5.4\,s at depth 4 and 133\,s at depth 5.
 
 \subsection{Safe method 2: PINI brings back one label per class}
 We call a class \emph{composable} if it contains a PINI gadget whose inputs are also composable. We checked each operator exhaustively and with VerifMSI: XOR, NOT, refresh and HPC1 are PINI, while ISW and DOM are not. Inside composable classes a single safe label works again, and the usual one-node-per-class extraction is safe, \textbf{without checking any inputs at all}. This is what lets the method scale.
@@ -583,7 +583,7 @@ DOM AND, no registers & 8 & 5, \bad & 10, \ok\\
 Circuit & Inputs & Exact & PINI & Time & VerifMSI\\\midrule
 Keccak $\chi$, 6-bit & $2^{24}$ & secure & secure & 0.01\,s & 103/103\\
 Keccak $\chi$, 8-bit & $2^{32}$ & too large & secure & 0.01\,s & 137/137\\
-Keccak $\chi$, 32-bit & $2^{128}$ & too large & secure & 0.04\,s & 545/545\\
+Keccak $\chi$, 32-bit & $2^{128}$ & too large & secure & 0.05\,s & 545/545\\
 ISW chain, depth 15 & $2^{62}$ & too large & secure & 0.01\,s & 212/212\\
 \bottomrule
 \end{tabular}
@@ -621,7 +621,7 @@ Fig.~\ref{fig:arch} shows how the tool is organised, in four layers. The \emph{f
 \node[box,below=1.05cm of lab] (eq) {\textbf{Equivalence check}\\ result = source on all inputs};
 \node[box,right=0.55cm of eq] (emit) {\textbf{Emitter}\\ netlist or Verilog (glitch-free)};
 \node[box,right=0.55cm of emit] (ver) {\textbf{verify.py}\\ 16 steps, one command};
-\node[box,right=0.55cm of ver] (tst) {\textbf{Test suite}\\ 173 tests (pytest)};
+\node[box,right=0.55cm of ver] (tst) {\textbf{Test suite}\\ 182 tests (pytest)};
 % layer frames
 \begin{scope}[on background layer]
 \node[lay,fit=(src)(cost),inner xsep=6pt,inner ysep=6pt] (L1) {};
@@ -661,7 +661,7 @@ Wire-level e-graph & Boolean rewriting of masked wires (RQ1, RQ2); our own engin
 Value-level e-graph & One class per secret value; R1--R3 as rules (RQ3).\\
 Per-term extraction & $k$ cheapest terms per class, lowered and checked; leaking terms cut for good.\\
 PINI extraction & Class-level extraction on composable classes; no enumeration (RQ4).\\
-Labeller & Bit-parallel safe/unsafe labels; 0.4\,s for a depth-5 chain against an estimated 50\,min for the reference labeller.\\
+Labeller & Bit-parallel safe/unsafe labels; 0.4\,s for a depth-5 chain against an estimated 61\,min for the reference labeller.\\
 Exact checker & Ground truth for first-order security, glitch-free and glitch-extended.\\
 VerifMSI & External oracle; any disagreement stops the work until fixed.\\
 Emitter & Netlist or Verilog with \texttt{a\_s0}, \texttt{a\_s1}, \ldots{} ports.\\
@@ -714,7 +714,27 @@ majority, OR form & 65 & 41 & 37\% & 41, \ok\\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:frontend} shows the compiled programs. Every result matches its source on all inputs, has no leaking wire, and is confirmed by VerifMSI. On $z\wedge z$ the optimiser is tempted to drop a refresh that is needed, and seqc refuses, so the main finding shows up on a real compiled program too. The largest program, a majority vote written with ORs (five gadgets), compiles from 65 to 41 in 78--102\,s.
+Table~\ref{tab:frontend} shows the compiled programs. Every result matches its source on all inputs, has no leaking wire, and is confirmed by VerifMSI. On $z\wedge z$ the optimiser is tempted to drop a refresh that is needed, and seqc refuses, so the main finding shows up on a real compiled program too. The largest program, a majority vote written with ORs (five gadgets), compiles from 65 to 41 in 83\,s.
+
+\begin{table}[t]
+\caption{Larger Compiled Programs (Cost: Gates + Random Bits; First Order, Two Shares, Glitch-Free)}\label{tab:larger}
+\centering\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Program & Start & Cost-only & Secure & Saving & Rand. & Time\\\midrule
+2-bit comparator & 58 & 48, \ok & 48 & 17\% & 8$\to$4 & 27\,s\\
+2-bit adder & 60 & 48, \ok & 48 & 20\% & 8$\to$4 & 75\,s\\
+$2{\times}2$ multiplier & 70 & 66, \bad & 69 & 1\% & 10$\to$8 & 6\,s\\
+4:1 multiplexer$^\dagger$ & 48 & 39, \ok & 39 & 19\% & 6$\to$3 & 8\,s\\
+Ascon S-box$^\dagger$ & 88 & 78, \ok & 78 & 11\% & 10$\to$5 & 14\,s\\
+PRESENT S-box & 134 & 101, \ok & 101 & 25\% & 12$\to$8 & 132\,s\\
+\bottomrule
+\multicolumn{7}{@{}p{0.95\columnwidth}@{}}{\scriptsize $^\dagger$Run with frontier width $k=2$ and 4 saturation rounds; the default $k=8$ did not finish within 40 minutes.}
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:larger} adds six larger programs, including the 5-bit S-box of Ascon and the 4-bit S-box of PRESENT. Each program was first checked against its specification (the published S-box tables, or integer arithmetic) on every input, and each compiled result matches its source, has no leaking wire, and agrees with VerifMSI on all 443 wires. Savings are between 11\% and 25\% except on the multiplier, where the cost-only optimum is again cheaper and leaks, and the secure circuit saves only 1\%. All twelve programs, these six included, are compared with AGEMA and COMPRESS in Table~\ref{tab:h2h}.
 
 % =====================================================================
 \section{Performance Comparison}\label{sec:perf}
@@ -748,44 +768,49 @@ Fig.~\ref{fig:price} lists every case where the cost-only optimiser and our tool
 Where the starting circuit has waste, the secure result is 20--58\% cheaper: 58\% on \texttt{factor}, 52\% on the multiplexer, 45\% on two ANDs sharing a factor, 40\% on the over-refreshed chain, 37\% on the OR-form majority, 25\% on the HPC1 chain, 21\% on majority and 20\% on the full adder (Fig.~\ref{fig:slack}, Table~\ref{tab:frontend}). On tight designs (the hand-written ISW chain and Keccak $\chi$) it finds nothing to save, and it never returns a circuit that leaks. The PINI route is the one case that costs more, 25--33\% above the ISW-based design, in return for certifying circuits too large to check directly.
 
 \subsection{Head-to-head with AGEMA and COMPRESS}\label{sec:h2h}
-We installed both tools and ran them on the six programs of Table~\ref{tab:frontend} with two shares. COMPRESS was run with its standard gadget library at latencies 2 to 4, and every design it produced passed its own simulation check; its area comes from Yosys with the Nangate45 library, the same flow its authors use. AGEMA was run with its Yosys front end and its HPC2 and HPC3 gadgets. Its gadgets are written in VHDL, which our Yosys cannot read, so its area is an estimate: the sum of the Nangate45 areas of the same gadget types as synthesised for COMPRESS, plus its pipeline registers. Table~\ref{tab:h2h} shows the results.
+We ran both tools on the twelve programs of Tables~\ref{tab:frontend} and~\ref{tab:larger} with two shares, all on one machine (an AMD Ryzen 5 5500U laptop, 12 threads, 5.6\,GB, Linux; Yosys 0.70, GHDL 7.0, COMPRESS commit 26ccd9c, AGEMA commit 3de80c1). COMPRESS was run with its default gadget library at latencies 2 to 4; the multiplier and the OR-form majority have no schedule at latency 2, and every other design it produced passed its own behavioural simulation. Its area is the area of the synthesised design from Yosys with the Nangate45 library, the flow its authors use. AGEMA was run through its Yosys front end with its HPC2 and HPC3 gadgets. Its gadgets are VHDL, which we read with the GHDL plugin of Yosys, so AGEMA's area is measured on the same library, not estimated. All areas are in gate equivalents (GE, 1\,GE $=0.798\,\mu$m$^2$). Table~\ref{tab:h2h} shows the results. As a check, the six programs of the first version of this table give the same COMPRESS gadget counts, random bits and area as before (for example 148.0\,GE on $a\wedge b\oplus a\wedge c$), so our flow reproduces the earlier runs.
 
 \begin{table*}[t]
-\caption{Measured Head-to-Head on the Same Six Programs (Two Shares). Area in Gate Equivalents (GE), Nangate45. ``Gadgets'' Counts Masked AND-Type Gadgets; ``rnd'' Counts Fresh Random Bits}\label{tab:h2h}
+\caption{Measured Head-to-Head on Twelve Programs (Two Shares, One Machine). Area in GE, Nangate45. ``Gadgets'' Counts Masked AND-Type Gadgets; ``rnd'' Counts Fresh Random Bits}\label{tab:h2h}
 \centering\footnotesize
-\setlength{\tabcolsep}{5pt}
+\setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{@{}lccccccc@{}}
 \toprule
 & \multicolumn{2}{c}{seqc (this work)} & \multicolumn{2}{c}{AGEMA} & \multicolumn{3}{c}{COMPRESS}\\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(l){6-8}
 Program & gadgets / rnd & area$^{a}$ & gadgets / rnd$^{b}$ & area$^{c}$ & gadgets / rnd & area & area on seqc's logic$^{d}$\\\midrule
-$a\wedge b\oplus a\wedge c$ & 1 / 1 & 17.3 & 1 / 1 & 73.3 & 2 / 2 & 148.0 & \textbf{81.7} ($-$45\%)\\
-$z\wedge z$, $z=a\oplus b$ & 1 / 2 & 21.3 & 0 / 0 & 4.0 & 1 / 1 & 70.3 & --\\
-multiplexer & 1 / 1 & 21.3 & 3 / 3 & 208.7 & 2 / 2 & 148.7 & \textbf{108.3} ($-$27\%)\\
-full adder & 2 / 2 & 38.7 & 3 / 3 & 238.7 & 2 / 2 & 167.3 & same logic\\
-majority, 2 AND & 2 / 2 & 34.7 & 4 / 4 & 300.0 & 2 / 2 & 152.0 & same logic\\
-majority, OR form & 4 / 4 & 64.7 & 4 / 4 & 300.0 & 5 / 9 & 282.3 & 290.7, rnd 9 $\to$ 6\\
+$a\wedge b\oplus a\wedge c$ & 1 / 1 & 12.0 & 1 / 1 & 73.0 & 2 / 2 & 148.0 & \textbf{81.7} ($-$45\%)\\
+$z\wedge z$, $z=a\oplus b$ & 1 / 2 & 16.7 & 0 / 0 & 4.0 & 1 / 1 & 70.3 & 70.3 (same)\\
+multiplexer & 1 / 1 & 16.0 & 3 / 3 & 207.0 & 2 / 2 & 148.7 & \textbf{108.3} ($-$27\%)\\
+full adder & 2 / 2 & 32.0 & 3 / 3 & 237.3 & 2 / 2 & 167.3 & 167.3 (same)\\
+majority, 2 AND & 2 / 2 & 22.0 & 4 / 4 & 285.0 & 2 / 2 & 152.0 & 152.0 (same)\\
+majority, OR form & 4 / 4 & 59.7 & 4 / 4 & 285.0 & 5 / 9 & 282.3 & 290.7 (+3\%), rnd 9 $\to$ 6\\
+2-bit comparator & 4 / 4 & 66.3 & 8 / 8 & 517.7 & 4 / 5 & 275.0 & 279.0 (+1\%)\\
+2-bit adder & 4 / 4 & 73.0 & 6 / 6 & 543.7 & 4 / 6 & 302.0 & 302.0 (same)\\
+$2{\times}2$ multiplier & 7 / 8 & 58.7 & 6 / 6 & 421.7 & 6 / 10 & 374.7 & 420.0 (+12\%)\\
+4:1 multiplexer$^\dagger$ & 3 / 3 & 53.3 & 9 / 9 & 641.3 & 3 / 5 & 213.0 & 213.0 (same)\\
+Ascon S-box$^\dagger$ & 5 / 5 & 98.0 & 11 / 11 & 937.0 & 5 / 5 & 440.3 & \textbf{411.7} ($-$6\%)\\
+PRESENT S-box & 8 / 8 & 133.7 & 24 / 24 & 1753.7 & 9 / 11 & 627.0 & \textbf{555.7} ($-$11\%)\\
 \bottomrule
-\multicolumn{8}{@{}p{0.97\textwidth}@{}}{\scriptsize $^{a}$Glitch-free, combinational, no registers; not directly comparable with the glitch-robust, pipelined designs of AGEMA and COMPRESS. $^{b}$HPC2 (one random bit per gadget). $^{c}$Estimated: best of HPC2 and HPC3, summed gadget and register areas. $^{d}$COMPRESS run on the Boolean structure seqc chose; COMPRESS keeps its own glitch-robust guarantee. Including its random-number generator, the OR-form majority falls from 624.9 to 519.1\,GE ($-$17\%).}
+\multicolumn{8}{@{}p{0.97\textwidth}@{}}{\scriptsize $^{a}$Glitch-free, combinational, no registers and no random-number generator; not directly comparable with the glitch-robust, pipelined designs of AGEMA and COMPRESS. $^{b}$HPC2 (one random bit per gadget). $^{c}$Measured: best of HPC2 and HPC3, AGEMA's VHDL gadgets and pipeline registers synthesised together. $^{d}$COMPRESS run on the Boolean structure seqc chose, each gadget as an AND; COMPRESS keeps its own glitch-robust guarantee, and the first number is its best-latency area. Changes are against the COMPRESS area in the previous column. $^\dagger$seqc with $k=2$.}
 \end{tabular}
 \end{table*}
 
-Three findings stand out. First, \textbf{seqc never needs more gadgets than either tool, except on $z\wedge z$}. It needs strictly fewer than AGEMA on three programs (multiplexer, adder, majority) and strictly fewer than COMPRESS on three (\texttt{factor}, multiplexer, OR-form majority); on the multiplexer it needs 1 gadget against AGEMA's 3 and COMPRESS's 2. AGEMA's front end optimises the logic for \emph{unmasked} area, so it happily turns the multiplexer and the majority into NAND gates, each of which then becomes an expensive masked gadget. COMPRESS keeps the logic exactly as written. Our optimiser is the only one of the three whose cost model counts what masking actually pays for. Second, \textbf{the savings carry over into a glitch-robust flow}: feeding seqc's chosen logic into COMPRESS shrinks its design by 45\% on \texttt{factor} and 27\% on the multiplexer, and cuts the random bits of the OR-form majority from 9 to 6. Third, there is one loss: on $z\wedge z$, AGEMA's synthesis applies $x\wedge x=x$ and removes the gadget altogether, a rule we deliberately left out to study the refresh. Fig.~\ref{fig:h2h} summarises the gadget counts.
+Three findings stand out. First, \textbf{seqc needs no more gadgets than either tool on ten of the twelve programs.} It needs strictly fewer than AGEMA on eight and strictly fewer than COMPRESS on four, with ties elsewhere. AGEMA's front end optimises the logic for \emph{unmasked} area, so it turns the multiplexers and the S-boxes into NAND and NOR networks, each gate of which then becomes a masked gadget (24 gadgets for the PRESENT S-box against seqc's 8). COMPRESS keeps the logic exactly as written, so it pays for every AND in the source. The two exceptions are $z\wedge z$, where AGEMA's synthesis applies $x\wedge x=x$ and removes the gadget (a rule we deliberately left out to study the refresh), and the multiplier, where seqc's secure optimum has 7 gadgets and both tools have 6. Second, \textbf{the savings carry over into a glitch-robust flow on some programs, not all}: feeding seqc's chosen logic into COMPRESS makes its design smaller on four programs (by 45\% on $a\wedge b\oplus a\wedge c$, 27\% on the multiplexer, 6\% on the Ascon S-box and 11\% on the PRESENT S-box), the same on five, and larger on three (by 12\% on the multiplier, 3\% on the OR-form majority, where the random bits still drop from 9 to 6, and 1\% on the comparator). Third, seqc's own area is far below the other two, but this is not a fair comparison: it has no registers, no random-number generator and only glitch-free security. Fig.~\ref{fig:h2h} summarises the gadget counts.
 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
-\begin{axis}[ybar,bar width=4pt,width=\columnwidth,height=4.4cm,
- ymin=0,ymax=6.2,ylabel={AND gadgets},
- symbolic x coords={factor,square,mux,adder,maj,major},xtick=data,
- xticklabels={$ab\oplus ac$,$z\wedge z$,mux,adder,maj.,maj.\ (OR)},
- xticklabel style={font=\scriptsize},yticklabel style={font=\scriptsize},label style={font=\scriptsize},
- nodes near coords,nodes near coords style={font=\tiny},
+\begin{axis}[ybar,bar width=2pt,width=\columnwidth,height=4.6cm,
+ ymin=0,ymax=26,ylabel={AND gadgets},
+ symbolic x coords={f,sq,mx,ad,mj,mo,cm,a2,mu,m4,as,pr},xtick=data,
+ xticklabels={$ab{\oplus}ac$,$z^2$,mux,add,maj,maj$_\vee$,cmp,add2,mul2,mux4,Ascon,PRES.},
+ x tick label style={font=\tiny,rotate=45,anchor=east},yticklabel style={font=\scriptsize},label style={font=\scriptsize},
  legend style={font=\scriptsize,at={(0.5,1.03)},anchor=south,draw=none,legend columns=3},
- axis lines*=left,ymajorgrids,grid style={black!8},enlarge x limits=0.1]
-\addplot[fill=blue,draw=blue] coordinates {(factor,1)(square,1)(mux,1)(adder,2)(maj,2)(major,4)};
-\addplot[fill=black!35,draw=black!45] coordinates {(factor,1)(square,0)(mux,3)(adder,3)(maj,4)(major,4)};
-\addplot[fill=orange,draw=orange] coordinates {(factor,2)(square,1)(mux,2)(adder,2)(maj,2)(major,5)};
+ axis lines*=left,ymajorgrids,grid style={black!8},enlarge x limits=0.05]
+\addplot[fill=blue,draw=blue] coordinates {(f,1)(sq,1)(mx,1)(ad,2)(mj,2)(mo,4)(cm,4)(a2,4)(mu,7)(m4,3)(as,5)(pr,8)};
+\addplot[fill=black!35,draw=black!45] coordinates {(f,1)(sq,0)(mx,3)(ad,3)(mj,4)(mo,4)(cm,8)(a2,6)(mu,6)(m4,9)(as,11)(pr,24)};
+\addplot[fill=orange,draw=orange] coordinates {(f,2)(sq,1)(mx,2)(ad,2)(mj,2)(mo,5)(cm,4)(a2,4)(mu,6)(m4,3)(as,5)(pr,9)};
 \legend{seqc,AGEMA,COMPRESS}
 \end{axis}
 \end{tikzpicture}
@@ -793,7 +818,34 @@ Three findings stand out. First, \textbf{seqc never needs more gadgets than eith
 \label{fig:h2h}
 \end{figure}
 
-On speed, AGEMA is the fastest (6--24\,ms per run) and COMPRESS's solver takes 0.07--1.7\,s at its best latency (212\,s for the OR-form majority at latency 4); seqc takes 0.4--0.6\,s, and 92\,s for the OR-form majority, where its exact checking is the limit.
+On speed, all on the machine above, AGEMA takes 8--17\,ms per run and COMPRESS's solver 0.04--0.68\,s over all latencies tried. seqc takes at most 0.2\,s on the five smallest programs and between 6\,s and 132\,s on the larger ones, where its exact checking is the limit (83\,s for the OR-form majority, 75\,s for the 2-bit adder, 132\,s for the PRESENT S-box).
+
+\subsection{Do the savings need equality saturation?}
+A fair objection is that any logic minimiser might find the same savings. Table~\ref{tab:noegraph} compares seqc with a plain minimiser, Yosys with ABC mapping to AND and XOR gates, on twelve programs (the six above and the six of Table~\ref{tab:larger}). The minimiser has no idea of masking. It needs more AND gates than seqc on eight programs, the same number on two, and fewer on two: $z\wedge z$, where it applies $x\wedge x=x$, and the multiplier. On eight programs it even needs more ANDs than the source already had, since ABC maps for area, not for the number of ANDs. This is a weak baseline: a minimiser built to reduce AND count, such as one in the style of Boyar and Peralta, might do better, and we did not run one. Table~\ref{tab:noegraph} also gives the area of seqc's own Verilog (Yosys 0.70, Nangate45, 1 GE $=0.798\,\mu$m$^2$, no registers, glitch-free model only). These are the same seqc areas as in Table~\ref{tab:h2h}; they supersede the seqc area column of an earlier version of this table, which came from a different synthesis run.
+
+\begin{table}[t]
+\caption{AND Gadgets Without an E-Graph (Yosys/ABC) Versus seqc, and seqc Area}\label{tab:noegraph}
+\centering\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Program & Written & ABC & seqc & Rnd. & GE\\\midrule
+$a\wedge b\oplus a\wedge c$ & 2 & 1 & 1 & 1 & 12.0\\
+$z\wedge z$ & 1 & 0 & 1 & 2 & 16.7\\
+multiplexer & 2 & 3 & 1 & 1 & 16.0\\
+full adder & 2 & 3 & 2 & 2 & 32.0\\
+majority, 2 AND & 2 & 4 & 2 & 2 & 22.0\\
+majority, OR form & 5 & 4 & 4 & 4 & 59.7\\
+2-bit comparator & 4 & 8 & 4 & 4 & 66.3\\
+2-bit adder & 4 & 6 & 4 & 4 & 73.0\\
+$2{\times}2$ multiplier & 6 & 6 & 7 & 8 & 58.7\\
+4:1 multiplexer$^\dagger$ & 3 & 9 & 3 & 3 & 53.3\\
+Ascon S-box$^\dagger$ & 5 & 13 & 5 & 5 & 98.0\\
+PRESENT S-box & 9 & 26 & 8 & 8 & 133.7\\
+\bottomrule
+\multicolumn{6}{@{}p{0.95\columnwidth}@{}}{\scriptsize Written: ANDs in the source (shared terms once). ABC: ANDs after Yosys/ABC. seqc: gadgets and random bits of the secure optimum. $^\dagger$$k=2$.}
+\end{tabular}
+\end{table}
 
 \subsection{Speed and scale}
 Table~\ref{tab:speed} gives the measured run times. Checking each candidate is exact but slows down quickly as circuits grow; PINI extraction and the fast labeller are what make large circuits practical.
@@ -804,13 +856,13 @@ Table~\ref{tab:speed} gives the measured run times. Checking each candidate is e
 \begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}Xr@{}}
 \toprule
 Task & Result\\\midrule
-Per-term extraction, ISW chain depth 3 / 4 / 5 & 0.3\,s / 7.4\,s / 144--193\,s\\
-Labeller, depth-5 chain: bit-parallel / reference & 0.4\,s / $\approx$50\,min (est.)\\
-PINI extraction, Keccak $\chi$ 32-bit ($2^{128}$ inputs) & 0.04\,s, 545/545 wires\\
+Per-term extraction, ISW chain depth 3 / 4 / 5 & 0.3\,s / 5.4\,s / 133\,s\\
+Labeller, depth-5 chain: bit-parallel / reference & 0.4\,s / $\approx$61\,min (est.)\\
+PINI extraction, Keccak $\chi$ 32-bit ($2^{128}$ inputs) & 0.05\,s, 545/545 wires\\
 PINI extraction, ISW chain depth 15 ($2^{62}$ inputs) & 0.01\,s, 212/212 wires\\
 Exact checker, largest input space & $\approx 2^{26}$ points\\
-seqc, OR-form majority (5 gadgets), 65 $\to$ 41 & 78--102\,s\\
-Full verification, all 16 steps & $\approx$11\,min (678\,s)\\
+seqc, OR-form majority (5 gadgets), 65 $\to$ 41 & 83\,s\\
+Full verification, all 16 steps & $\approx$8\,min (487\,s)\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -818,7 +870,7 @@ Full verification, all 16 steps & $\approx$11\,min (678\,s)\\
 % =====================================================================
 \section{Verification}\label{sec:evidence}
 % =====================================================================
-We never relied on our own checker alone. Every verdict was cross-checked by VerifMSI \cite{meunier2023verifmsi}, a published verifier we did not write, run as a separate program (Table~\ref{tab:oracle}). One command, \code{findings/verify.py -{}-full}, reruns every experiment and checks every number reported here; all 16 steps pass, along with 173 automated tests. Agreement on these circuits is strong evidence, but it is not a proof for every possible circuit. We also tested the verifier itself, and use its exact check, rather than its one-sided symbolic shortcut, as the reference.
+We never relied on our own checker alone. Every verdict was cross-checked by VerifMSI \cite{meunier2023verifmsi}, a published verifier we did not write, run as a separate program (Table~\ref{tab:oracle}). One command, \code{findings/verify.py -{}-full}, reruns every experiment and checks every number reported here; all 16 steps pass, along with 182 automated tests. Agreement on these circuits is strong evidence, but it is not a proof for every possible circuit. We also tested the verifier itself, and use its exact check, rather than its one-sided symbolic shortcut, as the reference.
 
 \begin{table}[t]
 \caption{Agreement With VerifMSI}\label{tab:oracle}
@@ -831,8 +883,10 @@ Bit-parallel labeller & 1,265 / 22,463 & 0\\
 Value-layer circuits & 27 / 914 & 0\\
 Sampled chain extractions & 240 / 6,054 & 0\\
 Random PINI-built circuits & 234 / 4,608 & 0\\
-Compiled programs & 7 / 178 & 0\\\midrule
-\textbf{Total wire checks} & \textbf{55,977} & \textbf{0}\\\midrule
+Compiled programs & 7 / 178 & 0\\
+Larger compiled programs & 6 / 443 & 0\\
+Three- and four-share circuits & 6 / 159 & 0\\\midrule
+\textbf{Total wire checks} & \textbf{56,579} & \textbf{0}\\\midrule
 Glitch checker (probes) & 167 & 0\\
 PINI verdicts (gadgets) & 6 & 0\\
 \bottomrule
@@ -860,7 +914,7 @@ PINI verdicts (gadgets) & 6 & 0\\
 \item \textbf{Savings:} only where the starting circuit has waste; tight designs do not improve.
 \item \textbf{Scale:} checking each candidate is exact only among the $k$ cheapest options, and slow on larger circuits; the 0-of-240 result is a sample.
 \item \textbf{Glitches:} the PINI result and the generated Verilog assume no glitches.
-\item \textbf{Evidence:} no synthesis or hardware test, a head-to-head against AGEMA and COMPRESS on six small programs only (AGEMA's area estimated), and the proofs are written by hand rather than machine-checked.
+\item \textbf{Evidence:} no hardware test and synthesis only for the glitch-free logic, a head-to-head against AGEMA and COMPRESS on twelve small programs only, one machine, and the proofs are written by hand rather than machine-checked.
 \end{itemize}
 
 % =====================================================================

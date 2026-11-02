@@ -1,0 +1,4 @@
+k-best chain extractions (F4): 240 circuits / 6054 wires cross-checked, 240 circuits with a leaking wire, 0 disagreements
+random PINI-built terms (F11 sec. 3): 234 circuits / 4608 wires cross-checked, 0 circuits with a leaking wire, 0 disagreements
+total disagreements: 0  (76 s)
+EXTENDED CROSS-CHECK: AGREE

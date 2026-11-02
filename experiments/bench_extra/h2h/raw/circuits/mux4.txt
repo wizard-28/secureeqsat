@@ -1,0 +1,16 @@
+// + XOR
+// & AND
+// # XNOR
+
+INPUTS d0 d1 d2 d3 s0 s1
+OUTPUTS y
+
+t3 = d0 + d1
+t2 = s0 & t3
+t1 = d0 + t2
+t8 = d2 + d3
+t7 = s0 & t8
+t6 = d2 + t7
+t5 = t1 + t6
+t4 = s1 & t5
+y = t1 + t4

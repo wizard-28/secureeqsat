@@ -1,0 +1,11 @@
+--- /home/wizard-28/h2h/sim_tb.py.orig	2026-11-02 13:38:33.641614384 +0530
++++ /home/wizard-28/h2h/compress/scripts/sim_tb.py	2026-11-02 13:38:33.644614364 +0530
+@@ -68,7 +68,7 @@
+     def exhaustive_patterns(self):
+         def named_patterns(handles):
+             for pattern in it.product(
+-                *(range(2**((hnd.left - hnd.right)+1)) for hnd in handles.values())
++                *(range(2**resolve_nbits(hnd)) for hnd in handles.values())
+             ):
+                 yield dict(zip(handles.keys(), pattern))
+ 
