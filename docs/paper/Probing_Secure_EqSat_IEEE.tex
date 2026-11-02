@@ -68,7 +68,7 @@
 \maketitle
 
 \begin{abstract}
-Chips that hold secret keys can give those keys away through their power use. The standard defence, masking, splits every secret into random pieces so that no single wire inside the chip reveals anything, but masked circuits are large, so it is tempting to let a compiler optimise them. We ask whether equality saturation, a compiler technique that collects every equivalent version of a program and then picks the cheapest, can do this safely. By default, it cannot. Starting from the textbook 8-gate masked AND gate (ISW), a cost-only optimiser picks a 7-gate version that exposes a secret on a single wire, and with two shares this always happens, because the only gate-saving rewrite is the one that puts a secret back together. Checking security when the final circuit is chosen repairs this at the cost of one gate. We then show that the tricks masking designers actually use, such as refreshes and gadget swaps, cannot be expressed in a standard e-graph at all, build a second e-graph over secret values that can, and prove that choosing one circuit per class is unsafe there. Two safe ways to choose follow: checking each candidate, and a PINI-based method that certifies a 32-bit Keccak~$\chi$ row, with $2^{128}$ possible inputs, in 0.05\,s. Everything is packaged as seqc, a small compiler from Boolean programs to masked Verilog, and every security verdict was confirmed by an independent verifier (56,579 wire checks, zero disagreements). On twelve small programs seqc needs no more AND gadgets than AGEMA and COMPRESS on ten, with mixed results in area; the scope is first order, two shares, and glitch-free output.
+Chips that hold secret keys can give those keys away through their power use. The standard defence, masking, splits every secret into random pieces so that no single wire inside the chip reveals anything, but masked circuits are large, so it is tempting to let a compiler optimise them. We ask whether equality saturation, a compiler technique that collects every equivalent version of a program and then picks the cheapest, can do this safely. By default, it cannot. Starting from the textbook 8-gate masked AND gate (ISW), a cost-only optimiser picks a 7-gate version that exposes a secret on a single wire, and with two shares this always happens, because the only gate-saving rewrite is the one that puts a secret back together. Checking security when the final circuit is chosen repairs this at the cost of one gate. We then show that the tricks masking designers actually use, such as refreshes and gadget swaps, cannot be expressed in a standard e-graph at all, build a second e-graph over secret values that can, and prove that choosing one circuit per class is unsafe there. Two safe ways to choose follow: checking each candidate, and a PINI-based method that certifies a 32-bit Keccak~$\chi$ row, with $2^{128}$ possible inputs, in 0.05\,s. Everything is packaged as seqc, a small compiler from Boolean programs to masked Verilog, and every security verdict about our own circuits was confirmed by an independent verifier, with zero disagreements in more than 400,000 wire checks. On twelve small programs seqc needs no more AND gadgets than AGEMA and COMPRESS on ten, with mixed results in area; the scope is first order, two shares, and glitch-free output.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -115,7 +115,7 @@ Existing tools fall into two groups. \emph{Security tools}, such as masking comp
 \item \textbf{A limit of standard e-graphs.} The designers' main trick, re-sharing, is not the kind of equality an e-graph is allowed to use.
 \item \textbf{A second e-graph} that works with secret values instead of wires, and a proof that the usual way of choosing from it is unsafe.
 \item \textbf{Two safe ways to choose}: one that checks each candidate and discards leaking pieces early, and one based on PINI that scales to very large circuits.
-\item \textbf{A working compiler, seqc} (architecture in Sec.~\ref{sec:arch}, performance in Sec.~\ref{sec:perf}), with every result confirmed by an independent verifier (56,579 wire checks, zero disagreements) and a measured comparison with AGEMA and COMPRESS on twelve small programs, which is a supporting result, not the main claim (it is first order, two shares and glitch-free, and seqc is behind both tools on one program).
+\item \textbf{A working compiler, seqc} (architecture in Sec.~\ref{sec:arch}, performance in Sec.~\ref{sec:perf}), with every security verdict about our circuits confirmed by an independent verifier (zero disagreements in more than 400,000 wire checks) and a measured comparison with AGEMA and COMPRESS on twelve small programs, which is a supporting result, not the main claim (it is first order, two shares and glitch-free, and seqc is behind both tools on one program).
 \end{enumerate}
 Table~\ref{tab:compare} places this work next to the alternatives. Among the approaches we know of, it is the only one that saturates an e-graph of equivalent circuits and checks every result; search-based gadget optimisation \cite{koblah2025evo} also explores rewritten gadgets under a security check, but by sampling rather than saturation. It is also the least mature; Sec.~\ref{sec:limits} sets out its scope.
 
@@ -544,7 +544,7 @@ Keccak $\chi$, 5-bit & 60 & 60 & 60 & 60 & 60 & 60 & 60 & 60 & 60\\
 \end{table}
 
 \subsection{Finding 5: glitches and large circuits}\label{sec:rq4}
-\emph{Glitches.} A glitch is a brief wrong value on a wire while signals are still arriving (Fig.~\ref{fig:glitch}). A register blocks it, so to an attacker a register works like a refresh. To a cost-only optimiser, however, a register looks like a wire that does nothing, so it deletes it (Table~\ref{tab:glitch}). Our check puts the registers back, and on the unregistered ISW gadget it adds two registers exactly where they are needed. Of egglog's own 784 cheapest candidates for a DOM chain, none is glitch-secure. Our glitch checker agrees with VerifMSI on all 167 probes.
+\emph{Glitches.} A glitch is a brief wrong value on a wire while signals are still arriving (Fig.~\ref{fig:glitch}). A register blocks it, so to an attacker a register works like a refresh. To a cost-only optimiser, however, a register looks like a wire that does nothing, so it deletes it (Table~\ref{tab:glitch}). Our check puts the registers back, and on the unregistered ISW gadget it adds two registers exactly where they are needed. Of egglog's own 784 cheapest candidates for a DOM chain, none is glitch-secure. Our glitch checker agrees with VerifMSI on all 167 probes of the first ten circuits, and on all 21,869 probes of the 784 candidates, whose end-to-end verdicts VerifMSI also confirms.
 
 \begin{figure}[!t]
 \centering
@@ -888,7 +888,10 @@ Compiled programs & 7 / 178 & 0\\
 Larger compiled programs & 6 / 443 & 0\\
 Three- and four-share circuits & 6 / 159 & 0\\\midrule
 \textbf{Total wire checks} & \textbf{56,579} & \textbf{0}\\\midrule
-Glitch checker (probes) & 167 & 0\\
+Glitch checker (probes), first ten circuits & 167 & 0\\
+Glitch k-best frontier, 784 circuits (probes) & 21,869 & 0\\
+One-node-per-class extractions of $z\wedge z$ (wires) & 348,973 & 0\\
+Emitted Verilog files read back (wires) & 603 & 0\\
 PINI verdicts (gadgets) & 6 & 0\\
 \bottomrule
 \end{tabular}
@@ -923,7 +926,7 @@ PINI verdicts (gadgets) & 6 & 0\\
 % =====================================================================
 \section{Conclusion}
 % =====================================================================
-Compiler optimisers promise to keep a program's meaning, and masked hardware needs more than that. Left to minimise cost, equality saturation turns secure masked circuits into cheaper ones that leak, and with two shares this always happens rather than by chance. Checking security when the circuit is chosen fixes this at the wire level. The designers' own tricks need a second, value-level e-graph, where the circuit must be chosen term by term or through PINI to stay safe. The result, seqc, removes waste where there is some and never returns a leaking circuit, and every verdict has been confirmed independently. \textbf{For secure hardware, giving the same answer is not enough: the optimiser must also keep the security.}
+Compiler optimisers promise to keep a program's meaning, and masked hardware needs more than that. Left to minimise cost, equality saturation turns secure masked circuits into cheaper ones that leak, and with two shares this always happens rather than by chance. Checking security when the circuit is chosen fixes this at the wire level. The designers' own tricks need a second, value-level e-graph, where the circuit must be chosen term by term or through PINI to stay safe. The result, seqc, removes waste where there is some and never returns a leaking circuit, and every security verdict about our circuits has been confirmed independently. \textbf{For secure hardware, giving the same answer is not enough: the optimiser must also keep the security.}
 
 \section*{Acknowledgment}
 Portions of the code, scripts and this report were prepared with the assistance of an AI system (Claude, Anthropic). The code and data are available at \url{https://github.com/wizard-28/secureeqsat}.

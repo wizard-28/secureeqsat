@@ -1,0 +1,4 @@
+R3            1 extractions, 0 secure, 15 wires cross-checked, 0 disagreements (0 s)
+R1+R3       338 extractions, 16 secure, 12142 wires cross-checked, 0 disagreements (5 s)
+R2+R3         3 extractions, 1 secure, 48 wires cross-checked, 0 disagreements (0 s)
+R1+R2+R3   8502 extractions, 2226 secure, 336768 wires cross-checked, 0 disagreements (191 s)

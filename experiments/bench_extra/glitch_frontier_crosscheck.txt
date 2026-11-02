@@ -1,0 +1,5 @@
+784 frontier circuits, 784 distinct
+ours: 0 glitch-secure among the distinct circuits
+VerifMSI: 21869 probes compared, 0 per-probe disagreements
+end-to-end checkSecurity verdict differs from ours on 0 circuits
+(23 s)

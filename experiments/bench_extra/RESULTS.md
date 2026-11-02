@@ -194,3 +194,16 @@ the source computes. All twelve pass (`sim_verilog.txt`: 64, 32, 64, 64, 64, 64,
 512, 256, 128 vectors). A copy of the adder with one XOR turned into an AND fails (72 mismatches),
 so the testbench is not vacuous. This checks **function, not security**; no glitch-extended or
 leakage tool was run on the Verilog, and it is not secure under glitches.
+
+## Extra VerifMSI cross-checks (2026-11-02)
+
+Run to remove the remaining places where a verdict rested on our checker alone:
+
+| What | Script | Result |
+|---|---|---|
+| All 784 circuits of egglog's glitch k-best frontier (registered DOM chain), every probe, glitch and glitch-free verdicts | `glitch_frontier_crosscheck.py` | 21,869 probes, 0 disagreements; VerifMSI's end-to-end `checkSecurity` verdict agrees on all 784 (none glitch-secure) |
+| Every acyclic one-node-per-class extraction of `square`, four rule sets | `dag_extractions_crosscheck.py` | 1 + 338 + 3 + 8,502 extractions (0, 16, 1 and 2,226 secure), 348,973 wires, 0 disagreements |
+| The emitted Verilog files, read back from their text | `verilog_crosscheck.py` | 12 files, 603 wires, 0 leaking, 0 disagreements |
+
+Not covered, and not claimed in the paper: AGEMA's and COMPRESS's generated designs (pipelined,
+glitch-robust netlists with registers) were not security-checked by us.

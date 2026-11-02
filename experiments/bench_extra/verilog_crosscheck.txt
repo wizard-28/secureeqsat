@@ -1,0 +1,12 @@
+factor           17 wires, 0 leaking, 0 disagreements with VerifMSI
+square           18 wires, 0 leaking, 0 disagreements with VerifMSI
+mux              19 wires, 0 leaking, 0 disagreements with VerifMSI
+adder            30 wires, 0 leaking, 0 disagreements with VerifMSI
+majority         28 wires, 0 leaking, 0 disagreements with VerifMSI
+majority_or      48 wires, 0 leaking, 0 disagreements with VerifMSI
+cmp2             57 wires, 0 leaking, 0 disagreements with VerifMSI
+add2             58 wires, 0 leaking, 0 disagreements with VerifMSI
+mul2             78 wires, 0 leaking, 0 disagreements with VerifMSI
+mux4             51 wires, 0 leaking, 0 disagreements with VerifMSI
+ascon_sbox       89 wires, 0 leaking, 0 disagreements with VerifMSI
+present_sbox    110 wires, 0 leaking, 0 disagreements with VerifMSI
