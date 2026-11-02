@@ -1,0 +1,8 @@
+square = ('isw', ('xor', ('in', 'a'), ('in', 'b')), ('refresh', ('xor', ('in', 'a'), ('in', 'b'))))
+R3        classes=  4 acyclic=    1 secure=0
+R1+R3     classes= 19 acyclic=  338 secure=16
+    cheapest secure example: (22, ('xor', ('isw', ('xor', ('in', 'a'), ('in', 'b')), ('in', 'b')), ('isw', ('xor', ('in', 'a'), ('in', 'b')), ('in', 'a'))))
+R2+R3     classes=  4 acyclic=    3 secure=1
+    cheapest secure example: (14, ('hpc1', ('xor', ('in', 'a'), ('in', 'b')), ('xor', ('in', 'a'), ('in', 'b'))))
+R1+R2+R3  classes= 19 acyclic= 8502 secure=2226
+    cheapest secure example: (14, ('hpc1', ('xor', ('in', 'a'), ('in', 'b')), ('xor', ('in', 'a'), ('in', 'b'))))
