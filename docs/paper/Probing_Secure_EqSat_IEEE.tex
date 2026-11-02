@@ -405,7 +405,7 @@ Random-bit reuse & one random bit shared between gadgets (not modelled here)\\
 \end{figure}
 
 \begin{finding}{Re-sharing is not a congruence.}
-Let $y$ be a refresh of $x$, so $y_0=x_0\oplus r$ and $y_1=x_1\oplus r$. Both hold the same secret. Now look only at share 0: whenever $r=1$, $x_0$ and $y_0$ differ. So $x$ and $y$ are equal as secrets but not as wires. That breaks the congruence rule, and \textbf{a correct wire-level e-graph is never allowed to treat them as equal} (Fig.~\ref{fig:congruence}).
+Let $y$ be a refresh of $x$, so $y_0=x_0\oplus r$ and $y_1=x_1\oplus r$. Both hold the same secret. Now look only at share 0: whenever $r=1$, $x_0$ and $y_0$ differ. So $x$ and $y$ are equal as secrets but not as wires. That breaks the congruence rule, and \textbf{a correct wire-level e-graph is never allowed to treat them as equal} (Fig.~\ref{fig:congruence}). ``Holds the same secret'' is therefore an equivalence on terms but not a congruence so we do not merge such terms at the wire level; the value-level e-graph below does merge them, because it tracks values and not wires.
 \end{finding}
 
 \begin{figure}[!t]
@@ -497,7 +497,7 @@ In both models, if a piece of a circuit has a leaking wire, then every larger ci
 So a leaking piece can be thrown away as soon as it is found, and every result is secure by construction. On the squaring example, $\isw(z,z)$ (cost 11) is cut and $\isw(z,\rf(z))$ (cost 14) is kept. The price is speed: 0.3\,s on a chain of depth 3, 5.4\,s at depth 4 and 133\,s at depth 5.
 
 \subsection{Safe method 2: PINI brings back one label per class}
-We call a class \emph{composable} if it contains a PINI gadget whose inputs are also composable. We checked each operator exhaustively and with VerifMSI: XOR, NOT, refresh and HPC1 are PINI, while ISW and DOM are not. Inside composable classes a single safe label works again, and the usual one-node-per-class extraction is safe, \textbf{without checking any inputs at all}. This is what lets the method scale. It is the same composition property that COMPRESS and TETRIS rely on to choose gadgets without enumerating inputs; what we believe is new here is using it inside extraction from an e-graph.
+We call a class \emph{composable} if it contains a PINI gadget whose inputs are also composable. We checked each operator exhaustively and with VerifMSI: XOR, NOT, refresh and HPC1 are PINI, while ISW and DOM are not. Inside composable classes a single safe label works again, and the usual one-node-per-class extraction is safe, \textbf{without checking any inputs at all}. Fan-out is allowed: PINI composition lets one gadget output feed several later gadgets, and the 234 random PINI-built circuits of Table~\ref{tab:oracle}, which reuse subterms, show no leak (first order, glitch-free). This is what lets the method scale. It is the same composition property that COMPRESS and TETRIS rely on to choose gadgets without enumerating inputs; what we believe is new here is using it inside extraction from an e-graph.
 
 % =====================================================================
 \section{Results}\label{sec:results}
@@ -548,7 +548,7 @@ Keccak $\chi$, 5-bit & 60 & 60 & 60 & 60 & 60 & 60 & 60 & 60 & 60\\
 \end{table}
 
 \subsection{Finding 5: glitches and large circuits}\label{sec:rq4}
-\emph{Glitches.} A glitch is a brief wrong value on a wire while signals are still arriving (Fig.~\ref{fig:glitch}). A register blocks it, so for the attacker a register has an effect similar to a refresh. To a cost-only optimiser, however, a register looks like a wire that does nothing, so it deletes it (Table~\ref{tab:glitch}). Our check puts the registers back, and on the unregistered ISW gadget it adds two registers exactly where they are needed. Of egglog's own 784 cheapest candidates for a DOM chain, none is glitch-secure. Our glitch checker agrees with VerifMSI on all 167 probes of the ten distinct circuits behind Table~\ref{tab:glitch}, and on all 21,869 probes of the 784 candidates, whose end-to-end verdicts VerifMSI also confirms.
+\emph{Glitches.} A glitch is a brief wrong value on a wire while signals are still arriving (Fig.~\ref{fig:glitch}). A register blocks it, so for the attacker a register has an effect similar to a refresh. To a cost-only optimiser, however, a register looks like a wire that does nothing, so it deletes it (Table~\ref{tab:glitch}). We model a register as a unary operator that leaves the value unchanged but does cut what a glitch-extended probe sees. In the experiment a register may be treated as opaque, or as transparent with rules that let it appear in front of a gate input; either way saturation is cut off after a fixed number of rounds, and extraction, not a rewrite direction, decides where registers stay. Our check puts the registers back, and on the unregistered ISW gadget it adds two registers exactly where they are needed. Of egglog's own 784 cheapest candidates for a DOM chain, none is glitch-secure. Our glitch checker agrees with VerifMSI on all 167 probes of the ten distinct circuits behind Table~\ref{tab:glitch}, and on all 21,869 probes of the 784 candidates, whose end-to-end verdicts VerifMSI also confirms.
 
 \begin{figure}[!t]
 \centering
