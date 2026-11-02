@@ -527,15 +527,19 @@ Fig.~\ref{fig:slack} shows the cheapest secure circuit found from several starti
 Table~\ref{tab:ablation} switches the three rule groups on and off. Each saving has one source: refresh removal (R3) gives the over-refreshed chain, Boolean algebra with factoring (R1) gives the shared-factor program, and gadget swaps (R2) give the HPC1 chain. No other combination saves anything, and the only configurations whose cost-only optimum leaks are those that contain R3.
 
 \begin{table}[t]
-\caption{Rule Ablation: Cheapest Secure Cost (Gates + Random Bits); ``11 leaks'' Is the Cost-Only Optimum When It Differs}\label{tab:ablation}
-\centering\scriptsize
-\setlength{\tabcolsep}{2.6pt}
-\begin{tabular}{@{}lrcccccccc@{}}
+\caption{Rule Ablation: Cheapest Secure Cost (Gates + Random Bits). Bold Marks a Saving Over the Start; $^\dagger$ Marks a Cost-Only Optimum of 11 That Leaks}\label{tab:ablation}
+\centering\footnotesize
+\setlength{\tabcolsep}{2.4pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}l@{\hspace{7pt}}c@{\hspace{4pt}}c@{\hspace{7pt}}ccc@{\hspace{7pt}}ccc@{\hspace{7pt}}c@{}}
 \toprule
-Circuit & Start & none & R1 & R2 & R3 & R1+R2 & R1+R3 & R2+R3 & all\\\midrule
+ & & & \multicolumn{3}{c}{one rule group} & \multicolumn{3}{c}{two rule groups} & \\
+\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+Circuit & Start & none & R1 & R2 & R3 & R1+R2 & R1+R3 & R2+R3 & all\\
+\midrule
 ISW chain & 18 & 18 & 18 & 18 & 18 & 18 & 18 & 18 & 18\\
 over-refreshed & 30 & 30 & 30 & 30 & \textbf{18} & 30 & \textbf{18} & \textbf{18} & \textbf{18}\\
-$z\wedge z$ & 14 & 14 & 14 & 14 & \makecell{14\\\textcolor{orange}{11 leaks}} & 14 & \makecell{14\\\textcolor{orange}{11 leaks}} & \makecell{14\\\textcolor{orange}{11 leaks}} & \makecell{14\\\textcolor{orange}{11 leaks}}\\
+$z\wedge z$ & 14 & 14 & 14 & 14 & 14$^\dagger$ & 14 & 14$^\dagger$ & 14$^\dagger$ & 14$^\dagger$\\
 $ab\oplus ad$ & 20 & 20 & \textbf{11} & 20 & 20 & \textbf{11} & \textbf{11} & 20 & \textbf{11}\\
 HPC1 chain & 24 & 24 & 24 & \textbf{18} & 24 & \textbf{18} & 24 & \textbf{18} & \textbf{18}\\
 Keccak $\chi$, 5-bit & 60 & 60 & 60 & 60 & 60 & 60 & 60 & 60 & 60\\
