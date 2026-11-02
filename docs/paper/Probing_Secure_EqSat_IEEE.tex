@@ -120,7 +120,7 @@ Existing tools fall into two groups. \emph{Security tools}, such as masking comp
 Table~\ref{tab:compare} places this work next to the alternatives. Among the approaches we know of, it is the only one that saturates an e-graph of equivalent circuits and checks every result; search-based gadget optimisation \cite{koblah2025evo} also explores rewritten gadgets under a security check, but by sampling rather than saturation. It is also the least mature; Sec.~\ref{sec:limits} sets out its scope.
 
 \begin{table*}[t]
-\caption{How Approaches Handle Making a Masked Circuit Cheaper Without Making It Leak (cells summarise each group; tools within a group differ)}\label{tab:compare}
+\caption{How Approaches Handle Making a Masked Circuit Cheaper Without Making It Leak (cells summarise each group; tools within a group differ; superVer rewrites expressions to check them, not to optimise)}\label{tab:compare}
 \centering\footnotesize
 \setlength{\tabcolsep}{5pt}
 \begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}Xcccccc@{}}
@@ -216,7 +216,7 @@ We consider an attacker who can probe one wire (this is called \emph{first order
 Checking every input stops being possible for large circuits. PINI \cite{cassiers2020pini} offers a shortcut. A gadget is PINI if a probe inside it can reveal at most one share of each input, and one share alone is just noise. The useful part is that PINI gadgets can be chained: a circuit built only from PINI gadgets is secure at any size. So each gadget is checked once, and the whole circuit never needs to be enumerated.
 
 \subsection{E-graphs and equality saturation}
-An e-graph groups expressions that are known to be equal into \emph{e-classes} (Fig.~\ref{fig:egraph}). Equality saturation works in two steps. First, it applies every rewrite rule wherever it can, until nothing new appears; this way the order of the rules no longer matters. Second, it \emph{extracts} a result, normally by picking the cheapest node in each class. Every use of a class then becomes the same wire. One more rule is important later: e-graph equalities must be a \emph{congruence} \cite{suciu2025semantic}, meaning that if $x=y$ then $f(x)=f(y)$ in every context. We use the egglog engine \cite{zhang2023egglog}.
+An e-graph groups expressions that are known to be equal into \emph{e-classes} (Fig.~\ref{fig:egraph}). Equality saturation works in two steps. First, it applies every rewrite rule wherever it can, until nothing new appears; this way the order of the rules no longer matters. Second, it \emph{extracts} a result, normally by picking the cheapest node in each class. Every use of a class then becomes the same wire. One more rule is important later: e-graph equalities must be a \emph{congruence} (formally a partial congruence \cite{suciu2025semantic}), meaning that if $x=y$ then $f(x)=f(y)$ in every context. We use the egglog engine \cite{zhang2023egglog}.
 
 \begin{figure}[!t]
 \centering
@@ -367,7 +367,7 @@ Full, constrained extraction & 25 & 8 & \ok\\
 
 \emph{Why not simply ban the factoring rule?} Three reasons. Factoring is useful elsewhere (later it takes a circuit from 20 to 11 and stays secure). Other moves leak too, such as moving $r$ to the end in ISW or dropping a needed refresh. And a leak depends on which wires end up in the circuit, not on which rule produced them. So we let every rule fire and check the result.
 
-\emph{Is there a cheaper secure circuit somewhere?} We tried a larger example: two ISW gadgets in a row, computing $(a\wedge b)\wedge d$, which takes 16 gates by hand and is secure. We combined the 40 cheapest options for each of its two outputs, across 6 variants of the e-graph, giving 240 circuits. Not one is secure, and the 28 that are cheaper than the hand design all leak (Fig.~\ref{fig:chain}). This is a sample, not a proof, but the message is clear: ordinary algebra alone gives no free savings here. The reason has to do with how the circuit is represented, which is the next finding.
+\emph{Is there a cheaper secure circuit somewhere?} We tried a larger example: two ISW gadgets in a row, computing $(a\wedge b)\wedge d$, which takes 16 gates by hand and is secure. We took egglog's 40 cheapest extractions of the second output and the 6 distinct ones it found for the first, and paired them in all $6\times40=240$ ways. Not one is secure, and the 28 that are cheaper than the hand design all leak (Fig.~\ref{fig:chain}). This is a sample, not a proof, but the message is clear: ordinary algebra alone gives no free savings here. The reason has to do with how the circuit is represented, which is the next finding.
 
 \begin{figure}[!t]
 \centering
@@ -585,7 +585,7 @@ Circuit & Inputs & Exact & PINI & Time & VerifMSI\\\midrule
 Keccak $\chi$, 6-bit & $2^{24}$ & secure & secure & 0.01\,s & 103/103\\
 Keccak $\chi$, 8-bit & $2^{32}$ & too large & secure & 0.01\,s & 137/137\\
 Keccak $\chi$, 32-bit & $2^{128}$ & too large & secure & 0.05\,s & 545/545\\
-ISW chain, depth 15 & $2^{62}$ & too large & secure & 0.01\,s & 212/212\\
+Chain of 15 gadgets, as HPC1 & $2^{62}$ & too large & secure & 0.01\,s & 212/212\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -715,7 +715,7 @@ majority, OR form & 65 & 41 & 37\% & 41, \ok\\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:frontend} shows the compiled programs. Every result matches its source on all inputs, has no leaking wire, and is confirmed by VerifMSI. On $z\wedge z$ the optimiser is tempted to drop a refresh that is needed, and seqc refuses, so the main finding shows up on a real compiled program too. The largest program, a majority vote written with ORs (five gadgets as written, four after optimisation), compiles from 65 to 41 in 83\,s.
+Table~\ref{tab:frontend} shows the compiled programs. Every result matches its source on all inputs, has no leaking wire, and is confirmed by VerifMSI. On $z\wedge z$ the optimiser is tempted to drop a refresh that is needed, and seqc refuses, so the main finding shows up on a real compiled program too. The largest program of this table, a majority vote written with ORs (five gadgets as written, four after optimisation), compiles from 65 to 41 in 83\,s.
 
 \begin{table}[t]
 \caption{Larger Compiled Programs (Cost: Gates + Random Bits; First Order, Two Shares, Glitch-Free)}\label{tab:larger}
@@ -797,7 +797,7 @@ PRESENT S-box & 8 / 8 & 133.7 & 24 / 24 & 1753.7 & 9 / 11 & 627.0 & \textbf{555.
 \end{tabular}
 \end{table*}
 
-Three findings stand out. First, \textbf{seqc needs no more gadgets than either tool on ten of the twelve programs.} It needs strictly fewer than AGEMA on eight and strictly fewer than COMPRESS on four, with ties elsewhere. AGEMA's front end optimises the logic for \emph{unmasked} area, so it turns the multiplexers and the S-boxes into NAND and NOR networks, each gate of which then becomes a masked gadget (24 gadgets for the PRESENT S-box against seqc's 8). COMPRESS keeps the logic exactly as written, so it pays for every AND in the source. The two exceptions are $z\wedge z$, where AGEMA's synthesis applies $x\wedge x=x$ and removes the gadget (a rule we deliberately left out to study the refresh), and the multiplier, where seqc's secure optimum has 7 gadgets and both tools have 6. Second, \textbf{the savings carry over into a glitch-robust flow on some programs, not all}: feeding seqc's chosen logic into COMPRESS makes its design smaller on four programs (by 45\% on $a\wedge b\oplus a\wedge c$, 27\% on the multiplexer, 6\% on the Ascon S-box and 11\% on the PRESENT S-box), the same on five, and larger on three (by 12\% on the multiplier, 3\% on the OR-form majority, where the random bits still drop from 9 to 6, and 1\% on the comparator). Third, seqc's own area is far below the other two, but this is not a fair comparison: it has no registers, no random-number generator and only glitch-free security. Fig.~\ref{fig:h2h} summarises the gadget counts.
+Three findings stand out. First, \textbf{seqc needs no more gadgets than either tool on ten of the twelve programs.} It needs strictly fewer than AGEMA on eight and strictly fewer than COMPRESS on four, with ties elsewhere. AGEMA's front end optimises the logic for \emph{unmasked} area, so it turns the multiplexers and the S-boxes into NAND and NOR networks, each gate of which then becomes a masked gadget (24 gadgets for the PRESENT S-box against seqc's 8). COMPRESS keeps the logic exactly as written, so it pays for every AND in the source. The two exceptions are $z\wedge z$, where AGEMA's synthesis applies $x\wedge x=x$ and removes the gadget (a rule we deliberately left out to study the refresh), and the multiplier, where seqc's secure optimum has 7 gadgets and both tools have 6. Second, \textbf{the savings carry over into a glitch-robust flow on some programs, not all}: feeding seqc's chosen logic into COMPRESS makes its design smaller on four programs (by 45\% on $a\wedge b\oplus a\wedge c$, 27\% on the multiplexer, 6\% on the Ascon S-box and 11\% on the PRESENT S-box), the same on five, and larger on three (by 12\% on the multiplier, 3\% on the OR-form majority, where the random bits still drop from 9 to 6, and 1\% on the comparator). Third, seqc's own area is below COMPRESS's on every program and below AGEMA's on all but $z\wedge z$, where AGEMA removes the gadget, but this is not a fair comparison: it has no registers, no random-number generator and only glitch-free security. Fig.~\ref{fig:h2h} summarises the gadget counts.
 
 \begin{figure}[t]
 \centering
@@ -860,7 +860,7 @@ Task & Result\\\midrule
 Per-term extraction, ISW chain depth 3 / 4 / 5 & 0.3\,s / 5.4\,s / 133\,s\\
 Labeller, depth-5 chain: bit-parallel / reference & 0.4\,s / $\approx$61\,min (est.)\\
 PINI extraction, Keccak $\chi$ 32-bit ($2^{128}$ inputs) & 0.05\,s, 545/545 wires\\
-PINI extraction, ISW chain depth 15 ($2^{62}$ inputs) & 0.01\,s, 212/212 wires\\
+PINI extraction, chain of 15 gadgets, as HPC1 ($2^{62}$ inputs) & 0.01\,s, 212/212 wires\\
 Exact checker, largest input space & $\approx 2^{26}$ points\\
 seqc, OR-form majority (5 gadgets written, 4 after), 65 $\to$ 41 & 83\,s\\
 Full verification, all 16 steps & $\approx$8\,min (487\,s)\\
@@ -886,12 +886,12 @@ Sampled chain extractions & 240 / 6,054 & 0\\
 Random PINI-built circuits & 234 / 4,608 & 0\\
 Compiled runs (six programs, plus $z\wedge z$ without a refresh) & 7 / 178 & 0\\
 Larger compiled programs & 6 / 443 & 0\\
-Three- and four-share circuits & 6 / 159 & 0\\\midrule
+Two-, three- and four-share ISW circuits & 6 / 159 & 0\\\midrule
 One-node-per-class extractions of $z\wedge z$ & 8,844 / 348,973 & 0\\
 Emitted Verilog files read back & 12 / 603 & 0\\\midrule
 \textbf{Total wire checks} & \textbf{406,155} & \textbf{0}\\\midrule
-Glitch checker (probes), first ten circuits & 167 & 0\\
-Glitch k-best frontier, 784 circuits (probes) & 21,869 & 0\\
+Glitch checker (probes), the ten distinct circuits behind Table~\ref{tab:glitch} & 167 & 0\\
+egglog k-best glitch frontier, 784 circuits (probes) & 21,869 & 0\\
 PINI verdicts (gadgets) & 6 & 0\\
 \bottomrule
 \end{tabular}
@@ -902,11 +902,11 @@ PINI verdicts (gadgets) & 6 & 0\\
 % =====================================================================
 \textbf{Masking compilers.} AGEMA \cite{knichel2021agema} turns an unprotected netlist into a masked one using PINI gadgets. It may simplify the \emph{unmasked} logic first, where rewrites cannot hurt security. COMPRESS \cite{cassiers2024compress} and TETRIS \cite{sarma2026tetris} choose and schedule gadgets for a fixed circuit. Tornado \cite{belaid2020tornado} adds refreshes wherever its verifier finds an attack. Feldtkeller et al.\ \cite{feldtkeller2022} let gadgets share random bits, which we do not model. Apart from the search-based work below, none of them explores equivalent \emph{masked} circuits by rewriting. The type-directed compiler of Barthe et al.\ \cite{barthe2016sni} also inserts refreshes automatically, but for a fixed circuit and with a stronger notion (SNI) than the probing notion used here. Kumar et al.\ \cite{kumar2025graph} lower the fresh randomness of first-order masked circuits by graph colouring, and, in their words, only rewire the randomness inputs and leave the logic unchanged.
 
-\textbf{Verifiers.} VerifMSI \cite{meunier2023verifmsi} is our independent referee; maskVerif \cite{barthe2019maskverif} and SILVER \cite{knichel2020silver} are other well-known checkers. superVer \cite{treff2024supver} uses e-graphs to \emph{check} masked circuits rather than optimise them. The authors of the eVer verifier \cite{gourjon2026ever} removed unneeded refreshes from their gadgets by hand; we do this automatically, inside an optimiser.
+\textbf{Verifiers.} VerifMSI \cite{meunier2023verifmsi} is our independent referee; maskVerif \cite{barthe2019maskverif} and SILVER \cite{knichel2020silver} are other well-known checkers. superVer \cite{treff2024supver} uses e-graphs to \emph{check} masked circuits rather than optimise them. The eVer verifier \cite{gourjon2026ever} proves joint independence for several masking schemes; we read only its abstract, and its full text may discuss refresh optimisation.
 
-\textbf{Optimisers that break masking.} MaskedHLS \cite{sarma2024maskedhls} and a study for the German BSI \cite{oberhansl2024study} report that standard synthesis steps, such as re-timing, can weaken masking. MaskedHLS responds by not optimising the logic at all. We explain why this happens in equality saturation, and show how to fix it.
+\textbf{Optimisers that break masking.} MaskedHLS \cite{sarma2024maskedhls} and a study for the German BSI \cite{oberhansl2024study} report that standard synthesis steps, such as re-timing, can weaken masking. MaskedHLS responds by placing registers where glitch-robust gadgets require them and balancing the paths. We explain why this happens in equality saturation, and show how to fix it.
 
-\textbf{E-graphs for hardware.} E-Syn \cite{chen2024esyn} applies equality saturation to gate-level Boolean logic with technology-aware costs and reports area and delay savings over ABC; it has no notion of probing security, so it is the kind of optimiser whose output Finding~1 warns about.
+\textbf{E-graphs for hardware.} E-Syn \cite{chen2024esyn} applies equality saturation to gate-level Boolean logic with technology-aware costs and reports area and delay savings over ABC; its abstract mentions no security property, so it is the kind of optimiser whose output Finding~1 warns about.
 
 \textbf{Search-based optimisation of masked gadgets.} Koblah et al.\ \cite{koblah2025evo} optimise individual masked gadgets (COMAR and the HPC1--HPC3 families, first order) at the standard-cell level with an evolutionary search: a genetic algorithm over a graph of NanGate45 gates, with sensitivity-guided crossover and four kinds of mutation. Candidates are ranked by a surrogate for power and area, functional equivalence is checked by SAT, and the final candidates are verified for PINI security with the VERICA tool; candidates that fail are discarded, and only secure results are reported. They report reductions of up to about 15\% in power and 10\% in area on single gadgets, with many gadgets improving little or getting worse, and a 12\% power and 7\% area reduction in a 32-bit AES core after replacing one gadget. They also find that conventional CAD steps (technology mapping, FRAIG rewriting, retiming) sometimes give far larger gains on gadgets, up to about 60\%, but not systematically, which is the situation Finding~1 explains for equality saturation. Theirs is the closest work to ours in spirit, since it also searches over equivalent masked circuits and keeps only secure ones. It differs in what is searched and how. It works below the Boolean level, on library cells of one gadget, and does not change randomness or latency; we work on the Boolean structure of whole programs. It samples circuits with a randomised search, whereas we saturate an e-graph (every equivalent form, not a sample), add a value-level representation for re-sharing, and show which extraction choices are unsafe. Its security check is applied to the final candidates rather than to every individual in the search, whereas our checks run inside extraction. The two are complementary: a gadget chosen by our optimiser could be passed to theirs.
 
