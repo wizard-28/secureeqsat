@@ -904,7 +904,7 @@ PINI verdicts (gadgets) & 6 & 0\\
 
 \textbf{Verifiers.} VerifMSI \cite{meunier2023verifmsi} is our independent referee; maskVerif \cite{barthe2019maskverif} and SILVER \cite{knichel2020silver} are other well-known checkers. superVer \cite{treff2024supver} uses e-graphs to \emph{check} masked circuits rather than optimise them. The authors of the eVer verifier \cite{gourjon2026ever} removed unneeded refreshes from their gadgets by hand; we do this automatically, inside an optimiser.
 
-\textbf{Optimisers that break masking.} MaskedHLS \cite{sarma2024maskedhls} and a study for the German BSI \cite{oberhansl2024study} report that standard synthesis optimisations can recombine shares. MaskedHLS responds by not optimising the logic at all. We explain why this happens in equality saturation, and show how to fix it.
+\textbf{Optimisers that break masking.} MaskedHLS \cite{sarma2024maskedhls} and a study for the German BSI \cite{oberhansl2024study} report that standard synthesis steps, such as re-timing, can weaken masking. MaskedHLS responds by not optimising the logic at all. We explain why this happens in equality saturation, and show how to fix it.
 
 \textbf{E-graphs for hardware.} E-Syn \cite{chen2024esyn} applies equality saturation to gate-level Boolean logic with technology-aware costs and reports area and delay savings over ABC; it has no notion of probing security, so it is the kind of optimiser whose output Finding~1 warns about.
 
@@ -984,12 +984,12 @@ No result argues that re-sharing is non-congruent for e-graphs. The nearest sour
 \bibitem{knichel2021agema} D.~Knichel, A.~Moradi, N.~M\"uller, and P.~Sasdrich, ``Automated generation of masked hardware,'' \emph{IACR TCHES}, vol.~2022, no.~1, pp.~589--629, 2022.
 \bibitem{meunier2023verifmsi} Q.~L.~Meunier and A.~Taleb, ``VerifMSI: Practical verification of hardware and software masking schemes implementations,'' in \emph{SECRYPT 2023}, pp.~520--527, 2023.
 \bibitem{gourjon2026ever} M.~Gourjon, M.~Orlt, P.~Pauls, and A.~Treff, ``eVer: Universal and automated verification of side-channel security for additive, inner product, polynomial and general code-based masking,'' IACR Cryptol. ePrint Arch., Rep.~2026/208, 2026.
-\bibitem{sarma2024maskedhls} N.~Sarma, A.~S.~Thakur, and C.~Karfa, ``MaskedHLS: Domain-specific high-level synthesis of masked cryptographic designs,'' \emph{IEEE TCAD}, vol.~43, no.~11, pp.~3973--3984, 2024.
+\bibitem{sarma2024maskedhls} N.~Sarma, A.~S.~Thakur, and C.~Karfa, ``MaskedHLS: Domain-specific high-level synthesis of masked cryptographic designs,'' arXiv:2407.11806, 2024, preprint. % UNVERIFIED: the journal version (IEEE TCAD) was not confirmed; only the arXiv page was read.
 \bibitem{treff2024supver} A.~Treff, P.~Pauls, M.~Orlt, and M.~Gourjon, ``superVer: Verifying probabilistic independence of systems of expressions using equality saturation,'' work-in-progress abstract, \emph{EGRAPHS 2024}, 2024.
 \bibitem{feldtkeller2022} J.~Feldtkeller, D.~Knichel, P.~Sasdrich, A.~Moradi, and T.~G\"uneysu, ``Randomness optimization for gadget compositions in higher-order masking,'' \emph{IACR TCHES}, vol.~2022, no.~4, pp.~188--227, 2022.
 \bibitem{cassiers2024compress} G.~Cassiers, B.~Gigerl, S.~Mangard, C.~Momin, and R.~Nagpal, ``Compress: Generate small and fast masked pipelined circuits,'' \emph{IACR TCHES}, vol.~2024, no.~3, pp.~500--529, 2024.
 \bibitem{sarma2026tetris} N.~Sarma, T.~Patidar, N.~Brahamanya, and C.~Karfa, ``TETRIS: Automated design space exploration of randomness--latency trade-offs in masked hardware,'' IACR Cryptol. ePrint Arch., Rep.~2026/1306, 2026.
-\bibitem{barthe2019maskverif} G.~Barthe \emph{et al.}, ``MaskVerif: Automated verification of higher-order masking in presence of physical defaults,'' in \emph{ESORICS 2019}, pp.~300--318, 2019. % UNVERIFIED: full author list (HAL page blocked, search snippets disagree); fetch before submission.
+\bibitem{barthe2019maskverif} G.~Barthe, S.~Bela\"id, G.~Cassiers, P.-A.~Fouque, B.~Gr\'egoire, and F.-X.~Standaert, ``maskVerif: Automated verification of higher-order masking in presence of physical defaults,'' in \emph{ESORICS 2019}, pp.~300--318, 2019.
 \bibitem{barthe2016sni} G.~Barthe, S.~Bela\"id, F.~Dupressoir, P.-A.~Fouque, B.~Gr\'egoire, P.-Y.~Strub, and R.~Zucchini, ``Strong non-interference and type-directed higher-order masking,'' in \emph{ACM CCS 2016}, pp.~116--129, 2016.
 \bibitem{knichel2020silver} D.~Knichel, P.~Sasdrich, and A.~Moradi, ``SILVER -- Statistical independence and leakage verification,'' in \emph{ASIACRYPT 2020}, LNCS, pp.~787--816, 2020.
 \bibitem{chen2024esyn} C.~Chen, G.~Hu, D.~Zuo, C.~Yu, Y.~Ma, and H.~Zhang, ``E-Syn: E-graph rewriting with technology-aware cost functions for logic synthesis,'' in \emph{Proc. DAC}, 2024, arXiv:2403.14242.
@@ -998,7 +998,7 @@ No result argues that re-sharing is non-congruent for e-graphs. The nearest sour
 \bibitem{courtois2011} N.~T.~Courtois, D.~Hulme, and T.~Mourouzis, ``Solving circuit optimisation problems in cryptography and cryptanalysis,'' preprint hosted by the IMA, 2011. % UNVERIFIED: venue; the claim used (multiplicative complexity of the PRESENT S-box is exactly 4, Theorem 1) was read in the document.
 \bibitem{eldib2014masking} H.~Eldib and C.~Wang, ``Synthesis of masking countermeasures against side channel attacks,'' in \emph{Computer Aided Verification (CAV)}, 2014. % UNVERIFIED: venue; title and authors read from the paper's first page.
 \bibitem{singher2023colored} E.~Singher and S.~Itzhaky, ``Colored e-graph: Equality reasoning with conditions,'' arXiv:2305.19203, 2023, preprint.
-\bibitem{oberhansl2024study} F.~Oberhansl, T.~Stelzer, and M.~Schink, ``New study on the synthesis of cryptographic hardware implementations,'' Fraunhofer AISEC, commissioned by the BSI, Nov. 2024.
+\bibitem{oberhansl2024study} Fraunhofer AISEC, study on the security impact of hardware design synthesis, commissioned by the German Federal Office for Information Security (BSI), publication page at bsi.bund.de. % UNVERIFIED: exact title, authors and date; the study itself was not read, only the BSI page summary and Fraunhofer blog excerpts.
 \end{thebibliography}
 
 \end{document}
