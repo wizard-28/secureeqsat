@@ -107,7 +107,7 @@ area, not for the number of ANDs.
 | ISW chain depth 3 / 4 / 5, per-term extraction | 0.3 / 5.4 / 133 s |
 | Labeller depth 5: bit-parallel / reference | 0.409 s / ~3686 s (estimated) |
 | PINI composition, chi 32-bit / ISW chain depth 15 | 0.05 s / 0.01 s |
-| Full verification, 16 steps (`findings/verify.py --full`) | see `timing/verify_full.txt` |
+| Full verification, 16 steps (`findings/verify.py --full`), fresh `git clone` | 533 s, 16 of 16 pass (`timing/verify_clean_checkout.txt`) |
 
 Raw: `timing/`. Each was run alone; load before and after is in `timing/machine.txt`.
 
@@ -149,6 +149,8 @@ Raw: `timing/`. Each was run alone; load before and after is in `timing/machine.
   all timings from the one-at-a-time pass (`timing/`, `h2h/raw/compress_quiet/`).
 
 ## Where the timings live
+
+The earlier run in the working tree (`timing/verify_full.txt`, 487 s) passed 14 of 16: its two lint gates scanned untracked local folders. The paper quotes the clean-checkout run.
 
 `findings/outputs/` still holds the committed outputs of an earlier machine (Windows 11), with
 its own timings. The outputs of this machine's full verification run (14 of 16 steps pass; G1
