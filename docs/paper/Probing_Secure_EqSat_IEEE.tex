@@ -423,7 +423,7 @@ $x$ & $y$ & $r$ & $x_0$ & $y_0=x_0\oplus r$ & $x_1$ & $y_1=x_1\oplus r$\\\midrul
 \caption{Why re-sharing is not a congruence. $x$ and $y=\rf(x)$ always hold the same secret (columns $x$ and $y$), but share 0 differs in rows 3 and 4, so the context ``read share 0 gives $f(x)=0$ and $f(y)=1$.''}\label{fig:congruence}
 \end{figure}
 
-In other words, a wire-level optimiser cannot even \emph{see} the designers' moves. We found no earlier statement of this point for e-graphs.
+In other words, a wire-level optimiser cannot even \emph{see} the designers' moves. We found no earlier statement of this point for e-graphs; it applies the known fact that e-graph equalities form a congruence \cite{suciu2025semantic} to masked circuits (search record in Appendix~\ref{app:search}).
 
 \subsection{A second e-graph, over secret values}
 Our answer is to move the e-graph up a level, so that each class stands for a secret value rather than a particular set of wires (Fig.~\ref{fig:value}). A term is built from inputs, XOR, NOT, refresh, registers and gadgets:
@@ -467,9 +467,9 @@ Notice that security is no longer part of the equality at all. It has to be enfo
 \section{Finding 4: One Label Per Class Is No Longer Enough}\label{sec:extract}
 % =====================================================================
 \begin{proposition}[Safety is not a property of the e-class]\label{prop:vplc}
-With refresh removal (R3), $\isw(z,z)$ and $\isw(z,\rf(z))$ end up in the same e-class, yet the first leaks and the second is secure. Picking one node per class always returns $\isw(z,z)$, while picking whole terms can return the secure one.
+With refresh removal (R3), $\isw(z,z)$ and $\isw(z,\rf(z))$ end up in the same e-class, yet the first leaks and the second is secure. With R3 as the only rule, picking one node per class always returns $\isw(z,z)$, while picking whole terms can return the secure one.
 \end{proposition}
-Here is the intuition. In $\isw(z,z)$, both inputs are the same pair of shares, so one product wire is 1 half the time when $z=0$ and never when $z=1$; it leaks $z$. With a refresh on one input, every product wire is 1 a quarter of the time, whatever $z$ is (Fig.~\ref{fig:class}). Because R3 makes the refresh a loop back into $z$'s own class, the usual one-node-per-class extraction cannot use it, so both inputs become the same wire (full proof in Appendix~\ref{app:proofs}). This is a statement about this rule set: with all three rule groups, 16 of the 338 possible one-node-per-class choices are secure, and at the wire level a single label per class still works.
+Here is the intuition. In $\isw(z,z)$, both inputs are the same pair of shares, so one product wire is 1 half the time when $z=0$ and never when $z=1$; it leaks $z$. With a refresh on one input, every product wire is 1 a quarter of the time, whatever $z$ is (Fig.~\ref{fig:class}). Because R3 makes the refresh a loop back into $z$'s own class, the usual one-node-per-class extraction cannot use it, so both inputs become the same wire (full proof in Appendix~\ref{app:proofs}). This is a statement about refresh removal alone. With distributivity (R1) added, 16 of the 338 acyclic one-node-per-class choices for this example are secure, for instance $\isw(a,a\oplus b)\oplus\isw(b,a\oplus b)$, so the claim is not that one-node-per-class extraction can never find a secure circuit, only that it can miss every one. At the wire level a single label per class still works.
 
 \begin{figure*}[!t]
 \centering
@@ -943,6 +943,20 @@ Throughout, a secret $s$ is shared as $(s_0,s_0\oplus s)$ with $s_0$ uniformly r
 
 \emph{Proof of Proposition~\ref{prop:cut}.}
 Let $w$ be a leaking wire in the lowering of a piece $s$ of a larger term $t$. Lowering builds $t$ from its pieces, so the lowering of $t$ contains a wire $w'$ that computes the same function as $w$, up to renaming its random bits, which does not change any distribution. Everything $w'$ depends on lies inside $s$, because the rest of $t$ only uses $s$'s outputs. So a probe on $w'$ sees exactly what a probe on $w$ sees, and $w'$ leaks too. The argument only uses this dependency structure, so it also works when the attacker has several probes. As a sanity check we also enumerated every term over two inputs with up to three operators: all 2,204 leaking terms stay leaking in all 26 one-step contexts each (57,304 checks, no counterexample). This is a bounded check, not a machine-checked proof.\hfill$\square$
+
+
+\section{Search Record for the Congruence Claim}\label{app:search}
+The claim that re-sharing is not a congruence of the wire-term algebra, and so cannot be an e-graph equality, is a negative novelty claim, so we record how it was checked. The search was run on 25 October 2026 with a web-search tool restricted to a US index, by four independent search passes told to try to refute the claims. The queries bearing on this claim were:
+\begin{itemize}
+\item \emph{Semantic Foundations of Equality Saturation Suciu Wang Zhang ICDT 2025 congruence}
+\item \emph{e-graphs with contexts OR ``colored e-graphs'' Singher Itzhaky conditional equalities non-congruence}
+\item \emph{equality saturation directed/non-symmetric/refinement relations not congruence}
+\item \emph{equality saturation masked implementation side-channel countermeasure e-graph optimization masking gadgets}
+\item \emph{``e-graph'' OR ``equality saturation'' ``masked'' implementation threshold implementation rewriting side-channel}
+\item \emph{equality saturation e-graph masking probing security side-channel}
+\item \emph{masked circuit optimization e-graph equality saturation probing security}
+\end{itemize}
+No result argues that re-sharing is non-congruent for e-graphs. The nearest sources are the semantics of equality saturation as a partial congruence \cite{suciu2025semantic} and colored e-graphs (Singher and Itzhaky, arXiv 2305.19203), where each colour is its own congruence layer; neither mentions masking. We rate the claim medium-high, not certain. Several PDFs could not be fetched, so some sources were judged from abstracts or search snippets, and the search tool is snippet-based, so a recent workshop paper could be missed. A later search for the project's title and tool name found nothing, and a search for gadget-level optimisation found the work of Koblah et al.\ \cite{koblah2025evo}, which we read in full; it works on library cells and does not address congruence. The full record, with the reading status of each source, is in \texttt{docs/adversarial-search-6.md} of the repository.
 
 \begin{thebibliography}{99}
 \footnotesize
