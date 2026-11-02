@@ -1,0 +1,12 @@
+factor         PASS 64
+square         PASS 32
+mux            PASS 64
+adder          PASS 64
+majority       PASS 64
+majority_or    PASS 64
+cmp2           PASS 128
+add2           PASS 256
+mul2           PASS 128
+mux4           PASS 512
+ascon_sbox     PASS 256
+present_sbox   PASS 128

@@ -414,3 +414,11 @@ uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.
   (Yosys/ABC) added (weak by construction). All paper timings re-measured on this laptop only
   (`bench_extra/timing/`). Paper copy updated (56,579 wire checks, new Table VIII/XII).
   Workarounds are listed in `bench_extra/RESULTS.md`; no repository dependency changed.
+- **2026-11-02** — **Limitations pass.** Cited Koblah et al. (ePrint 2025/1190, evolutionary search over
+  masked gadgets, verified by abstract fetch; PINI use UNVERIFIED, title given by the team not found)
+  in related work, Table I and the novelty text, and logged the queries (`docs/adversarial-search-7.md`);
+  the claim "only approach that explores rewrites and checks every result" is narrowed. Measured
+  `k`/rounds sensitivity of seqc (`bench_extra/k_sweep.txt`): stable except the multiplier, where
+  extraction is non-monotone in `k` (69 for k 2-8, 75 for k 16/32), so costs are best-found, not
+  optima. Emitted Verilog simulated with Icarus on all twelve programs (function only). Exact
+  multiplicative complexity of the PRESENT S-box is 4 (Courtois et al.), against seqc's 8 gadgets.

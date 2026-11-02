@@ -120,9 +120,12 @@ Raw: `timing/`. Each was run alone; load before and after is in `timing/machine.
 - The areas of AGEMA and COMPRESS include registers and (COMPRESS: `area_ge`, excluding its
   random-number generator) differ in what they include; `area_ge_wrng` is in the raw CSVs.
 - The no-e-graph baseline is weak (ABC is not a multiplicative-complexity minimiser). A
-  dedicated minimiser could do better than ABC and might match seqc on some programs.
+  dedicated minimiser could do better than ABC. For the PRESENT S-box the minimum is known
+  exactly: multiplicative complexity 4 (Courtois, Hulme, Mourouzis, Theorem 1, read in the
+  document), against 8 seqc gadgets and 9 as written, so seqc is not optimal in gadget count
+  there. No dedicated minimiser was run; building one (for example mockturtle) was not done.
 - Twelve small programs, two shares, first order. The Ascon and 4:1 mux seqc rows use `k = 2`
-  (the default `k = 8` did not finish in 40 minutes); stability across `k` was not re-checked.
+  (the default `k = 8` with 6 saturation rounds did not finish in 40 minutes); see the `k` sweep below.
 - Behavioural simulation only (COMPRESS's structural simulation is not run by its Makefile).
 
 ## Deviations and workarounds (so the run can be repeated)
@@ -152,3 +155,42 @@ its own timings. The outputs of this machine's full verification run (14 of 16 s
 and G2 fail only because ruff also scans the untracked `.agents/` and `.claude/skills/kaggle`
 folders; they pass with those excluded) are in `timing/verify_outputs/`. The paper reports this
 machine's timings only.
+
+## Sensitivity of seqc's result to `k` and to the saturation rounds
+
+`k_sweep.sh` (4 saturation rounds, 300 s cap per run, cost = gates + random bits of the secure
+optimum; gadgets in brackets):
+
+| Program | k=2 | k=4 | k=8 | k=16 |
+|---|---|---|---|---|
+| factor / square / mux / adder / majority | 11 / 14 / 13 / 24 / 22 | same | same | same |
+| 2-bit comparator | 46 (4g) | 46 | 46 | 46 |
+| 2-bit adder | 48 (4g) | 48 | 48 | 48 |
+| OR-form majority | 51 (5g) | 51 | 51 | 51 |
+| 4:1 multiplexer | 39 (3g) | 39 | 39 | timeout |
+| Ascon S-box | 78 (5g) | 78 | 78 | timeout |
+| PRESENT S-box | 112 (9g) | 112 | 112 | timeout |
+| **2x2 multiplier** | **75 (8g)** | **71** | **71** | **75** |
+
+- With enough saturation rounds the result does not depend on `k` for `k` up to 8 on any program
+  except the multiplier. On the multiplier the cost is **not monotone in `k`**: with 6 rounds
+  (the default) it is 69 (7 gadgets) for `k` = 2, 4, 8 and also for 7 and 8 rounds, but 75 for
+  `k` = 16 and 32. The extractor ranks child terms by standalone cost while the true cost depends
+  on sharing, so a wider frontier can push out a term that is cheap in context. Reported costs
+  are therefore the best found, not proven optima.
+- 4 rounds is not enough saturation for two programs: the PRESENT S-box gives 112 (9 gadgets)
+  and the OR-form majority 51 (5 gadgets), against 101 (8) and 41 (4) with the default 6
+  rounds. The paper reports 6 rounds except for the two `k = 2` rows, which use 4.
+- mux4 and the Ascon S-box give the same cost at `k` = 2, 4 and 8 with 4 rounds, so the `k = 2`
+  rows of the main table are not an artefact of the narrow frontier at 4 rounds.
+- The multiplier loss (7 gadgets against 6 as written) is not caused by `k` or by too few rounds:
+  it is stable at 69 for 6 to 8 rounds and `k` up to 8.
+
+## Emitted Verilog in simulation
+
+`sim_verilog.py` simulates seqc's Verilog with Icarus for all twelve programs: every input value
+with 8 random sharings and random bits each, checking that the two output shares XOR to the value
+the source computes. All twelve pass (`sim_verilog.txt`: 64, 32, 64, 64, 64, 64, 128, 256, 128,
+512, 256, 128 vectors). A copy of the adder with one XOR turned into an AND fails (72 mismatches),
+so the testbench is not vacuous. This checks **function, not security**; no glitch-extended or
+leakage tool was run on the Verilog, and it is not secure under glitches.
