@@ -1,0 +1,12 @@
+# PRESENT 4-bit S-box from its algebraic normal form (x3 is the most significant bit).
+input x0, x1, x2, x3
+p12 = x1 & x2
+p01 = x0 & x1
+p13 = x1 & x3
+p23 = x2 & x3
+p02 = x0 & x2
+p03 = x0 & x3
+out y0 = x0 ^ x2 ^ p12 ^ x3
+out y1 = x1 ^ (p01 & x2) ^ x3 ^ p13 ^ (p01 & x3) ^ p23 ^ (p02 & x3)
+out y2 = ~(p01 ^ x2 ^ x3 ^ p03 ^ p13 ^ (p01 & x3) ^ (p02 & x3))
+out y3 = ~(x0 ^ x1 ^ p12 ^ (p01 & x2) ^ x3 ^ (p01 & x3) ^ (p02 & x3))

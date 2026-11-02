@@ -1,0 +1,8 @@
+# 2-bit ripple-carry adder with carry in and carry out
+input a0, a1, b0, b1, cin
+p0 = a0 ^ b0
+out s0 = p0 ^ cin
+c1 = (a0 & b0) ^ (cin & p0)
+p1 = a1 ^ b1
+out s1 = p1 ^ c1
+out cout = (a1 & b1) ^ (c1 & p1)

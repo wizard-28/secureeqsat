@@ -8,7 +8,7 @@ Contract:
               wires are in topological order.
     stdout : JSON {wire_name: bool}   (True == first-order probing secure)
 
-Translation of our circuits into VerifMSI's symbolic model (2 shares):
+Translation of our circuits into VerifMSI's symbolic model (d shares; d = 2 shown):
     share0  ->  mask  m0          (type 'M', uniform)
     share1  ->  secret ^ m0       (so share0 ^ share1 == secret)
     random  ->  mask              (type 'M', uniform)
@@ -36,9 +36,9 @@ def main():
     """Read a circuit as JSON on stdin; print `RESULT_JSON:{wire: verdicts}`.
 
     Algorithm, step by step:
-      1. For each secret (only 2-share maskings are supported), create a secret symbol
-         `s` and a mask symbol `m0`. Share 0 is `m0` and share 1 is `s ^ m0`, so the
-         shares XOR to the secret and share 0 is uniform.
+      1. For each secret (d >= 2 shares), create a secret symbol `s` and d-1 mask
+         symbols `m0 ...`. Shares 0 .. d-2 are the masks and the last share is `s`
+         XOR every mask, so the shares XOR to the secret (d = 2: `m0`, `s ^ m0`).
       2. Give each fresh random its own uniform 1-bit symbol.
       3. Walk the wires in order, building each wire's symbolic expression from its
          operands' expressions (`^` and `&` on symbols build expressions).
@@ -51,15 +51,17 @@ def main():
     env = {}  # wire name -> its symbolic expression
 
     for secret, shares in data["shares"].items():
-        if len(shares) != 2:
-            raise SystemExit(
-                f"driver only models 2-share maskings; got {len(shares)} shares "
-                f"for {secret!r}"
-            )
+        if len(shares) < 2:
+            raise SystemExit(f"need at least 2 shares for {secret!r}")
         s = symbol(secret, "S", 1)  # the secret: a 1-bit "S" (secret) symbol
-        m0 = symbol(f"{secret}__m0", "M", 1)  # a uniform 1-bit "M" (mask) symbol
-        env[shares[0]] = m0  # share 0 = the mask
-        env[shares[1]] = s ^ m0  # share 1 = secret XOR mask
+        last = s  # the last share is the secret XOR every other (uniform) share
+        for k, name in enumerate(shares[:-1]):
+            # shares 0 .. d-2 are independent uniform masks; for d = 2 this is the
+            # original model (share 0 = m0, share 1 = secret ^ m0)
+            mk = symbol(f"{secret}__m{k}", "M", 1)
+            env[name] = mk
+            last = last ^ mk
+        env[shares[-1]] = last
 
     for r in data["randoms"]:
         env[r] = symbol(r, "M", 1)  # each fresh random is a uniform 1-bit mask

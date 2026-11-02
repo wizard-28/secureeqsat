@@ -1,0 +1,5 @@
+# 4:1 multiplexer: y = d[s1 s0]
+input d0, d1, d2, d3, s0, s1
+lo = d0 ^ (s0 & (d0 ^ d1))
+hi = d2 ^ (s0 & (d2 ^ d3))
+out y = lo ^ (s1 & (lo ^ hi))

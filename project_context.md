@@ -389,3 +389,9 @@ uv run python experiments/frontend/seqc.py experiments/frontend/examples/factor.
   Python file under `experiments/` and `findings/verify.py`, and added explanatory comments
   to the three shell scripts and `pyproject.toml`. Comments and docstrings only: each file's
   syntax tree matches HEAD, ruff is clean, 171 tests pass.
+- **2026-11-02** — **Paper review #1** (`docs/paper-review-1.md`) and follow-up work: new
+  `experiments/three_share/` (d = 2, 3, 4 ISW factoring search; cost-only still leaks, secure
+  savings exist for d >= 3; in-house checker only, not VerifMSI cross-checked), a bounded
+  exhaustive leak-cut test (`experiments/resharing/test_leak_cut_exhaustive.py`, 57,304 checks), and
+  a patched paper copy in `docs/paper/` (related work, ablation table, d-share section). No
+  claim promoted to a headline; the d >= 3 numbers await the oracle cross-check.

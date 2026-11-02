@@ -1,0 +1,20 @@
+# Ascon 5-bit S-box (x0 is the most significant bit), five AND gadgets.
+input x0, x1, x2, x3, x4
+a0 = x0 ^ x4
+a4 = x4 ^ x3
+a2 = x2 ^ x1
+t0 = ~a0 & x1
+t1 = ~x1 & a2
+t2 = ~a2 & x3
+t3 = ~x3 & a4
+t4 = ~a4 & a0
+b0 = a0 ^ t1
+b1 = x1 ^ t2
+b2 = a2 ^ t3
+b3 = x3 ^ t4
+b4 = a4 ^ t0
+out y0 = b0 ^ b4
+out y1 = b1 ^ b0
+out y2 = ~b2
+out y3 = b3 ^ b2
+out y4 = b4
