@@ -1,5 +1,5 @@
 % Probing-Secure EqSat -- course project report in IEEE conference format.
-% Build: pdflatex ieee.tex (twice). Uses the official IEEEtran.cls.
+% Build: pdflatex Probing_Secure_EqSat_IEEE.tex (twice). Uses the official IEEEtran.cls.
 \documentclass[conference]{IEEEtran}
 
 \usepackage{amsmath,amssymb,stmaryrd,amsthm}
@@ -489,7 +489,7 @@ $z$ & $z_0$ & $r$ & $z_1$ & $z_1'=z_1\oplus r$ & $z_0z_1'$\\\midrule
 \end{figure*}
 
 \subsection{Safe method 1: check each candidate, cut leaks early}
-Instead of choosing one node per class, we choose whole \emph{terms}, so the same class can be built differently in different places. Each class keeps its $k=8$ cheapest terms (the results were identical for $k=2$, 8 and 32 on the value-layer fixtures, but not on the $2{\times}2$ multiplier, where the secure optimum is 69 for $k$ from 2 to 8 and 75 for $k=16$ and 32, so extraction is a search: the costs we report are the best found, not proven optima). Each candidate is lowered to wires, and every wire is checked exactly.
+Instead of choosing one node per class, we choose whole \emph{terms}, so the same class can be built differently in different places. Each class keeps its $k=8$ cheapest terms (the results were identical for $k=2$, 8 and 32 on the value-layer fixtures, but not on the $2{\times}2$ multiplier, where the secure optimum is 69 for $k$ from 2 to 8 and 75 for $k=16$ and 32, so extraction is a search: the costs we report are the best found, not proven optima. The extractor ranks child terms by their standalone cost, while the cost of a term depends on what it shares, so a wider frontier can push out a term that is cheap in context). Each candidate is lowered to wires, and every wire is checked exactly.
 
 \begin{proposition}[Leak cut]\label{prop:cut}
 In both models, if a piece of a circuit has a leaking wire, then every larger circuit containing that piece also leaks.
@@ -715,7 +715,7 @@ majority, OR form & 65 & 41 & 37\% & 41, \ok\\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:frontend} shows the compiled programs. Every result matches its source on all inputs, has no leaking wire, and is confirmed by VerifMSI. On $z\wedge z$ the optimiser is tempted to drop a refresh that is needed, and seqc refuses, so the main finding shows up on a real compiled program too. The largest program, a majority vote written with ORs (five gadgets), compiles from 65 to 41 in 83\,s.
+Table~\ref{tab:frontend} shows the compiled programs. Every result matches its source on all inputs, has no leaking wire, and is confirmed by VerifMSI. On $z\wedge z$ the optimiser is tempted to drop a refresh that is needed, and seqc refuses, so the main finding shows up on a real compiled program too. The largest program, a majority vote written with ORs (five gadgets as written, four after optimisation), compiles from 65 to 41 in 83\,s.
 
 \begin{table}[t]
 \caption{Larger Compiled Programs (Cost: Gates + Random Bits; First Order, Two Shares, Glitch-Free)}\label{tab:larger}
@@ -743,7 +743,7 @@ Table~\ref{tab:larger} adds six larger programs, including the 5-bit S-box of As
 We compare seqc with three baselines, all run on the same programs: a \emph{cost-only optimiser} (the same e-graph and rules with ordinary extraction, which is what standard equality-saturation tools do), the \emph{hand-written} masked design, and two published masking tools, AGEMA \cite{knichel2021agema} and COMPRESS \cite{cassiers2024compress}.
 
 \subsection{Security: ours versus a cost-only optimiser}
-Fig.~\ref{fig:price} lists every case where the cost-only optimiser and our tool disagree. Each time, the cost-only result is cheaper and leaks, and ours is secure. The gap is the price of security: one gate on ISW, three on squaring, three on the unregistered ISW gadget (one gate and two registers), and the full set of registers on DOM circuits. On top of this, none of egglog's 784 cheapest DOM-chain candidates is glitch-secure, and none of the 240 sampled chain circuits is secure.
+Fig.~\ref{fig:price} lists every case where the cost-only optimiser and our tool disagree. Each time, the cost-only result is cheaper and leaks, and ours is secure. The gap is the price of security: one gate on ISW, three on squaring, three on the unregistered ISW gadget (one gate and two registers), two on the two-gadget ISW chain, and the full set of registers on DOM circuits. On top of this, none of egglog's 784 cheapest DOM-chain candidates is glitch-secure, and none of the 240 sampled chain circuits is secure.
 
 \begin{figure}[t]
 \centering
@@ -766,7 +766,7 @@ Fig.~\ref{fig:price} lists every case where the cost-only optimiser and our tool
 \end{figure}
 
 \subsection{Cost: ours versus the hand-written design}
-Where the starting circuit has waste, the secure result is 20--58\% cheaper: 58\% on $a\wedge b\oplus a\wedge c$ from the compiler's start of 26, 52\% on the multiplexer, 45\% on the same logic from its hand-written start of 20, 40\% on the over-refreshed chain, 37\% on the OR-form majority, 25\% on the HPC1 chain, 21\% on majority and 20\% on the full adder (Fig.~\ref{fig:slack}, Table~\ref{tab:frontend}). On tight designs (the hand-written ISW chain and Keccak $\chi$) it finds nothing to save, and in the glitch-free model it never returns a circuit that leaks. The PINI route is the one case that costs more, 25--33\% above the ISW-based design, in return for certifying circuits too large to check directly.
+Where the starting circuit has waste, the secure result is 11--58\% cheaper: 58\% on $a\wedge b\oplus a\wedge c$ from the compiler's start of 26, 52\% on the multiplexer, 45\% on the same logic from its hand-written start of 20, 40\% on the over-refreshed chain, 37\% on the OR-form majority, 25\% on the HPC1 chain, 21\% on majority and 20\% on the full adder, and the larger programs of Table~\ref{tab:larger} save 11--25\% apart from the multiplier (Fig.~\ref{fig:slack}, Table~\ref{tab:frontend}). On tight designs (the hand-written ISW chain and Keccak $\chi$) it finds nothing to save, and in the glitch-free model it never returns a circuit that leaks. The PINI route is the one case that costs more, 25--33\% above the ISW-based design, in return for certifying circuits too large to check directly.
 
 \subsection{Head-to-head with AGEMA and COMPRESS}\label{sec:h2h}
 We ran both tools on the twelve programs of Tables~\ref{tab:frontend} and~\ref{tab:larger} with two shares, all on one machine (an AMD Ryzen 5 5500U laptop, 12 threads, 5.6\,GB, Linux; Yosys 0.70, GHDL 7.0, COMPRESS commit 26ccd9c, AGEMA commit 3de80c1). COMPRESS was run with its default gadget library at latencies 2 to 4; the multiplier and the OR-form majority have no schedule at latency 2, and every other design it produced passed its own behavioural simulation. Its area is the area of the synthesised design from Yosys with the Nangate45 library, the flow its authors use. AGEMA was run through its Yosys front end with its HPC2 and HPC3 gadgets. Its gadgets are VHDL, which we read with the GHDL plugin of Yosys, so AGEMA's area is measured on the same library, not estimated. All areas are in gate equivalents (GE, 1\,GE $=0.798\,\mu$m$^2$). Table~\ref{tab:h2h} shows the results. As a check, the six programs of the first version of this table give the same COMPRESS gadget counts, random bits and area as before (for example 148.0\,GE on $a\wedge b\oplus a\wedge c$), so our flow reproduces the earlier runs.
@@ -862,7 +862,7 @@ Labeller, depth-5 chain: bit-parallel / reference & 0.4\,s / $\approx$61\,min (e
 PINI extraction, Keccak $\chi$ 32-bit ($2^{128}$ inputs) & 0.05\,s, 545/545 wires\\
 PINI extraction, ISW chain depth 15 ($2^{62}$ inputs) & 0.01\,s, 212/212 wires\\
 Exact checker, largest input space & $\approx 2^{26}$ points\\
-seqc, OR-form majority (5 gadgets), 65 $\to$ 41 & 83\,s\\
+seqc, OR-form majority (5 gadgets written, 4 after), 65 $\to$ 41 & 83\,s\\
 Full verification, all 16 steps & $\approx$8\,min (487\,s)\\
 \bottomrule
 \end{tabularx}
@@ -871,7 +871,7 @@ Full verification, all 16 steps & $\approx$8\,min (487\,s)\\
 % =====================================================================
 \section{Verification}\label{sec:evidence}
 % =====================================================================
-We never relied on our own checker alone. Every verdict was cross-checked by VerifMSI \cite{meunier2023verifmsi}, a published verifier we did not write, run as a separate program (Table~\ref{tab:oracle}). One command, \code{findings/verify.py -{}-full}, reruns every experiment and checks every number reported here; all 16 steps pass, along with 182 automated tests. Agreement on these circuits is strong evidence, but it is not a proof for every possible circuit. We also tested the verifier itself, and use its exact check, rather than its one-sided symbolic shortcut, as the reference.
+We never relied on our own checker alone. Every security verdict about our circuits was cross-checked by VerifMSI \cite{meunier2023verifmsi}, a published verifier we did not write, run as a separate program (Table~\ref{tab:oracle}). One command, \code{findings/verify.py -{}-full}, reruns every experiment and checks every number reported here; all 16 steps pass, along with 182 automated tests. Agreement on these circuits is strong evidence, but it is not a proof for every possible circuit. We also tested the verifier itself, and use its exact check, rather than its one-sided symbolic shortcut, as the reference.
 
 \begin{table}[t]
 \caption{Agreement With VerifMSI}\label{tab:oracle}
@@ -887,11 +887,11 @@ Random PINI-built circuits & 234 / 4,608 & 0\\
 Compiled runs (six programs, plus $z\wedge z$ without a refresh) & 7 / 178 & 0\\
 Larger compiled programs & 6 / 443 & 0\\
 Three- and four-share circuits & 6 / 159 & 0\\\midrule
-\textbf{Total wire checks} & \textbf{56,579} & \textbf{0}\\\midrule
+One-node-per-class extractions of $z\wedge z$ & 8,844 / 348,973 & 0\\
+Emitted Verilog files read back & 12 / 603 & 0\\\midrule
+\textbf{Total wire checks} & \textbf{406,155} & \textbf{0}\\\midrule
 Glitch checker (probes), first ten circuits & 167 & 0\\
 Glitch k-best frontier, 784 circuits (probes) & 21,869 & 0\\
-One-node-per-class extractions of $z\wedge z$ (wires) & 348,973 & 0\\
-Emitted Verilog files read back (wires) & 603 & 0\\
 PINI verdicts (gadgets) & 6 & 0\\
 \bottomrule
 \end{tabular}
@@ -910,7 +910,7 @@ PINI verdicts (gadgets) & 6 & 0\\
 
 \textbf{Search-based optimisation of masked gadgets.} Koblah et al.\ \cite{koblah2025evo} optimise individual masked gadgets (COMAR and the HPC1--HPC3 families, first order) at the standard-cell level with an evolutionary search: a genetic algorithm over a graph of NanGate45 gates, with sensitivity-guided crossover and four kinds of mutation. Candidates are ranked by a surrogate for power and area, functional equivalence is checked by SAT, and the final candidates are verified for PINI security with the VERICA tool; candidates that fail are discarded, and only secure results are reported. They report reductions of up to about 15\% in power and 10\% in area on single gadgets, with many gadgets improving little or getting worse, and a 12\% power and 7\% area reduction in a 32-bit AES core after replacing one gadget. They also find that conventional CAD steps (technology mapping, FRAIG rewriting, retiming) sometimes give far larger gains on gadgets, up to about 60\%, but not systematically, which is the situation Finding~1 explains for equality saturation. Theirs is the closest work to ours in spirit, since it also searches over equivalent masked circuits and keeps only secure ones. It differs in what is searched and how. It works below the Boolean level, on library cells of one gadget, and does not change randomness or latency; we work on the Boolean structure of whole programs. It samples circuits with a randomised search, whereas we saturate an e-graph (every equivalent form, not a sample), add a value-level representation for re-sharing, and show which extraction choices are unsafe. Its security check is applied to the final candidates rather than to every individual in the search, whereas our checks run inside extraction. The two are complementary: a gadget chosen by our optimiser could be passed to theirs.
 
-\textbf{What we claim.} We do not claim to be the first to show that optimisers break masking, the first to use e-graphs on masked circuits, the first to search over equivalent masked circuits under a security check, or the first to remove refreshes or choose gadgets. What is new is the analysis and repair inside equality saturation. Since this is a ``nobody has done it'' claim (we searched and found nothing), we rate our confidence as medium.
+\textbf{What we claim.} We do not claim to be the first to show that optimisers break masking, the first to use e-graphs on masked circuits, the first to search over equivalent masked circuits under a security check, or the first to remove refreshes or choose gadgets. What is new is the analysis and repair inside equality saturation. Since this is a ``nobody has done it'' claim (we searched and found nothing), we rate our confidence in this overall claim as medium (the narrower congruence claim of Appendix~\ref{app:search} as medium-high).
 
 % =====================================================================
 \section{Scope and Limitations}\label{sec:limits}
@@ -920,13 +920,13 @@ PINI verdicts (gadgets) & 6 & 0\\
 \item \textbf{Savings:} only where the starting circuit has waste; tight designs do not improve.
 \item \textbf{Scale:} checking each candidate is exact only among the $k$ cheapest options, and slow on larger circuits; the 0-of-240 result is a sample.
 \item \textbf{Glitches:} the PINI result and the generated Verilog assume no glitches.
-\item \textbf{Evidence:} no hardware test; the emitted Verilog is synthesised for area and simulated for function on all twelve programs, but no leakage tool was run on it and it assumes no glitches; a head-to-head against AGEMA and COMPRESS on twelve small programs only, one machine, and the proofs are written by hand rather than machine-checked.
+\item \textbf{Evidence:} no hardware test; the emitted Verilog is synthesised for area and simulated for function on all twelve programs, but VerifMSI checked its glitch-free logic but no glitch-extended or simulation-based leakage tool was run on it, and it assumes no glitches; a head-to-head against AGEMA and COMPRESS on twelve small programs only, one machine, and the proofs are written by hand rather than machine-checked.
 \end{itemize}
 
 % =====================================================================
 \section{Conclusion}
 % =====================================================================
-Compiler optimisers promise to keep a program's meaning, and masked hardware needs more than that. Left to minimise cost, equality saturation turns secure masked circuits into cheaper ones that leak, and for the two-share ISW gadget this happens by construction rather than by chance. Checking security when the circuit is chosen fixes this at the wire level. The designers' own tricks need a second, value-level e-graph, where the circuit must be chosen term by term or through PINI to stay safe. The result, seqc, removes waste where there is some and never returns a leaking circuit, and every security verdict about our circuits has been confirmed independently. \textbf{For secure hardware, giving the same answer is not enough: the optimiser must also keep the security.}
+Compiler optimisers promise to keep a program's meaning, and masked hardware needs more than that. Left to minimise cost, equality saturation turns secure masked circuits into cheaper ones that leak, and for the two-share ISW gadget this happens by construction rather than by chance. Checking security when the circuit is chosen fixes this at the wire level. The designers' own tricks need a second, value-level e-graph, where the circuit must be chosen term by term or through PINI to stay safe. The result, seqc, removes waste where there is some and never returns a leaking circuit in the glitch-free model, and every security verdict about our circuits has been confirmed independently. \textbf{For secure hardware, giving the same answer is not enough: the optimiser must also keep the security.}
 
 \section*{Acknowledgment}
 Portions of the code, scripts and this report were prepared with the assistance of an AI system (Claude, Anthropic). The code and data are available at \url{https://github.com/wizard-28/secureeqsat}.
@@ -967,7 +967,7 @@ We repeated the search on 2 November 2026 with fresh queries and found nothing n
 \item \emph{superVer verifying probabilistic independence of systems of expressions using equality saturation EGRAPHS 2024}
 \end{itemize}
 The only source that uses e-graphs for a masking-related property is superVer \cite{treff2024supver}; its abstract describes verification of probabilistic independence and does not mention refreshing, rewrites that change randomness, or congruence, but we read only the abstract and the full work-in-progress text may say more. Other hits were an SMT-based masking synthesiser \cite{eldib2014masking} and an e-graph paper on Boolean FHE circuits, neither of which concerns re-sharing.
-No result argues that re-sharing is non-congruent for e-graphs. The nearest sources are the semantics of equality saturation as a partial congruence \cite{suciu2025semantic} and colored e-graphs \cite{singher2023colored}, where each colour is its own congruence layer; neither mentions masking. We rate the claim medium-high, not certain. Several PDFs could not be fetched, so some sources were judged from abstracts or search snippets, and the search tool is snippet-based, so a recent workshop paper could be missed. A later search for the project's title and tool name found nothing, and a search for gadget-level optimisation found the work of Koblah et al.\ \cite{koblah2025evo}, which we read in full; it works on library cells and does not address congruence. The full record, with the reading status of each source, is in \texttt{docs/adversarial-search-6.md} of the repository.
+No result argues that re-sharing is non-congruent for e-graphs. The nearest sources are the semantics of equality saturation as a partial congruence \cite{suciu2025semantic} and colored e-graphs \cite{singher2023colored}, where each colour is its own congruence layer; neither mentions masking. We rate this claim medium-high, not certain; the overall novelty claim in Sec.~\ref{sec:related} is rated medium. Several PDFs could not be fetched, so some sources were judged from abstracts or search snippets, and the search tool is snippet-based, so a recent workshop paper could be missed. A later search for the project's title and tool name found nothing, and a search for gadget-level optimisation found the work of Koblah et al.\ \cite{koblah2025evo}, which we read in full; it works on library cells and does not address congruence. The full record, with the reading status of each source, is in \texttt{docs/adversarial-search-6.md} of the repository.
 
 \begin{thebibliography}{99}
 \footnotesize
