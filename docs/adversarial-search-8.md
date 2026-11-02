@@ -58,3 +58,25 @@ and the study was not read; the BSI page summary was).
 Results: Usuba and Tornado (compiler plus tightPROVE+ inserting refreshes), tightPROVE, IronMask
 (verifiers), PoMMES and CoMEMS (software, micro-architectural register allocation). None rewrites
 equivalent masked circuits to minimise cost. Not read in full: any of these papers.
+
+## Full texts read (PDFs supplied by the team, 2026-11-02)
+
+- **eVer**, ePrint 2026/208 (long version, 18 pages): a verifier with a new proof rule for several masking
+  schemes. In the introduction the authors say they "optimize out a superfluous sequence of refresh
+  applications" and "use eVer to optimize the costly refresh gadgets for PM and IPM with d = 2",
+  re-verifying each result. No mention of e-graphs or equality saturation. The earlier sentence in the
+  paper (authors removed unneeded refreshes) was therefore essentially right; whether by hand or
+  search is not stated, so the paper now says "use it to optimise".
+- **TETRIS**, ePrint 2026/1306 (34 pages): takes unmasked C code (AND, XOR, NOT, no loops), parses an AST,
+  extracts Toffoli candidates as COMPRESS does, and assigns PINI gadgets by two heuristics (MLRC, MRLC)
+  under latency or randomness constraints. It does not rewrite the Boolean circuit. It states that
+  COMPRESS uses pre-optimised sub-circuits in some cases.
+- **COMPRESS**, ePrint 2023/1600 (29 pages): "takes as an input a Boolean circuit" and optimises
+  scheduling of pipeline registers, deduplicates logic between gadgets, selects gadgets, and merges AND-XOR
+  into Toffoli gadgets. Its related-work section says AGEMA's "naive" mode follows the structure of the
+  input circuit and performs better on already optimised circuits. Neither rewrites the Boolean logic,
+  which matches the benchmark behaviour observed (COMPRESS gadget counts equal the AND counts as written).
+
+Still only an abstract: superVer (EGRAPHS 2024 work in progress; the team found no longer version).
+Nothing in the three texts contradicts the paper's novelty claims; the paper's description of
+COMPRESS and TETRIS and its eVer sentence are updated to match.
